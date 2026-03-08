@@ -1,0 +1,25 @@
+{
+  "bio": "Software engineer based in Hamburg, currently finishing my B.Sc. in Wirtschaftsinformatik (Business Informatics) at the University of Hamburg. My focus is backend development, from microservices to infrastructure. I particularly enjoy picking up new technologies and domains. After a full academic year at San Diego State University, I returned to Hamburg to write my bachelor thesis while working as a student engineer at OTTO, helping build the next-generation product data onboarding platform.",
+  "skills": [
+    {
+      "category": "Languages",
+      "items": ["Java", "Kotlin", "Python", "C#", "Rust", "Go", "TypeScript / JavaScript", "Bash", "SQL"]
+    },
+    {
+      "category": "Backend & Infra",
+      "items": ["Spring Boot", "Kafka", "MongoDB", "PostgreSQL", "Hibernate", "Flyway", "REST APIs", "AWS", "S3", "Lambda", "ECS", "Docker", "Terraform"]
+    },
+    {
+      "category": "Frontend & Desktop",
+      "items": ["React", "Next.js", "JavaFX", "HTML / CSS"]
+    },
+    {
+      "category": "Tooling",
+      "items": ["Git", "Linux", "Gradle", "Maven", "GitHub Actions", "DSL Design", "ANTLR4"]
+    },
+    {
+      "category": "Spoken Languages",
+      "items": ["🇩🇪 German (Native)", "🇺🇸 English (C2)", "🇫🇷 French (Basic)"]
+    }
+  ]
+}

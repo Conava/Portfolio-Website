@@ -1,0 +1,150 @@
+---
+title: "MinJ: A Programming Language for the JVM"
+date: "2024"
+summary: "A lightweight, statically-typed scripting language for the JVM, built from scratch with ANTLR4. Custom grammar, visitor-based interpreter, and full CI/CD pipeline."
+tech: ["Java", "ANTLR4", "Gradle", "ShadowJar", "GitHub Actions", "JVM"]
+githubUrl: "https://github.com/conava/minj"
+thumbnail: "/images/projects/minj.jpg"
+featured: true
+status: "completed"
+fullWidth: true
+---
+
+## Overview
+
+**MinJ** (*Minimalistic Java*) is a statically-typed scripting language for the JVM, built from scratch. The full pipeline, from ANTLR4 grammar to lexer/parser to visitor-based interpreter, is implemented in Java, packaged as a standalone fat-JAR, and shipped via an automated CI/CD pipeline. The language supports classes, methods, loops, lists, and built-in I/O, with complete ownership from grammar design through release automation.
+
+## Architecture
+
+MinJ processes source files in three stages:
+
+1. **Lexing & Parsing** – `MinJLexer` and `MinJParser` are generated from `MinJ.g4` by ANTLR4 during the Gradle build. The parser produces a typed parse tree.
+2. **AST Evaluation** – `EvalVisitor` extends `MinJBaseVisitor<Object>` and overrides one method per grammar rule. Each `visit*` call walks the tree and executes the corresponding logic: variable allocation, arithmetic, control flow, method dispatch.
+3. **Entry Point** – `Main.java` reads the source file via `CharStreams.fromPath()`, feeds it through the lexer and parser, then calls `visitor.visit(tree)`.
+
+The visitor pattern keeps the grammar and execution logic strictly separated. The `.g4` file defines structure, `EvalVisitor` defines behavior. Adding a new language construct requires touching exactly two places.
+
+## Language Features
+
+**Type system**
+- `var` – dynamically typed, mutable
+- `val` – immutable constant (single assignment enforced at runtime)
+- Explicit types: `int`, `float`, `double`, `boolean`, `char`, `String`
+
+**Control flow**
+- `if` / `elseif` / `else` blocks terminated by `end`
+- `while` loops
+- `for i = 1 to n [step s]` numeric loops
+- `foreach x in list` iteration
+
+**Object-oriented**
+- `class` declarations with fields and `method` blocks
+- `new ClassName()` instantiation
+- Dot-call syntax: `obj.method(args)`
+- Global `func` declarations with `return`
+
+**Lists & I/O**
+- List literals: `[1, 2, 3]` with `foreach` iteration
+- `print(...)` for output, `input(...)` for interactive prompts
+
+**Error checking**
+- Static type enforcement on typed declarations
+- `val` immutability violations (enforced at runtime, not statically)
+- Undefined name errors
+
+## Examples
+
+### FizzBuzz
+
+```minj
+val limit = 100
+for i = 1 to limit do:
+  if i % 15 == 0 then:
+    print "FizzBuzz"
+  elseif i % 3 == 0 then:
+    print "Fizz"
+  elseif i % 5 == 0 then:
+    print "Buzz"
+  else:
+    print i
+  end
+end
+```
+
+### Classes & Methods
+
+```minj
+class Counter:
+  var count = 0
+  method inc():
+    count = count + 1
+  end
+  method get():
+    return count
+  end
+end
+
+var c = new Counter()
+c.inc()
+c.inc()
+print c.get()   // 2
+```
+
+### Recursive Factorial
+
+```minj
+func factorial(n):
+  if n <= 1 then:
+    return 1
+  end
+  return n * factorial(n - 1)
+end
+
+print factorial(5)   // 120
+```
+
+## Tooling & CI/CD
+
+- **Gradle + ANTLR plugin** – `generateGrammarSource` regenerates the lexer and parser from `MinJ.g4` on every build; generated files live in `build/generated-src/antlr/main/`
+- **ShadowJar** – bundles the ANTLR runtime and all dependencies into a single fat-JAR; run any `.mj` file with `java -jar minjc-<VERSION>.jar <yourfile>.mj`
+- **GitHub Actions** – on every push to `release`: checkout → JDK 21 setup → build fat-JAR → run test suite → archive artifact → package with examples → publish versioned release asset
+- **GitHub Pages** – docs auto-deployed from `master` on each push via a separate Actions workflow
+
+## Extending the Language
+
+The architecture makes adding grammar constructs mechanical. Here's how the `while` loop was added:
+
+**1. Add the grammar rule** in `MinJ.g4`:
+```antlr
+whileStmt : WHILE expr DO COLON block END ;
+```
+
+**2. Register it** in the `statement` rule:
+```antlr
+statement : varDecl | assign | printStmt | ifStmt | whileStmt ;
+```
+
+**3. Add lexer tokens:**
+```antlr
+WHILE : 'while' ;
+DO    : 'do' ;
+END   : 'end' ;
+```
+
+**4. Implement the visitor** in `EvalVisitor.java`:
+```java
+@Override
+public Object visitWhileStmt(MinJParser.WhileStmtContext ctx) {
+    while ((Boolean) visit(ctx.expr())) {
+        visitBlock(ctx.block());
+    }
+    return null;
+}
+```
+
+**5. Rebuild:**
+```bash
+./gradlew clean shadowJar
+```
+
+Each new construct is fully self-contained: grammar rule, token definition, visitor override. No changes elsewhere in the codebase.

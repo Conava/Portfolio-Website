@@ -1,0 +1,114 @@
+---
+title: "Chess: Modular Game Platform and AI Development Testbench"
+date: "2023 – Present"
+summary: "A multi-module Java chess platform with offline play, TCP multiplayer, and a headless API mode. Originally a university project, now my testbench for spec-driven and test-driven agentic AI workflows."
+tech: ["Java 17", "JavaFX 21", "Maven", "TCP Networking", "JUnit 5", "Mockito", "Docker", "CSS Theming", "i18n"]
+githubUrl: "https://github.com/conava/chess"
+thumbnail: "/images/projects/chess.jpg"
+featured: false
+status: "in-progress"
+fullWidth: false
+---
+
+## Overview
+
+A three-module Maven project (Java 17 + JavaFX 21) implementing a complete chess platform: a JavaFX desktop client, a pure-logic game engine, and a TCP multiplayer server, each with hard dependency boundaries enforced by architecture law.
+
+I started this project during my second year at university. Since then it has gone through several major iterations and today serves a dual purpose: it is a fully functional chess application, and it is my primary testbench for **agentic AI development workflows**. I use it to experiment with spec-driven and test-driven approaches to AI-assisted coding, testing how reliably these workflows produce high-quality code on a real, non-trivial codebase. Past experiments include a full refactoring from Swing to JavaFX, large-scale cleanup of technical debt, and architectural restructuring. I plan to continue running new experiments here as the tooling evolves.
+
+## Features
+
+- **Offline play** – two players on the same machine, no network needed
+- **Online multiplayer** – TCP-based lobby system; host or join a game by code
+- **Headless / API mode** – run without a GUI for programmatic game control (`nogui` flag)
+- **Pawn promotion** – interactive piece-selection dialog mid-game
+- **Castling** – king-side and queen-side with move-history tracking
+- **Board themes** – Classic, Ocean, and Walnut color schemes
+- **UI themes** – Light and Dark modes with CSS-driven styling
+- **Localization** – English and German via `ResourceBundle` properties files
+- **Concurrent server** – up to 40 simultaneous online games
+
+## Architecture
+
+The project is split into three Maven modules with strict dependency rules:
+
+```text
+┌─────────────────────────────────────────────────────┐
+│                   application                       │
+│  JavaFX 21 UI · Controllers · Theming · i18n · Net  │
+│           depends on → core only                    │
+└──────────────────────┬──────────────────────────────┘
+                       │
+              ┌────────▼────────┐
+              │      core       │
+              │  Game engine ·  │
+              │  Pieces · Rules │
+              │  Observer · API │
+              │  (no deps)      │
+              └────────▲────────┘
+                       │
+┌──────────────────────┴──────────────────────────────┐
+│                    server                           │
+│       TCP server · Lobby · Move relay               │
+│           depends on → core only                    │
+└─────────────────────────────────────────────────────┘
+```
+
+**Architecture laws** are enforced across all modules:
+
+1. **Hard module boundaries** – `core` has zero dependencies on `application` or `server`. `application` and `server` depend on `core` only, never on each other.
+2. **Facade-only API** – all external interaction with the game engine goes through `Chess.java`. Direct instantiation of `Game` subclasses from outside `core` is not allowed.
+3. **Observer for state propagation** – UI components implement `GameObserver` and register via `chess.addObserver()`. No polling.
+4. **Core is logic-only** – no UI imports, no JavaFX, no I/O in `core`.
+5. **Strategy pattern for ruleset variants** – new rule sets implement the `Ruleset` interface; branching inside `Game` is not allowed.
+
+## Design Patterns
+
+| Pattern | Implementation | Purpose |
+|---------|----------------|---------|
+| **Facade** | `Chess.java` | Single API surface for all game interaction |
+| **Observer** | `GameObserver` / `Observable` | Decoupled, push-based state propagation to UI |
+| **Strategy** | `Ruleset` interface + `StandardChessRuleset` | Pluggable rule variants without conditionals |
+| **Factory Method** | `Game.createGame()` / `Game.createServerGame()` | Enforces module boundaries; keeps constructors package-private |
+| **Template Method** | `Game.executeMove()` | Defines move sequence; `OnlineGame` overrides for network relay |
+
+## Multiplayer Server
+
+The server accepts TCP connections on a configurable port (default 54321). Each client connection runs in its own thread. Games are managed as isolated `GameInstance` sessions; the server relays moves between two players and forwards terminal game states.
+
+- Up to 40 concurrent games (semaphore-limited)
+- Newline-delimited plain-text protocol
+- Join-code-based lobby: one player creates a game, gets a code, the other joins with that code
+- Automatic resignation win on disconnect
+
+## Testing
+
+The project has 23 test classes across all three modules:
+
+| Module | Tests | Focus |
+|--------|-------|-------|
+| `core` | 15 classes | Board state, piece construction, move generation, observer notifications, ruleset for all 6 piece types, move parsing, game factory |
+| `application` | 5 classes | Facade, i18n, settings, theme manager, background move task |
+| `server` | 3 classes | Server startup, game instance lifecycle, client handler integration |
+
+## Agentic AI Testbench
+
+This project doubles as my environment for evaluating AI-assisted development. The codebase is large enough to be realistic (three modules, strict architecture rules, a real test suite) but small enough to iterate quickly. Experiments so far:
+
+- **Swing to JavaFX migration** – full UI framework replacement guided by spec-driven agentic workflows
+- **Technical debt cleanup** – automated identification and resolution of code smells, dead code, and inconsistent patterns
+- **Architectural restructuring** – enforcing module boundaries and design patterns through AI-generated refactoring plans
+
+The goal is to find methods that reliably produce high-quality code for bigger projects. Each experiment tests a different workflow (spec-first, test-first, review-loop) and I evaluate the results against the architecture laws and test suite.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Java 17 |
+| UI | JavaFX 21 (FXML + CSS theming) |
+| Build | Maven (multi-module) |
+| Testing | JUnit 5, Mockito |
+| Networking | Java standard library (ServerSocket, ConcurrentHashMap, Semaphore) |
+| Localization | ResourceBundle (EN/DE) |
+| Theming | CSS (2 UI themes, 3 board color schemes) |

@@ -1,0 +1,40 @@
+---
+title: "VPS: Persönliche Cloud- und Entwicklungsinfrastruktur"
+date: "2025 – Heute"
+summary: "Ein Linux-VPS, auf dem alle meine persönlichen Dienste und Projektbackends laufen. Orchestriert mit Docker Compose, geroutet über Traefik, mit Remote-Storageboxen für die Massenspeicherung."
+tech: ["Linux", "Docker", "Traefik", "Nextcloud", "Matrix", "Navidrome", "Let's Encrypt", "MariaDB", "PostgreSQL", "Redis"]
+thumbnail: "/images/projects/homeserver.jpg"
+featured: false
+status: "active"
+---
+
+## Übersicht
+
+Ein Linux-VPS, den ich selbst betreibe und verwalte. Er hostet eine Kombination aus persönlichen Diensten und Entwicklungsinfrastruktur. Alles läuft als Docker-Container, gruppiert in Compose-Dateien pro Dienstkategorie. Remote-Storageboxen sind für die Massenspeicherung eingebunden; Nextcloud-Daten liegen dort statt auf dem VPS-Disk.
+
+## Infrastruktur
+
+**Traefik** fungiert als Reverse-Proxy für alle Dienste: automatische SSL-Zertifikatsausstellung und -erneuerung über Let's Encrypt, HSTS-Durchsetzung und HTTP-zu-HTTPS-Weiterleitungen. Kein manuelles Zertifikatsmanagement.
+
+## Persönliche Dienste
+
+| Dienst | Zweck |
+|---|---|
+| **Nextcloud** | Persönlicher Cloud-Speicher und Datei-Sync, gesichert durch eine Remote-Storagebox |
+| **Navidrome** | Self-hosted Musik-Streaming, liest die Nextcloud-Musikbibliothek |
+| **Matrix / Synapse** | Self-hosted verschlüsselter Messaging-Homeserver |
+| **Element Web** | Web-Client für den Matrix-Homeserver |
+| **Coturn** | TURN-Server für Matrix-Audio- und Videoanrufe |
+
+## Entwicklungsinfrastruktur
+
+Der VPS hostet außerdem Entwicklungs-Deployments meiner persönlichen Projekte:
+
+- **Fortalis Auth** – Entwicklungs-Build des Authentifizierungsdienstes
+- **Fortalis Backend** – Entwicklungs-Build des Spiel-Backends
+- **Schachserver** – Backend für mein Schach-Engine-Projekt
+- **Dieses Portfolio** – wird vom selben Host ausgeliefert
+
+## Speicher
+
+Massenspeicher (Nextcloud-Daten, Medienbibliotheken) wird über Remote-Storageboxen abgewickelt, die auf dem VPS eingebunden sind. So bleiben Speicherkosten von den Rechenkosten getrennt und die Kapazität lässt sich unabhängig skalieren.

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "example-cert",
+    "name": "Example: AWS Certified Developer – Associate",
+    "issuer": "Amazon Web Services",
+    "date": "2025",
+    "summary": "Example certificate entry — set hidden to false (or remove the field) to display it.",
+    "details": "Validates technical expertise in developing and maintaining applications on AWS. Covers core services, security, deployment, and best practices for cloud-native development.",
+    "url": "https://aws.amazon.com/certification/certified-developer-associate/",
+    "hidden": true
+  }
+]

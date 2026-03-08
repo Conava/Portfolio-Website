@@ -1,0 +1,56 @@
+---
+title: "Bachelor Thesis: BPMN Process Modeling as Code"
+date: "2025"
+summary: "A domain-specific language that compiles textual process definitions to executable BPMN 2.0 XML for Camunda and Operaton. My open-source bachelor thesis at the University of Hamburg."
+tech: ["Java", "BPMN 2.0", "Operaton", "Camunda", "Maven", "GitHub Actions"]
+githubUrl: "https://github.com/conava/bpmn-dsl"
+thumbnail: "/images/projects/bpmn-dsl.jpg"
+featured: true
+status: "upcoming"
+fullWidth: true
+---
+
+## Overview
+
+For my bachelor thesis at the University of Hamburg, I am designing and implementing a **domain-specific language (DSL)** for BPMN process authoring. The DSL compiles textual process definitions to deployable `.bpmn` files, ready to run directly on **Camunda** or **Operaton** process engines, while remaining compatible with existing BPMN tooling and visual editors. The entire project will be published as **open source**.
+
+## Problem
+
+BPMN (Business Process Model and Notation) is the industry standard for executable business processes. But its underlying format is XML, and BPMN XML is notoriously hostile to software development workflows.
+
+The core issue is structural: BPMN XML interleaves process semantics with Diagram Interchange (DI) layout data (coordinates, bounds, waypoints) in a single document. A trivial logical change, such as renaming a task or inserting a sequential step, produces disproportionately large and unreadable diffs. Merging branches and reviewing changes is practically unworkable.
+
+The alternative, "Workflow as Code" platforms like Temporal or Apache Airflow, solves the engineering friction but abandons BPMN entirely, losing the standardized visual language that bridges developers and business analysts. Attempts to use simpler text formats (e.g. Camunda's Zeebe YAML, deprecated in v1.0.0-alpha1) have shown that naive serialization cannot capture complex workflow semantics.
+
+This thesis investigates whether a dedicated textual DSL can reduce maintenance friction while preserving full compatibility with existing BPMN execution engines.
+
+## Research Questions
+
+- **RQ1** – Which BPMN 2.0 constructs should be included in a practical developer-oriented subset for textual process authoring?
+- **RQ2** – How can these constructs be represented in a concise textual syntax without losing essential execution semantics?
+- **RQ3** – Can such a DSL be translated into valid executable BPMN 2.0 XML for the Operaton execution engine?
+- **RQ4** – Does the DSL improve maintainability for representative change scenarios compared to working directly with BPMN XML?
+
+## Planned Approach
+
+**DSL design** – Define a developer-friendly syntax covering a practical subset of BPMN constructs: tasks, gateways, events, sequence flows, subprocesses, service tasks, and boundary events. Informed by research showing that the average BPMN model uses roughly nine distinct constructs.
+
+**Tooling** – Evaluate and select a language workbench (Eclipse Xtext or Langium) to generate the parser, AST, and optional IDE support. The choice will be driven by ecosystem fit and the complexity of the target grammar.
+
+**Compiler** – Implement a compiler that translates DSL source to valid BPMN 2.0 XML targeting Operaton and Camunda 7/8. The primary output is executable process XML; Diagram Interchange (DI) auto-layout is a secondary goal if feasible within scope.
+
+**Case study** – Deploy the DSL on a real-world reference architecture: MisArch, a microservice system comprising 17+ services, orchestrated via Operaton. This validates practical expressiveness and serves as the evaluation baseline.
+
+**Evaluation** – Assess the DSL across three dimensions: correctness (parsing, BPMN generation, and successful execution on Operaton), maintainability (Git diff size and readability for representative process changes in DSL vs. raw BPMN XML), and expressiveness (whether all required workflow constructs can be modeled without falling back to manual XML).
+
+## Timeline
+
+| Phase | Timeframe |
+|---|---|
+| Literature review, requirements analysis, evaluation design | Weeks 1–2 |
+| DSL scope definition, syntax and semantic mapping | Weeks 3–4 |
+| Prototype implementation (parser, validation, BPMN generation) | Weeks 5–8 |
+| Operaton integration and MisArch case study | Weeks 9–10 |
+| Evaluation and result analysis | Weeks 11–12 |
+| Writing, revision, and finalization | Weeks 13–14 |
+| **Thesis submission** | **Week 15** |

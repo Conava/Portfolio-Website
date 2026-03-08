@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "about": "Über mich",
+    "experience": "Erfahrung",
+    "education": "Ausbildung",
+    "projects": "Projekte",
+    "certificates": "Zertifikate",
+    "publications": "Publikationen",
+    "contact": "Kontakt"
+  },
+  "hero": {
+    "greeting": "Hi, ich bin",
+    "tagline": "Full-Stack Entwickler",
+    "cta_projects": "Projekte ansehen",
+    "cta_contact": "Kontakt aufnehmen"
+  },
+  "sections": {
+    "about": "Über mich",
+    "experience": "Erfahrung",
+    "education": "Ausbildung",
+    "projects": "Projekte",
+    "certificates": "Zertifikate",
+    "publications": "Publikationen",
+    "contact": "Kontakt",
+    "all_projects": "Alle Projekte"
+  },
+  "common": {
+    "view_project": "Projekt ansehen",
+    "view_details": "Details ansehen",
+    "github": "GitHub",
+    "read_more": "Mehr lesen",
+    "collapse": "Weniger anzeigen",
+    "back": "Zurück",
+    "view_certificate": "Zertifikat ansehen",
+    "status_completed": "Abgeschlossen",
+    "status_in_progress": "In Entwicklung",
+    "status_upcoming": "Demnächst",
+    "status_active": "Aktiv",
+    "status_discontinued": "Eingestellt",
+    "view_publication": "Publikation ansehen",
+    "download_pdf": "PDF herunterladen",
+    "see_all_projects": "Alle Projekte",
+    "copy_link": "Link kopieren (mit Theme)",
+    "copied": "Kopiert!"
+  }
+}

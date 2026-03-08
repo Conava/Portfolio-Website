@@ -1,0 +1,13 @@
+[
+  {
+    "id": "example-pub",
+    "title": "Beispiel: Eine domänenspezifische Sprache für ausführbares BPMN",
+    "year": "2025",
+    "venue": "arXiv",
+    "description": "Beispiel-Publikationseintrag — setze hidden auf false (oder entferne das Feld), um ihn anzuzeigen.",
+    "projectSlug": "bachelor-thesis",
+    "publishedUrl": "https://arxiv.org",
+    "pdfUrl": "https://arxiv.org",
+    "hidden": true
+  }
+]

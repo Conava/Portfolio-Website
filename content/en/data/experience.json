@@ -1,0 +1,36 @@
+[
+  {
+    "id": "otto",
+    "company": "OTTO",
+    "role": "Working Student, Software Development",
+    "period": "2025 – Present",
+    "location": "Hamburg, Germany",
+    "summary": "Building the next-generation product data onboarding suite to replace legacy systems and streamline how product information flows into OTTO's platform.",
+    "details": [
+      "Developing Java/Spring Boot microservices for the next-gen product data onboarding platform",
+      "Working with event-driven architecture via Apache Kafka for asynchronous, high-throughput data pipelines",
+      "Managing cloud infrastructure on AWS with Docker containers and Terraform for infrastructure-as-code",
+      "Using MongoDB as the primary data store for flexible, schema-agnostic product data management",
+      "Contributing to REST API design and implementation across service boundaries",
+      "Collaborating in an agile team actively decommissioning legacy onboarding systems",
+      "Day-to-day tooling: Git, Linux, GitHub Actions, IntelliJ IDEA"
+    ],
+    "tech": ["Java", "Spring Boot", "Kafka", "MongoDB", "AWS", "Docker", "Terraform", "REST APIs", "Git", "Linux"]
+  },
+  {
+    "id": "msg-life",
+    "company": "msg.life",
+    "role": "Working Student, Software Development",
+    "period": "2023 – 2024",
+    "location": "Hamburg, Germany",
+    "summary": "Backend Java development and quality assurance for enterprise life insurance software, gaining experience in large-scale Java environments with structured release cycles.",
+    "details": [
+      "Maintained and extended Java-based backend modules for enterprise life insurance platforms",
+      "Implemented bug fixes and new features across multiple product versions",
+      "Conducted functional and regression testing to ensure software quality across releases",
+      "Produced technical documentation directly as code using a Docs-as-Code approach",
+      "Worked within structured Java EE enterprise environments with long-horizon release cycles"
+    ],
+    "tech": ["Java", "Java EE", "SQL", "Git", "Docs-as-Code", "QA Testing"]
+  }
+]

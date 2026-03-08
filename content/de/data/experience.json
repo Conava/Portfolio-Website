@@ -1,0 +1,36 @@
+[
+  {
+    "id": "otto",
+    "company": "OTTO",
+    "role": "Werkstudent, Softwareentwicklung",
+    "period": "2025 – Heute",
+    "location": "Hamburg",
+    "summary": "Entwicklung der nächsten Generation der Produktdaten-Onboarding-Plattform, um Altsysteme abzulösen und den Produktdatenfluss in OTTOs Plattform zu modernisieren.",
+    "details": [
+      "Entwicklung von Java/Spring-Boot-Microservices für die neue Produktdaten-Onboarding-Plattform",
+      "Einsatz von ereignisgesteuerter Architektur mit Apache Kafka für asynchrone, hochperformante Datenpipelines",
+      "Verwaltung der Cloud-Infrastruktur auf AWS mit Docker und Terraform als Infrastructure-as-Code",
+      "MongoDB als primärer Datenspeicher für flexible Produktdatenverwaltung",
+      "Mitarbeit am Design und der Implementierung von REST APIs über Servicegrenzen hinweg",
+      "Agile Teamarbeit mit aktiver Ablösung von Legacy-Onboarding-Systemen",
+      "Tägliche Werkzeuge: Git, Linux, GitHub Actions, IntelliJ IDEA"
+    ],
+    "tech": ["Java", "Spring Boot", "Kafka", "MongoDB", "AWS", "Docker", "Terraform", "REST APIs", "Git", "Linux"]
+  },
+  {
+    "id": "msg-life",
+    "company": "msg.life",
+    "role": "Werkstudent, Softwareentwicklung",
+    "period": "2023 – 2024",
+    "location": "Hamburg",
+    "summary": "Backend-Java-Entwicklung und Qualitätssicherung für Enterprise-Lebensversicherungssoftware in einem strukturierten Java-EE-Umfeld.",
+    "details": [
+      "Wartung und Erweiterung von Java-Backend-Modulen für Enterprise-Lebensversicherungsplattformen",
+      "Implementierung von Bugfixes und neuen Features über mehrere Produktversionen hinweg",
+      "Durchführung von funktionalen Tests und Regressionstests zur Qualitätssicherung",
+      "Erstellung technischer Dokumentation nach dem Docs-as-Code-Prinzip",
+      "Arbeit in einem strukturierten Java-EE-Enterprise-Umfeld mit langen Release-Zyklen"
+    ],
+    "tech": ["Java", "Java EE", "SQL", "Git", "Docs-as-Code", "QA-Testing"]
+  }
+]

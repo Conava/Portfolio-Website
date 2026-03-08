@@ -1,0 +1,40 @@
+---
+title: "VPS: Personal Cloud and Development Infrastructure"
+date: "2025 – Present"
+summary: "A Linux VPS running all my personal services and project backends. Orchestrated with Docker Compose, routed through Traefik, with remote storage boxes for mass storage."
+tech: ["Linux", "Docker", "Traefik", "Nextcloud", "Matrix", "Navidrome", "Let's Encrypt", "MariaDB", "PostgreSQL", "Redis"]
+thumbnail: "/images/projects/homeserver.jpg"
+featured: false
+status: "active"
+---
+
+## Overview
+
+A Linux VPS I run and maintain, hosting a mix of personal services and development infrastructure. Everything runs as Docker containers, grouped into Compose files per service category. Remote storage boxes are mounted for mass storage; Nextcloud data lives there rather than on the VPS disk.
+
+## Infrastructure
+
+**Traefik** acts as the reverse proxy for all services: automatic SSL certificate issuance and renewal via Let's Encrypt, HSTS enforcement, and HTTP-to-HTTPS redirects. No manual certificate management.
+
+## Personal Services
+
+| Service | Purpose |
+|---|---|
+| **Nextcloud** | Personal cloud storage and file sync, backed by a remote storage box |
+| **Navidrome** | Self-hosted music streaming, reads the Nextcloud music library |
+| **Matrix / Synapse** | Self-hosted encrypted messaging homeserver |
+| **Element Web** | Web client for the Matrix homeserver |
+| **Coturn** | TURN server for Matrix audio and video calls |
+
+## Development Infrastructure
+
+The VPS also hosts development deployments of my personal projects:
+
+- **Fortalis Auth** – development build of the authentication service
+- **Fortalis Backend** – development build of the game backend
+- **Chess server** – backend for my chess engine project
+- **This portfolio** – served from the same host
+
+## Storage
+
+Mass storage (Nextcloud data, media libraries) is handled via remote storage boxes mounted on the VPS. This keeps storage costs separate from compute and makes it straightforward to scale capacity independently.

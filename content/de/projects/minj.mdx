@@ -1,0 +1,150 @@
+---
+title: "MinJ: Eine Programmiersprache für die JVM"
+date: "2024"
+summary: "Eine leichtgewichtige, statisch typisierte Skriptsprache für die JVM. Von Grund auf mit ANTLR4 entwickelt, mit eigener Grammatik, Visitor-basiertem Interpreter und vollständiger CI/CD-Pipeline."
+tech: ["Java", "ANTLR4", "Gradle", "ShadowJar", "GitHub Actions", "JVM"]
+githubUrl: "https://github.com/conava/minj"
+thumbnail: "/images/projects/minj.jpg"
+featured: true
+status: "completed"
+fullWidth: true
+---
+
+## Überblick
+
+**MinJ** (*Minimalistic Java*) ist eine statisch typisierte Skriptsprache für die JVM, die von Grund auf entwickelt wurde. Die gesamte Pipeline, von der ANTLR4-Grammatik über Lexer/Parser bis zum Visitor-basierten Interpreter, ist in Java implementiert, als eigenständiges fat-JAR verpackt und über eine automatisierte CI/CD-Pipeline ausgeliefert. Die Sprache unterstützt Klassen, Methoden, Schleifen, Listen und eingebaute Ein-/Ausgabe, mit vollständiger Verantwortung vom Grammatikdesign bis zur Release-Automatisierung.
+
+## Architektur
+
+MinJ verarbeitet Quelldateien in drei Stufen:
+
+1. **Lexing & Parsing** – `MinJLexer` und `MinJParser` werden von ANTLR4 während des Gradle-Builds aus `MinJ.g4` generiert. Der Parser erzeugt einen typisierten Parse-Tree.
+2. **AST-Auswertung** – `EvalVisitor` erweitert `MinJBaseVisitor<Object>` und überschreibt je eine Methode pro Grammatikregel. Jeder `visit*`-Aufruf traversiert den Baum und führt die entsprechende Logik aus: Variablenzuweisung, Arithmetik, Kontrollfluss, Methodenaufruf.
+3. **Einstiegspunkt** – `Main.java` liest die Quelldatei über `CharStreams.fromPath()`, leitet sie durch Lexer und Parser und ruft anschließend `visitor.visit(tree)` auf.
+
+Das Visitor-Pattern hält Grammatik und Ausführungslogik strikt getrennt: die `.g4`-Datei definiert die Struktur, `EvalVisitor` definiert das Verhalten. Das Hinzufügen eines neuen Sprachkonstrukts erfordert Änderungen an genau zwei Stellen.
+
+## Sprachfeatures
+
+**Typsystem**
+- `var` – dynamisch typisiert, veränderlich
+- `val` – unveränderliche Konstante (einmalige Zuweisung, zur Laufzeit erzwungen)
+- Explizite Typen: `int`, `float`, `double`, `boolean`, `char`, `String`
+
+**Kontrollfluss**
+- `if` / `elseif` / `else`-Blöcke, abgeschlossen durch `end`
+- `while`-Schleifen
+- `for i = 1 to n [step s]` – numerische Schleifen
+- `foreach x in list` – Iteration über Listen
+
+**Objektorientierung**
+- `class`-Deklarationen mit Feldern und `method`-Blöcken
+- Instanziierung mit `new ClassName()`
+- Punkt-Aufruf-Syntax: `obj.method(args)`
+- Globale `func`-Deklarationen mit `return`
+
+**Listen & Ein-/Ausgabe**
+- Listen-Literale: `[1, 2, 3]` mit `foreach`-Iteration
+- `print(...)` für Ausgabe, `input(...)` für interaktive Eingaben
+
+**Fehlerprüfung**
+- Statische Typprüfung bei typisierten Deklarationen
+- Verletzungen der `val`-Unveränderlichkeit (zur Laufzeit geprüft, nicht statisch)
+- Fehler bei undefinierten Namen
+
+## Beispiele
+
+### FizzBuzz
+
+```minj
+val limit = 100
+for i = 1 to limit do:
+  if i % 15 == 0 then:
+    print "FizzBuzz"
+  elseif i % 3 == 0 then:
+    print "Fizz"
+  elseif i % 5 == 0 then:
+    print "Buzz"
+  else:
+    print i
+  end
+end
+```
+
+### Klassen & Methoden
+
+```minj
+class Counter:
+  var count = 0
+  method inc():
+    count = count + 1
+  end
+  method get():
+    return count
+  end
+end
+
+var c = new Counter()
+c.inc()
+c.inc()
+print c.get()   // 2
+```
+
+### Rekursive Fakultät
+
+```minj
+func factorial(n):
+  if n <= 1 then:
+    return 1
+  end
+  return n * factorial(n - 1)
+end
+
+print factorial(5)   // 120
+```
+
+## Tooling & CI/CD
+
+- **Gradle + ANTLR-Plugin** – `generateGrammarSource` regeneriert Lexer und Parser bei jedem Build aus `MinJ.g4`; generierte Dateien liegen unter `build/generated-src/antlr/main/`
+- **ShadowJar** – bündelt die ANTLR-Laufzeitumgebung und alle Abhängigkeiten in einem einzelnen fat-JAR; beliebige `.mj`-Dateien lassen sich mit `java -jar minjc-<VERSION>.jar <yourfile>.mj` ausführen
+- **GitHub Actions** – bei jedem Push auf `release`: Checkout → JDK 21 Setup → fat-JAR bauen → Testsuite ausführen → Artefakt archivieren → mit Beispielen verpacken → versioniertes Release-Asset veröffentlichen
+- **GitHub Pages** – Dokumentation wird bei jedem Push auf `master` über einen separaten Actions-Workflow automatisch deployt
+
+## Sprache erweitern
+
+Die Architektur macht das Hinzufügen neuer Sprachkonstrukte zu einem mechanischen Vorgang. Hier am Beispiel der `while`-Schleife:
+
+**1. Grammatikregel hinzufügen** in `MinJ.g4`:
+```antlr
+whileStmt : WHILE expr DO COLON block END ;
+```
+
+**2. Regel registrieren** in der `statement`-Regel:
+```antlr
+statement : varDecl | assign | printStmt | ifStmt | whileStmt ;
+```
+
+**3. Lexer-Token hinzufügen:**
+```antlr
+WHILE : 'while' ;
+DO    : 'do' ;
+END   : 'end' ;
+```
+
+**4. Visitor implementieren** in `EvalVisitor.java`:
+```java
+@Override
+public Object visitWhileStmt(MinJParser.WhileStmtContext ctx) {
+    while ((Boolean) visit(ctx.expr())) {
+        visitBlock(ctx.block());
+    }
+    return null;
+}
+```
+
+**5. Neu bauen:**
+```bash
+./gradlew clean shadowJar
+```
+
+Jedes neue Konstrukt ist vollständig in sich geschlossen: Grammatikregel, Token-Definition, Visitor-Override. Keine Änderungen an anderen Teilen der Codebasis nötig.

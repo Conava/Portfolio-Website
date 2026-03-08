@@ -1,0 +1,56 @@
+---
+title: "Bachelorarbeit: BPMN-Prozessmodellierung als Code"
+date: "2025"
+summary: "Eine domänenspezifische Sprache, die textuelle Prozessdefinitionen zu ausführbarem BPMN-2.0-XML für Camunda und Operaton kompiliert. Meine Open-Source-Bachelorarbeit an der Universität Hamburg."
+tech: ["Java", "BPMN 2.0", "Operaton", "Camunda", "Maven", "GitHub Actions"]
+githubUrl: "https://github.com/conava/bpmn-dsl"
+thumbnail: "/images/projects/bpmn-dsl.jpg"
+featured: true
+status: "upcoming"
+fullWidth: true
+---
+
+## Überblick
+
+Im Rahmen meiner Bachelorarbeit an der Universität Hamburg entwerfe und implementiere ich eine **domänenspezifische Sprache (DSL)** für die BPMN-Prozessmodellierung. Die DSL kompiliert textuelle Prozessdefinitionen zu deploybaren `.bpmn`-Dateien, direkt ausführbar auf **Camunda**- oder **Operaton**-Process-Engines, und bleibt dabei vollständig kompatibel mit bestehenden BPMN-Tools und grafischen Editoren. Das gesamte Projekt wird als **Open Source** veröffentlicht.
+
+## Problem
+
+BPMN (Business Process Model and Notation) ist der Industriestandard für ausführbare Geschäftsprozesse. Das zugrundeliegende Format ist jedoch XML, und BPMN-XML ist notorisch feindlich gegenüber modernen Softwareentwicklungs-Workflows.
+
+Das Kernproblem ist strukturell: BPMN-XML vermengt Prozesssemantik mit Diagram-Interchange-(DI-)Layout-Daten (Koordinaten, Abmessungen, Wegpunkte) in einem einzigen Dokument. Eine triviale logische Änderung, etwa das Umbenennen eines Tasks oder das Einfügen eines sequenziellen Schritts, erzeugt unverhältnismäßig große und unlesbare Diffs. Branches zu mergen und Änderungen zu reviewen ist praktisch kaum handhabbar.
+
+Die Alternative, „Workflow as Code"-Plattformen wie Temporal oder Apache Airflow, löst die Engineering-Friction, gibt BPMN aber vollständig auf und verliert damit die standardisierte visuelle Sprache, die Entwickler und Business-Analysten verbindet. Versuche, einfachere Textformate zu nutzen (z. B. Camundas Zeebe-YAML, in v1.0.0-alpha1 als deprecated markiert), haben gezeigt, dass naive Serialisierungsformate komplexe Workflow-Semantik nicht abbilden können.
+
+Diese Bachelorarbeit untersucht, ob eine dedizierte textuelle DSL die Wartungskosten reduzieren kann, während die vollständige Kompatibilität mit bestehenden BPMN-Execution-Engines erhalten bleibt.
+
+## Forschungsfragen
+
+- **F1** – Welche BPMN-2.0-Konstrukte sollten in eine praxisnahe, entwicklerorientierte Teilmenge für die textuelle Prozessmodellierung aufgenommen werden?
+- **F2** – Wie können diese Konstrukte in einer kompakten textuellen Syntax dargestellt werden, ohne wesentliche Ausführungssemantik zu verlieren?
+- **F3** – Lässt sich eine solche DSL in valides, ausführbares BPMN-2.0-XML für die Operaton-Execution-Engine übersetzen?
+- **F4** – Verbessert die DSL die Wartbarkeit bei repräsentativen Änderungsszenarien im Vergleich zur direkten Arbeit mit BPMN-XML?
+
+## Geplantes Vorgehen
+
+**DSL-Design** – Entwicklung einer entwicklerfreundlichen Syntax, die eine praxisnahe Teilmenge von BPMN-Konstrukten abdeckt: Tasks, Gateways, Events, Sequenzflüsse, Subprozesse, Service-Tasks und Boundary-Events. Grundlage bildet u. a. die Forschung, die zeigt, dass ein durchschnittliches BPMN-Modell etwa neun distinkte Konstrukte verwendet.
+
+**Tooling** – Evaluierung und Auswahl einer Language-Workbench (Eclipse Xtext oder Langium) zur Generierung von Parser, AST und optionaler IDE-Unterstützung. Die Entscheidung orientiert sich am Ecosystem-Fit und der Komplexität der Zielgrammatik.
+
+**Compiler** – Implementierung eines Compilers, der DSL-Quellcode in valides BPMN-2.0-XML für Operaton und Camunda 7/8 übersetzt. Der primäre Output sind ausführbare Prozess-XMLs; ein Diagram-Interchange-(DI-)Auto-Layout ist ein sekundäres Ziel, sofern es im Rahmen der Arbeit realisierbar ist.
+
+**Fallstudie** – Einsatz der DSL auf einer realen Referenzarchitektur: MisArch, einem Microservice-System mit 17+ Services, orchestriert über Operaton. Dies validiert die praktische Ausdrucksstärke der DSL und dient als Evaluierungsbasis.
+
+**Evaluation** – Bewertung der DSL anhand von drei Dimensionen: Korrektheit (Parsing, BPMN-Generierung und erfolgreiche Ausführung auf Operaton), Wartbarkeit (Größe und Lesbarkeit von Git-Diffs für repräsentative Prozessänderungen in DSL vs. rohem BPMN-XML) und Ausdrucksstärke (ob alle erforderlichen Workflow-Konstrukte ohne manuelles XML-Editieren modellierbar sind).
+
+## Zeitplan
+
+| Phase | Zeitraum |
+|---|---|
+| Literaturrecherche, Anforderungsanalyse, Evaluierungsdesign | Wochen 1–2 |
+| DSL-Scope-Definition, Syntax- und Semantik-Mapping | Wochen 3–4 |
+| Prototyp-Implementierung (Parser, Validierung, BPMN-Generierung) | Wochen 5–8 |
+| Operaton-Integration und MisArch-Fallstudie | Wochen 9–10 |
+| Evaluation und Ergebnisanalyse | Wochen 11–12 |
+| Schreiben, Überarbeitung und Finalisierung | Wochen 13–14 |
+| **Abgabe der Bachelorarbeit** | **Woche 15** |

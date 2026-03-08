@@ -1,0 +1,13 @@
+[
+  {
+    "id": "example-pub",
+    "title": "Example Title",
+    "year": "2026",
+    "venue": "arXiv",
+    "description": "Example publication entry — set hidden to false (or remove the field) to display it.",
+    "projectSlug": "none",
+    "publishedUrl": "https://arxiv.org",
+    "pdfUrl": "https://arxiv.org",
+    "hidden": true
+  }
+]

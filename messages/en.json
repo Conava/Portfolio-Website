@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "about": "About",
+    "experience": "Experience",
+    "education": "Education",
+    "projects": "Projects",
+    "certificates": "Certificates",
+    "publications": "Publications",
+    "contact": "Contact"
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "tagline": "Full-Stack Engineer",
+    "cta_projects": "View Projects",
+    "cta_contact": "Get in Touch"
+  },
+  "sections": {
+    "about": "About Me",
+    "experience": "Experience",
+    "education": "Education",
+    "projects": "Projects",
+    "certificates": "Certificates",
+    "publications": "Publications",
+    "contact": "Contact",
+    "all_projects": "All Projects"
+  },
+  "common": {
+    "view_project": "View Project",
+    "view_details": "View Details",
+    "github": "GitHub",
+    "read_more": "Read More",
+    "collapse": "Show Less",
+    "back": "Back",
+    "view_certificate": "View Certificate",
+    "status_completed": "Completed",
+    "status_in_progress": "In Progress",
+    "status_upcoming": "Upcoming",
+    "status_active": "Active",
+    "status_discontinued": "Discontinued",
+    "view_publication": "View Publication",
+    "download_pdf": "Download PDF",
+    "see_all_projects": "See All Projects",
+    "copy_link": "Copy link (with theme)",
+    "copied": "Copied!"
+  }
+}

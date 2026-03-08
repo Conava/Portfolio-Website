@@ -1,0 +1,25 @@
+{
+  "bio": "Softwareentwickler aus Hamburg, aktuell im Abschlusssemester meines B.Sc. Wirtschaftsinformatik an der Universität Hamburg. Mein Schwerpunkt ist Backend-Entwicklung, vom Microservice bis zur Infrastruktur. Neue Technologien und Domänen reizen mich dabei besonders. Nach einem vollständigen Studienjahr an der San Diego State University bin ich nach Hamburg zurückgekehrt, um meine Bachelorarbeit zu schreiben und gleichzeitig als Werkstudent bei OTTO an der nächsten Generation der Produktdaten-Onboarding-Plattform mitzuwirken.",
+  "skills": [
+    {
+      "category": "Sprachen",
+      "items": ["Java", "Kotlin", "Python", "C#", "Rust", "Go", "TypeScript / JavaScript", "Bash", "SQL"]
+    },
+    {
+      "category": "Backend & Infrastruktur",
+      "items": ["Spring Boot", "Kafka", "MongoDB", "PostgreSQL", "Hibernate", "Flyway", "REST APIs", "AWS", "S3", "Lambda", "ECS", "Docker", "Terraform"]
+    },
+    {
+      "category": "Frontend & Desktop",
+      "items": ["React", "Next.js", "JavaFX", "HTML / CSS"]
+    },
+    {
+      "category": "Werkzeuge",
+      "items": ["Git", "Linux", "Gradle", "Maven", "GitHub Actions", "DSL-Design", "ANTLR4"]
+    },
+    {
+      "category": "Sprachkenntnisse",
+      "items": ["🇩🇪 Deutsch (Muttersprache)", "🇺🇸 Englisch (C2)", "🇫🇷 Französisch (Grundkenntnisse)"]
+    }
+  ]
+}

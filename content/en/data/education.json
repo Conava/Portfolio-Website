@@ -1,0 +1,63 @@
+[
+  {
+    "id": "bsc-uhh",
+    "institution": "University of Hamburg",
+    "degree": "B.Sc.",
+    "field": "Wirtschaftsinformatik (Business Informatics)",
+    "period": "2022 – Present",
+    "status": "in-progress",
+    "summary": "Interdisciplinary degree combining computer science, information systems, and business administration, currently in the 8th and final semester.",
+    "details": [
+      "Core focus on software engineering, databases, algorithms, and distributed systems",
+      "Currently writing my bachelor thesis on a domain-specific language for BPMN process modeling",
+      "The thesis is published open source and generates executable .bpmn files for Camunda and Operaton engines",
+      "8th semester, thesis phase, targeted graduation in 2026"
+    ],
+    "thesis": {
+      "title": "A Domain-Specific Language for Executable BPMN",
+      "summary": "Developing a DSL that lets developers describe business processes in a concise, code-first notation and compile them to executable BPMN files compatible with Camunda and Operaton process engines. The project is published as open source.",
+      "projectSlug": "bachelor-thesis",
+      "githubUrl": "https://github.com/conava/bpmn-dsl"
+    }
+  },
+  {
+    "id": "sdsu-exchange",
+    "institution": "San Diego State University",
+    "degree": "Exchange Year",
+    "field": "Computer Science (B.Sc.)",
+    "period": "2024 – 2025",
+    "status": "completed",
+    "summary": "Full academic year abroad in San Diego, California as part of my B.Sc. program, focused on computer science theory, algorithms, and advanced programming concepts.",
+    "details": [
+      "Coursework in Algorithms & Data Structures, Advanced Programming Languages, and Software Systems",
+      "Deepened understanding of formal language theory, type systems, and compiler construction",
+      "Studied at an international research university, broadened perspective on engineering approaches and academic culture"
+    ]
+  },
+  {
+    "id": "btg-oldenburg",
+    "institution": "Bildungszentrum für Technik und Gestaltung, Oldenburg",
+    "degree": "Abitur",
+    "field": "Technical High School (Technisches Gymnasium)",
+    "period": "2019 – 2022",
+    "status": "completed",
+    "summary": "German university entrance qualification from a technical high school with an IT specialization. Final grade 1.3 (German scale, 1.0 best; approx. 4.0 GPA).",
+    "details": [
+      "Advanced classes: Information Technology, Mathematics, English",
+      "IT coursework covered graphical programming in C#, microcontroller development, computer fundamentals, binary logic, and electrical engineering basics",
+      "Took Information Processing and Business/Economics as part of the Abitur",
+      "Final grade 1.3 on the German scale (1.0 is highest; roughly equivalent to a 4.0 GPA)"
+    ]
+  },
+  {
+    "id": "msc-uhh",
+    "institution": "University of Hamburg",
+    "degree": "M.Sc.",
+    "field": "Wirtschaftsinformatik (Business Informatics)",
+    "period": "2026 – Present",
+    "status": "upcoming",
+    "summary": "Planned Master's program in Business Informatics, to begin after bachelor graduation.",
+    "details": [],
+    "hidden": true
+  }
+]

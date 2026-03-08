@@ -1,0 +1,63 @@
+[
+  {
+    "id": "bsc-uhh",
+    "institution": "Universität Hamburg",
+    "degree": "B.Sc.",
+    "field": "Wirtschaftsinformatik",
+    "period": "2022 – Heute",
+    "status": "in-progress",
+    "summary": "Interdisziplinärer Studiengang, der Informatik, Wirtschaftsinformatik und Betriebswirtschaft verbindet, aktuell im 8. und letzten Semester.",
+    "details": [
+      "Schwerpunkte in Software Engineering, Datenbanken, Algorithmen und verteilten Systemen",
+      "Aktuell: Bachelorarbeit über eine domänenspezifische Sprache (DSL) für BPMN-Prozessmodellierung",
+      "Die Abschlussarbeit wird als Open Source veröffentlicht und generiert ausführbare .bpmn-Dateien für Camunda und Operaton",
+      "8. Semester, Abschlussphase, angestrebte Graduierung 2026"
+    ],
+    "thesis": {
+      "title": "Eine domänenspezifische Sprache für ausführbares BPMN",
+      "summary": "Entwicklung einer DSL, mit der Entwickler Geschäftsprozesse in einer kompakten, code-orientierten Notation beschreiben und zu ausführbaren BPMN-Dateien für Camunda und Operaton kompilieren können. Das Projekt wird als Open Source veröffentlicht.",
+      "projectSlug": "bachelor-thesis",
+      "githubUrl": "https://github.com/conava/bpmn-dsl"
+    }
+  },
+  {
+    "id": "sdsu-exchange",
+    "institution": "San Diego State University",
+    "degree": "Auslandsjahr",
+    "field": "Informatik (B.Sc.)",
+    "period": "2024 – 2025",
+    "status": "completed",
+    "summary": "Vollständiges Studienjahr in San Diego, Kalifornien als Teil meines B.Sc.-Studiums, mit Fokus auf Informatiktheorie, Algorithmen und fortgeschrittene Programmierkonzepte.",
+    "details": [
+      "Lehrveranstaltungen in Algorithmen & Datenstrukturen, Programmiersprachen und Softwaresystemen",
+      "Vertiefung formaler Sprachtheorie, Typsysteme und Compilerbau",
+      "Internationales Hochschulumfeld, breiter Einblick in unterschiedliche Ingenieursansätze und Wissenschaftskulturen"
+    ]
+  },
+  {
+    "id": "btg-oldenburg",
+    "institution": "Bildungszentrum für Technik und Gestaltung, Oldenburg",
+    "degree": "Abitur",
+    "field": "Technisches Gymnasium, Schwerpunkt Informationstechnologie",
+    "period": "2019 – 2022",
+    "status": "completed",
+    "summary": "Allgemeine Hochschulreife an einem technischen Gymnasium mit IT-Schwerpunkt. Abiturnote: 1,3.",
+    "details": [
+      "Leistungskurse: Informationstechnologie, Mathematik, Englisch",
+      "IT-Inhalte: grafische Programmierung in C#, Mikrocontroller-Entwicklung, Rechnergrundlagen, Binärlogik und Elektrotechnik",
+      "Weitere Abiturfächer: Informationsverarbeitung, Wirtschaft",
+      "Abiturnote: 1,3"
+    ]
+  },
+  {
+    "id": "msc-uhh",
+    "institution": "Universität Hamburg",
+    "degree": "M.Sc.",
+    "field": "Wirtschaftsinformatik",
+    "period": "2026 – Heute",
+    "status": "upcoming",
+    "summary": "Geplantes Masterstudium in Wirtschaftsinformatik, beginnt nach Abschluss des Bachelorstudiums.",
+    "details": [],
+    "hidden": true
+  }
+]
