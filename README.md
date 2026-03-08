@@ -1,51 +1,75 @@
-# Portfolio
+# Portfolio — marlonkranz.com
 
-Personal portfolio website — bilingual (EN/DE), dark/light mode, built with Next.js 16 + Framer Motion.
+Personal portfolio website built with Next.js 16, featuring bilingual content (EN/DE), four switchable design themes each with dark/light variants, and a fully automated Docker-based CI/CD pipeline.
+
+[Live Site](https://marlonkranz.com) · [LinkedIn](https://linkedin.com/in/marlon-kranz) · [Email](mailto:dev@marlonkranz.com)
+
+## Features
+
+- Bilingual (EN/DE) with path-based routing via next-intl
+- Four design themes (Atelier, Iris, Manifesto, Cobalt), each with dark and light variants
+- Animated theme/language switcher with slot-machine locale animation
+- Project pages authored in MDX with full component support
+- Shareable URLs for theme and language preferences via query params
+- Fully automated deployment: push to `main` → Docker image built → live within ~2 minutes
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 (App Router) + TypeScript
-- **Styling:** Tailwind CSS v4
-- **Animations:** Framer Motion
-- **i18n:** next-intl (EN/DE, path-based)
-- **Theming:** next-themes (dark default)
-- **Content:** MDX via next-mdx-remote
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) + TypeScript |
+| Styling | Tailwind CSS v4 |
+| Animations | Framer Motion |
+| i18n | next-intl (EN/DE, path-based) |
+| Theming | next-themes + custom CSS custom properties |
+| Content | MDX via next-mdx-remote |
+| CI/CD | GitHub Actions → GHCR → Docker + Traefik |
 
-## Development
+## Architecture
+
+The theming system has two independent layers that compose: dark/light mode (managed by next-themes, stored as a class on `<html>`) and design themes (four palettes applied via `data-theme`, stored in localStorage). An inline script in `<head>` reads both values before hydration to prevent flash.
+
+All site content lives in `content/{locale}/` — JSON files for structured data (experience, education, publications) and MDX for project detail pages. Server-side loaders read these at request time, keeping content changes deployable without touching application code.
+
+## Getting Started
 
 ```bash
 pnpm install
-pnpm dev
-```
-
-## Build
-
-```bash
-pnpm build
-pnpm start
+pnpm dev        # http://localhost:3000
+pnpm build      # Production build
+pnpm tsc --noEmit  # Type-check
 ```
 
 ## Content
 
-Add/edit content in the `content/` directory:
-- `content/{locale}/data/` — JSON files for experience, education, certificates, about
-- `content/{locale}/projects/` — MDX files for project detail pages
+All content lives in `content/{locale}/` and can be edited without touching application code:
+
+- `content/{locale}/data/experience.json` — Work experience
+- `content/{locale}/data/education.json` — Education
+- `content/{locale}/data/certificates.json` — Certificates
+- `content/{locale}/data/about.json` — Bio and intro text
+- `content/{locale}/data/publications.json` — Publications
+- `content/{locale}/projects/*.mdx` — Project detail pages
+
+Where `{locale}` is `en` or `de`. The English locale is the source of truth; the German locale falls back to English where translations are missing.
 
 ## Deployment
 
-Docker + Traefik + GitHub Actions. Pushing to `main` builds a Docker image, pushes it to GHCR, and SSHes into the server to pull and restart the container.
+The site runs in Docker behind Traefik, deployed automatically via GitHub Actions. Pushing to `main` builds a Docker image, pushes it to GitHub Container Registry (GHCR), and SSHes into the server to pull and restart the container — live within ~2 minutes.
 
-### docker-compose.yml
+### Server Setup
 
-Use the pre-built image from GHCR instead of building locally:
+1. Install Docker and Docker Compose on the server
+2. Add the deployment public key to `~/.ssh/authorized_keys`
+3. Create a `docker-compose.yml` on the server:
 
 ```yaml
 portfolio:
-  image: ghcr.io/yourusername/portfolio:latest
+  image: ghcr.io/conava/portfolio-website:latest
   restart: unless-stopped
   labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.portfolio.rule=Host(`your-domain.com`)"
+    - "traefik.http.routers.portfolio.rule=Host(`marlonkranz.com`)"
     - "traefik.http.routers.portfolio.entrypoints=websecure"
     - "traefik.http.routers.portfolio.tls.certresolver=letsencrypt"
     - "traefik.http.services.portfolio.loadbalancer.server.port=3000"
@@ -53,25 +77,17 @@ portfolio:
     - traefik
 ```
 
-### GitHub Actions secrets
+### GitHub Actions Secrets
 
 Add these in **Settings → Secrets and variables → Actions**:
 
 | Secret | Value |
 |---|---|
-| `DEPLOY_HOST` | Your server's IP or hostname |
-| `DEPLOY_USER` | SSH user (e.g. `marlon`) |
-| `DEPLOY_KEY` | Private SSH key (contents of `~/.ssh/id_ed25519`) |
-| `DEPLOY_PATH` | Absolute path to your `docker-compose.yml` on the server |
+| `DEPLOY_HOST` | Server IP or hostname |
+| `DEPLOY_USER` | SSH user |
+| `DEPLOY_KEY` | Private SSH key (unencrypted, contents of `~/.ssh/deploy_key`) |
+| `DEPLOY_PATH` | Absolute path to `docker-compose.yml` on the server |
 
-### Server setup
+### Updating Content
 
-1. Add the corresponding public key to `~/.ssh/authorized_keys` on the server
-2. Make the GHCR package public (**GitHub → Packages → portfolio → Package settings → Change visibility**) so the server can pull without authentication — or log in manually once:
-   ```bash
-   echo $CR_PAT | docker login ghcr.io -u yourusername --password-stdin
-   ```
-
-### Updating content
-
-Edit MDX/JSON files directly on GitHub and push (or use GitHub's web editor). The pipeline runs automatically and the site is live within ~2 minutes.
+Edit MDX/JSON files directly on GitHub and push. The pipeline runs automatically.
