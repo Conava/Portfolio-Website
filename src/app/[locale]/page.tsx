@@ -63,10 +63,10 @@ export default async function Home({ params }: Props) {
       return b.date.localeCompare(a.date);
     });
 
-  // Dynamic section numbering — Hero counts as section 1 (not displayed)
-  let sectionCounter = 1; // Hero = I
+  // Dynamic section numbering — Hero is not numbered
+  let sectionCounter = 0;
   const idx = {
-    about:        toRoman(++sectionCounter), // II
+    about:        toRoman(++sectionCounter), // I
     experience:   toRoman(++sectionCounter), // III
     education:    toRoman(++sectionCounter), // IV
     projects:     toRoman(++sectionCounter), // V

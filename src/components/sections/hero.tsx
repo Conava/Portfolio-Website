@@ -52,15 +52,6 @@ export function Hero({ name, projectCount }: { name: string; projectCount: numbe
           </span>
         </div>
 
-        {/* Roman numeral - bottom left decoration */}
-        <div
-          aria-hidden="true"
-          className="hero-numeral absolute bottom-12 left-[clamp(2rem,10vw,10rem)] font-display italic font-light text-[var(--color-accent)] pointer-events-none select-none"
-          style={{ fontSize: "clamp(3rem, 8vw, 7rem)", opacity: 0.12, lineHeight: 1 }}
-        >
-          I
-        </div>
-
         {/* Top gold rule — draws left→right */}
         <div className="hero-rule w-full h-px bg-[var(--color-accent)]" />
 
@@ -133,15 +124,6 @@ export function Hero({ name, projectCount }: { name: string; projectCount: numbe
           Clip-path reveals left→right.
       ══════════════════════════════════════════ */}
       <section className="hero-section hero-manifesto relative min-h-[100svh] flex-col justify-center overflow-hidden px-[clamp(2rem,6vw,8rem)] py-24">
-
-        {/* Huge corner index */}
-        <div
-          aria-hidden="true"
-          className="hero-corner-index absolute top-0 right-0 font-display font-extrabold italic text-[var(--color-accent)] pointer-events-none select-none leading-none"
-          style={{ fontSize: "clamp(6rem, 18vw, 16rem)", opacity: 0.08, lineHeight: 0.85, paddingRight: "clamp(2rem,6vw,8rem)" }}
-        >
-          001
-        </div>
 
         {/* Background texture text */}
         <div
