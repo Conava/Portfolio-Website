@@ -23,7 +23,10 @@ export function ExpandableCard({
     <motion.div
       layout
       className={`expandable-card border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 cursor-pointer transition-colors hover:bg-[var(--color-bg-card-hover)] ${className}`}
-      onClick={() => setIsExpanded(!isExpanded)}
+      onClick={() => {
+        if (window.getSelection()?.toString()) return;
+        setIsExpanded(!isExpanded);
+      }}
     >
       <motion.div layout="position">{children}</motion.div>
       <AnimatePresence>

@@ -29,7 +29,10 @@ function EducationCard({
       <motion.div
         layout
         className="theme-card expandable-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 cursor-pointer hover:bg-[var(--color-bg-card-hover)] transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          if (window.getSelection()?.toString()) return;
+          setIsExpanded(!isExpanded);
+        }}
       >
         <motion.div layout="position">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
@@ -72,6 +75,7 @@ function EducationCard({
                     className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-4 mt-4 cursor-pointer hover:bg-[var(--color-bg-card-hover)] transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (window.getSelection()?.toString()) return;
                       setThesisExpanded(!thesisExpanded);
                     }}
                   >
