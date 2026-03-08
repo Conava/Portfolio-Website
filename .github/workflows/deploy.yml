@@ -29,7 +29,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.IMAGE }}:latest
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
@@ -38,6 +40,6 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            cd ${{ secrets.DEPLOY_PATH }}
+            cd "${{ secrets.DEPLOY_PATH }}" || exit 1
             docker compose pull portfolio
             docker compose up -d portfolio
