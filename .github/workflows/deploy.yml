@@ -43,6 +43,6 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            cd "${{ secrets.DEPLOY_PATH }}" || exit 1
+            eval cd "${{ secrets.DEPLOY_PATH }}" || exit 1
             docker compose pull portfolio
             docker compose up -d portfolio
