@@ -50,6 +50,17 @@ Section numbering uses `toRoman()` from `src/lib/utils.ts` and is computed dynam
 
 All 6 font families are loaded unconditionally at build time via `next/font/google` in `layout.tsx` and applied as CSS variables on `<html>`. Theme CSS overrides `--font-sans` and `--font-display` per `data-theme` to switch fonts when themes change.
 
+### Analytics
+
+Self-hosted [Umami](https://umami.is) at `analytics.marlonkranz.com`. The Umami `<Script>` tag is conditionally rendered in `layout.tsx` only when both env vars are set:
+
+- `NEXT_PUBLIC_UMAMI_URL` — Umami instance URL (e.g. `https://analytics.marlonkranz.com`)
+- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` — website ID from the Umami dashboard
+
+Use the typed `trackEvent(name, data?)` helper from `src/lib/analytics.ts` to instrument interactions. It safely no-ops when Umami is absent (SSR or env vars unset). Events are currently tracked on: hero CTAs, nav section clicks, project card interactions, and social footer links.
+
+Server setup: `docker-compose.umami.yml` in the project root is a reference Compose snippet for deploying Umami + PostgreSQL behind Traefik.
+
 ### Key Files
 
 | File | Purpose |
@@ -58,6 +69,7 @@ All 6 font families are loaded unconditionally at build time via `next/font/goog
 | `src/app/globals.css` | CSS custom properties for all 4 themes + special effects (grain, watermarks) |
 | `src/lib/content.ts` | All filesystem content loaders |
 | `src/lib/types.ts` | All shared TypeScript types |
+| `src/lib/analytics.ts` | Typed `trackEvent()` helper for Umami analytics |
 | `src/lib/site-config.ts` | Name, social links — edit here to change personal info |
 | `src/app/[locale]/page.tsx` | Main page — assembles all sections, controls section numbering |
 | `src/components/nav/navbar.tsx` | Navigation — `sections` array must match page content |
