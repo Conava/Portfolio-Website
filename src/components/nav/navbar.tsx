@@ -8,6 +8,7 @@ import { LocaleToggle } from "./locale-toggle";
 import { DesignThemeSwitcher } from "@/components/ui/design-theme-switcher";
 import { siteConfig } from "@/lib/site-config";
 import { usePathname, useRouter, Link } from "@/i18n/navigation";
+import { trackEvent } from "@/lib/analytics";
 
 const sections = [
   "about",
@@ -36,6 +37,7 @@ export function Navbar() {
   }, []);
 
   function handleSectionNav(section: string) {
+    trackEvent("nav-section", { section });
     if (isProjectsPage) {
       router.push(`/#${section}`);
     } else {

@@ -12,11 +12,15 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 import { routing } from "@/i18n/routing";
 import { Navbar } from "@/components/nav/navbar";
 import { DesignThemeProvider } from "@/components/ui/design-theme-provider";
 import { LS_KEY, DEFAULT_THEME, DESIGN_THEMES } from "@/lib/design-themes";
 import "../globals.css";
+
+const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_URL;
+const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -98,6 +102,13 @@ export default async function LocaleLayout({ children, params }: Props) {
             __html: `(function(){try{var valid=${JSON.stringify([...DESIGN_THEMES])};var p=new URLSearchParams(window.location.search).get('theme');var t=(p&&valid.includes(p))?p:localStorage.getItem(${JSON.stringify(LS_KEY)});document.documentElement.setAttribute('data-theme',t||${JSON.stringify(DEFAULT_THEME)});}catch(e){}})();`,
           }}
         />
+        {umamiUrl && umamiWebsiteId && (
+          <Script
+            src={umamiUrl}
+            data-website-id={umamiWebsiteId}
+            strategy="afterInteractive"
+          />
+        )}
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider

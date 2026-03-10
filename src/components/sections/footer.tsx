@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { siteConfig } from "@/lib/site-config";
+import { trackEvent } from "@/lib/analytics";
 
 const GitHubIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 flex-shrink-0" aria-hidden="true">
@@ -69,6 +70,7 @@ export function Footer({ index }: { index?: string } = {}) {
               href={link.href}
               target={link.external ? "_blank" : undefined}
               rel={link.external ? "noopener noreferrer" : undefined}
+              onClick={() => trackEvent("contact-link", { platform: link.label.toLowerCase() })}
               className="group flex items-center gap-3 px-6 py-4 border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-card-hover)] transition-all duration-200 text-left"
             >
               <span className="text-[var(--color-accent)] transition-colors">
