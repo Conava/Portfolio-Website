@@ -90,13 +90,13 @@ export function Hero({ name, projectCount }: { name: string; projectCount: numbe
         {/* CTAs */}
         <div className="hero-cta flex items-center gap-8">
           <button
-            onClick={() => { trackEvent("hero-cta-projects", { theme: "atelier" }); go("projects"); }}
+            onClick={() => { trackEvent("hero-cta-projects", { theme: stableTheme }); go("projects"); }}
             className="font-sans text-[0.62rem] tracking-[0.2em] uppercase font-light border border-[var(--color-accent)] text-[var(--color-accent)] px-8 py-3.5 hover:bg-[var(--color-accent)] hover:text-[var(--color-bg)] transition-all duration-300"
           >
             {t("cta_projects")}
           </button>
           <button
-            onClick={() => { trackEvent("hero-cta-contact", { theme: "atelier" }); go("contact"); }}
+            onClick={() => { trackEvent("hero-cta-contact", { theme: stableTheme }); go("contact"); }}
             className="font-sans text-[0.62rem] tracking-[0.2em] uppercase font-light text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors flex items-center gap-2"
           >
             {t("cta_contact")}
@@ -202,13 +202,13 @@ export function Hero({ name, projectCount }: { name: string; projectCount: numbe
           </p>
           <div className="hero-cta flex gap-3">
             <button
-              onClick={() => { trackEvent("hero-cta-projects", { theme: "manifesto" }); go("projects"); }}
+              onClick={() => { trackEvent("hero-cta-projects", { theme: stableTheme }); go("projects"); }}
               className="theme-btn-primary font-sans text-[0.62rem] tracking-[0.15em] uppercase px-6 py-3 bg-[var(--color-accent)] text-[var(--color-bg)] font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
             >
               {t("cta_projects")} ↗
             </button>
             <button
-              onClick={() => { trackEvent("hero-cta-contact", { theme: "manifesto" }); go("contact"); }}
+              onClick={() => { trackEvent("hero-cta-contact", { theme: stableTheme }); go("contact"); }}
               className="theme-btn-ghost font-sans text-[0.62rem] tracking-[0.15em] uppercase px-6 py-3 border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-text)] transition-colors"
             >
               {t("cta_contact")} ↗
@@ -321,14 +321,14 @@ export function Hero({ name, projectCount }: { name: string; projectCount: numbe
         {/* CTAs */}
         <div className="hero-cta flex gap-4 mt-12 flex-wrap">
           <button
-            onClick={() => { trackEvent("hero-cta-projects", { theme: "cobalt" }); go("projects"); }}
+            onClick={() => { trackEvent("hero-cta-projects", { theme: stableTheme }); go("projects"); }}
             className="theme-btn-primary font-mono text-[0.62rem] tracking-[0.15em] uppercase px-8 py-3 bg-[var(--color-accent)] text-white rounded-full hover:bg-[var(--color-accent-hover)] transition-colors"
             style={{ boxShadow: "0 0 24px var(--color-accent-glow)" }}
           >
             {t("cta_projects")}
           </button>
           <button
-            onClick={() => { trackEvent("hero-cta-contact", { theme: "cobalt" }); go("contact"); }}
+            onClick={() => { trackEvent("hero-cta-contact", { theme: stableTheme }); go("contact"); }}
             className="theme-btn-ghost font-mono text-[0.62rem] tracking-[0.15em] uppercase px-8 py-3 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)] transition-colors"
           >
             {t("cta_contact")}
@@ -472,7 +472,7 @@ export function Hero({ name, projectCount }: { name: string; projectCount: numbe
 
           <div className="hero-cta flex gap-4 justify-center flex-wrap">
             <button
-              onClick={() => { trackEvent("hero-cta-projects", { theme: "iris" }); go("projects"); }}
+              onClick={() => { trackEvent("hero-cta-projects", { theme: stableTheme }); go("projects"); }}
               className="theme-btn-primary px-8 py-3 rounded-full font-sans font-medium transition-all duration-300"
               style={{
                 background:
@@ -484,7 +484,7 @@ export function Hero({ name, projectCount }: { name: string; projectCount: numbe
               {t("cta_projects")}
             </button>
             <button
-              onClick={() => { trackEvent("hero-cta-contact", { theme: "iris" }); go("contact"); }}
+              onClick={() => { trackEvent("hero-cta-contact", { theme: stableTheme }); go("contact"); }}
               className="theme-btn-ghost px-8 py-3 rounded-full border border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-card-hover)] transition-colors"
             >
               {t("cta_contact")}

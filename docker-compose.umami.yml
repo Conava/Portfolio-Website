@@ -10,6 +10,9 @@
 # Required environment variables (add to your server's .env):
 #   UMAMI_DB_PASSWORD=<strong-random-password>
 #   UMAMI_APP_SECRET=<random-64-char-string>
+#
+# IMPORTANT: After first launch, log into https://analytics.marlonkranz.com
+# and immediately change the default admin password (default: admin / umami).
 
 services:
   umami:

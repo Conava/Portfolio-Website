@@ -21,6 +21,8 @@ import "../globals.css";
 
 const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_URL;
 const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+const isValidUmamiUrl =
+  umamiUrl?.startsWith("https://analytics.marlonkranz.com") ?? false;
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -102,15 +104,15 @@ export default async function LocaleLayout({ children, params }: Props) {
             __html: `(function(){try{var valid=${JSON.stringify([...DESIGN_THEMES])};var p=new URLSearchParams(window.location.search).get('theme');var t=(p&&valid.includes(p))?p:localStorage.getItem(${JSON.stringify(LS_KEY)});document.documentElement.setAttribute('data-theme',t||${JSON.stringify(DEFAULT_THEME)});}catch(e){}})();`,
           }}
         />
-        {umamiUrl && umamiWebsiteId && (
+      </head>
+      <body className="font-sans antialiased">
+        {isValidUmamiUrl && umamiWebsiteId && (
           <Script
             src={umamiUrl}
             data-website-id={umamiWebsiteId}
             strategy="afterInteractive"
           />
         )}
-      </head>
-      <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

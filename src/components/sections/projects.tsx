@@ -156,7 +156,7 @@ export function Projects({
           <Link
             href="/projects"
             className="hidden md:inline-block absolute right-0 top-0 text-sm px-4 py-1.5 rounded-full border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-card-hover)] transition-colors"
-            onClick={() => trackEvent("see-all-projects")}
+            onClick={() => trackEvent("see-all-projects", { placement: "header" })}
           >
             {tc("see_all_projects")} →
           </Link>
@@ -172,7 +172,7 @@ export function Projects({
           <Link
             href="/projects"
             className="text-sm px-6 py-2.5 rounded-full border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-card-hover)] transition-colors"
-            onClick={() => trackEvent("see-all-projects")}
+            onClick={() => trackEvent("see-all-projects", { placement: "bottom" })}
           >
             {tc("see_all_projects")} →
           </Link>
