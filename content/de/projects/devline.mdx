@@ -1,0 +1,159 @@
+---
+title: "devline: Agentische Entwicklungs-Pipeline für Claude Code"
+date: "2026 – Heute"
+summary: "Ein Claude-Code-Plugin, das KI-Coding in eine Multi-Agenten-Pipeline überführt: Spec Engineering, TDD-Planung, parallele Implementierung, automatisiertes Review und Sicherheits-Hooks, die Agenten autonom arbeiten lassen, ohne das Repo zu zerschießen."
+tech: ["Claude Code", "Agents", "Hooks", "Skills", "MCP", "TDD", "Git"]
+githubUrl: "https://github.com/Conava/claude-devline"
+thumbnail: "/images/projects/devline.jpg"
+featured: false
+status: "active"
+---
+
+## Überblick
+
+Die meisten KI-Coding-Tools arbeiten in einer einzelnen Konversation: Man beschreibt, was man will, das Modell schreibt Code, und man hofft auf das Beste. Bei allem, was nicht trivial ist, bricht das schnell zusammen. Das Modell halluziniert APIs, überspringt Tests, macht destruktive Änderungen am Repo und produziert Code, der kompiliert, aber in Produktion scheitert. Keine Struktur, keine Verifikation, nichts hält es davon ab, `rm -rf` auf dein Arbeitsverzeichnis loszulassen.
+
+devline ist ein [Claude Code](https://docs.anthropic.com/en/docs/claude-code)-Plugin, das diesen Ansatz durch eine Multi-Agenten-Pipeline ersetzt. Jedes Feature durchläuft Spec Engineering, TDD-Planung, parallele Implementierung, automatisiertes Review und Dokumentation. Jede Phase läuft auf einem spezialisierten Agenten mit dem passenden Modell, Tools und Fachwissen. Sicherheits-Hooks erzwingen Branch Protection, blockieren destruktive Befehle und fangen Credential Leaks ab, bevor sie auf die Platte geschrieben werden — so kann man die Agenten laufen lassen, ohne ihnen ständig über die Schulter schauen zu müssen.
+
+Ich habe devline gebaut, weil ich klar definierte, aber zeitaufwändige Arbeit an KI delegieren wollte, ohne ständig prüfen zu müssen, ob etwas kaputtgegangen ist. Kein Vibe-Coding. Spec-getriebene Planung, striktes TDD und eine Review-Schleife, die Fehler abfängt, bevor sie den Branch erreichen.
+
+<div style={{ margin: '2rem 0' }}>
+<svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0 0L10 3.5L0 7z" fill="var(--color-text-muted)" />
+    </marker>
+    <marker id="arr-a" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0 0L10 3.5L0 7z" fill="var(--color-accent)" />
+    </marker>
+  </defs>
+
+  <rect x="218" y="4" width="12" height="12" rx="3" fill="var(--color-accent)" fillOpacity="0.15" stroke="var(--color-accent)" strokeWidth="1" />
+  <text x="236" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Interaktiv</text>
+  <rect x="318" y="4" width="12" height="12" rx="3" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1" />
+  <text x="336" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Autonom</text>
+
+  <rect x="8" y="34" width="178" height="56" rx="10" fill="var(--color-accent)" fillOpacity="0.08" stroke="var(--color-accent)" strokeWidth="1.5" />
+  <text x="97" y="58" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Brainstorm</text>
+  <text x="97" y="76" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Idee → Spec</text>
+
+  <line x1="190" y1="62" x2="232" y2="62" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+  <rect x="238" y="34" width="178" height="56" rx="10" fill="var(--color-accent)" fillOpacity="0.08" stroke="var(--color-accent)" strokeWidth="1.5" />
+  <text x="327" y="58" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Plan</text>
+  <text x="327" y="76" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">TDD-Architektur</text>
+
+  <line x1="420" y1="62" x2="462" y2="62" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+  <rect x="468" y="34" width="178" height="56" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
+  <text x="557" y="58" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Implement</text>
+  <text x="557" y="76" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Paralleles TDD</text>
+
+  <line x1="557" y1="94" x2="557" y2="162" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+  <rect x="468" y="168" width="178" height="56" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
+  <text x="557" y="192" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Review</text>
+  <text x="557" y="210" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Qualität & Sicherheit</text>
+
+  <line x1="464" y1="196" x2="420" y2="196" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+  <rect x="238" y="168" width="178" height="56" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
+  <text x="327" y="192" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Docs</text>
+  <text x="327" y="210" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Auto-Update</text>
+
+  <line x1="234" y1="196" x2="190" y2="196" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+  <rect x="8" y="168" width="178" height="56" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
+  <text x="97" y="192" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Deep Review</text>
+  <text x="97" y="210" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Merge-Gate</text>
+
+  <path d="M650 168 C698 168, 698 90, 650 90" stroke="var(--color-accent)" strokeWidth="1.5" strokeDasharray="5 3" fill="none" markerEnd="url(#arr-a)" />
+  <text x="690" y="132" fontSize="9.5" fill="var(--color-accent)" fontFamily="var(--font-sans)" textAnchor="middle" fontStyle="italic">Retry</text>
+
+  <path d="M160 168 C160 110, 490 110, 490 92" stroke="var(--color-accent)" strokeWidth="1.5" strokeDasharray="5 3" fill="none" markerEnd="url(#arr-a)" />
+  <text x="390" y="104" fontSize="9.5" fill="var(--color-accent)" fontFamily="var(--font-sans)" textAnchor="middle" fontStyle="italic">Retry</text>
+
+  <path d="M80 168 C80 136, 300 136, 300 92" stroke="var(--color-accent)" strokeWidth="1.5" strokeDasharray="2 3" fill="none" markerEnd="url(#arr-a)" />
+  <text x="158" y="130" fontSize="9.5" fill="var(--color-accent)" fontFamily="var(--font-sans)" textAnchor="middle" fontStyle="italic">Eskalation</text>
+
+  <line x1="97" y1="224" x2="97" y2="272" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+  <rect x="8" y="278" width="178" height="52" rx="10" fill="var(--color-accent)" fillOpacity="0.08" stroke="var(--color-accent)" strokeWidth="1.5" />
+  <text x="97" y="300" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Du</text>
+  <text x="97" y="318" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Freigabe · Änderungen · Merge</text>
+</svg>
+</div>
+
+## Was es tut
+
+Die Pipeline ist interaktiv, wo es darauf ankommt (Brainstorming, Planung, Approval Gates) und autonom, wo nicht (Implementierung, Review, Dokumentation). Man beschreibt eine grobe Idee, verfeinert sie in einem kurzen Dialog, genehmigt den Plan und lässt die Agenten arbeiten.
+
+**Brainstorm** — Man beschreibt ein Feature in natürlicher Sprache. Der Brainstormer stellt 1-3 gezielte Fragen zu Scope, Grenzfällen und Constraints und liefert dann eine kurze Spezifikation.
+
+**Plan** — Ein TDD-First-Planner entwirft die Architektur, schlägt Bibliotheken über Echtzeit-Dokumentation nach (Context7 MCP), teilt die Arbeit in parallele Pakete mit Dateiisolierung auf und schreibt den Plan auf die Festplatte. Er hinterfragt seinen eigenen Ansatz und schlägt Alternativen vor. Man prüft und genehmigt, bevor etwas implementiert wird.
+
+**Implement** — Mehrere Agenten starten parallel, einer pro Arbeitspaket. Jeder folgt striktem TDD: erst fehlschlagende Tests schreiben, dann implementieren bis alles grün ist, dann refactoren. Jede Zeile Produktionscode hat einen Test, bevor sie existiert.
+
+**Review** — Jedes Arbeitspaket wird auf Korrektheit, Sicherheit, Performance und Codequalität geprüft. Wenn ein Review durchfällt, bekommt der Implementierer einen zweiten Versuch. Scheitert auch der, übernimmt ein Debugger-Agent die systematische Ursachenanalyse. Erst dann wird an den Entwickler eskaliert.
+
+**Documentation** — Ein Docs-Keeper-Agent erkennt, welche Dateien sich geändert haben, und aktualisiert die betroffene Dokumentation.
+
+**Deep Review** — Ein letztes Gate vor dem Merge: Security-Audit, Credential-Scanning, Codequalität, technische Schulden, Konventionsprüfung und Verifikation, dass jedes Kriterium aus dem Plan tatsächlich erfüllt wurde. Wenn etwas durchfällt, geht die Arbeit zurück an den Implementierer. Wenn das Problem architektonischer Natur ist, wird an den Planner eskaliert.
+
+**Du entscheidest** — Wenn alles durchläuft, hast du das letzte Wort. Freigeben und beenden, Änderungen anfordern, die zurück in die Pipeline gehen, oder devline automatisch committen und mergen lassen.
+
+## Agenten-Architektur
+
+devline steuert 10 spezialisierte Agenten. Jeder hat ein bestimmtes Modell-Tier (Opus für reasoning-intensive Aufgaben, Sonnet für Durchsatz), ein Berechtigungslevel und injizierte Domain-Skills:
+
+| Agent | Modell | Rolle |
+|---|---|---|
+| Planner | Opus | Architekturentwurf, TDD-Planung, interaktives Q&A |
+| Implementer | Sonnet | Parallele TDD-Implementierung pro Arbeitspaket |
+| DevOps | Sonnet | Infrastruktur, CI/CD, Docker, Build-Systeme |
+| Reviewer | Sonnet | Korrektheit, Sicherheit, Performance-Review |
+| Debugger | Opus | Systematische Ursachenanalyse nach wissenschaftlicher Methode |
+| Deep Review | Opus | Finales Merge-Gate-Audit |
+| Frontend Reviewer | Sonnet | Automatisch ausgelöste Barrierefreiheits- und UI-Qualitätsprüfungen |
+| Docs-keeper | Vererbt | Dokumentationspflege |
+| Dependency Patcher | Sonnet | CVE-Patching über Repositories hinweg |
+| Dependency Migrator | Opus | Breaking-Change-Migrationen mit Code-Refactoring |
+
+Nichts wird zufällig aufgerufen. Jeder Agenten-Aufruf läuft über den Pipeline-Orchestrator oder einen expliziten Befehl. Fachwissen kommt aus komponierbaren Skill-Modulen (TDD-Methodik, Frontend-Patterns, Cloud-Infrastruktur, Debugging-Heuristiken), sodass jeder Agent sein Fachgebiet kennt, ohne Kontext mitzuschleppen, den er nicht braucht.
+
+## Sicherheitsschicht
+
+devline ist für Claude Codes Bypass-Permissions-Modus konzipiert, in dem Agenten mit voller Autonomie und ohne Approval-Prompts arbeiten. Das heißt: Die Sicherheits-Hooks sind das Einzige zwischen autonomen Agenten und der Codebasis.
+
+- **Branch Protection** — Schreibzugriffe auf geschützte Branches (main, master, develop, release, production, staging) sind blockiert. Agenten müssen zuerst einen Feature-Branch erstellen.
+- **Destruktive Befehle blockieren** — `rm -rf` außerhalb des Arbeitsverzeichnisses, Force-Pushes, Hard-Resets, Operationen auf Festplattenebene, Datenbank-Drops und Paket-Publishing werden hart blockiert.
+- **Credential-Scanning** — Hartcodierte API-Keys, Private Keys, AWS-Credentials, GitHub-Tokens, JWTs und Secrets in `.env`-Dateien werden am Schreiben auf die Festplatte gehindert.
+- **Pipeline-Isolation** — Arbeitsdateien in `.devline/` können nicht gestaged oder committet werden.
+- **Commit-Validierung** — Conventional-Commit-Format standardmäßig erzwungen, pro Projekt konfigurierbar.
+- **External-Mutation-Guards** — HTTP-Mutationen zu Nicht-Localhost, SSH-Zugriff und Service-Control-Befehle brauchen explizite Bestätigung oder werden komplett blockiert.
+
+## Praxiseinsatz
+
+Ich habe devline ausgiebig an meinem [Schachprojekt](/de/projects/chess-engine) eingesetzt, einer Multi-Modul-Java-Plattform, die ich ursprünglich im dritten Semester an der Uni gebaut habe. Damit habe ich die gesamte Oberfläche von Java Swing zu JavaFX migriert, ein animiertes cinematisches Hauptmenü gebaut und den Server von einem Proof-of-Concept zu einem produktionsfähigen System mit Authentifizierung, Spielstandspeicherung und gleichzeitiger Session-Verwaltung umgebaut. Die Pipeline hat Spec Engineering, parallele TDD-Implementierung und Review-Zyklen für all das übernommen.
+
+devline ist auch mein Test, ob strukturierte KI-Workflows im professionellen Teamkontext funktionieren. Ich habe es mit dem Ziel gebaut, diesen Ansatz in mein Team bei [OTTO](https://www.otto.de) zu bringen.
+
+## Installation
+
+devline ist über den Claude-Code-Plugin-Marketplace verfügbar.
+
+**Schritt 1 — Marketplace hinzufügen.** In Claude Code ausführen:
+
+```
+/plugin marketplace add Conava/claude-devline
+```
+
+**Schritt 2 — Plugin installieren.**
+
+```
+/plugin install devline@conava-claude-devline
+```
+
+Oder den Plugin-Manager mit `/plugin` öffnen, zum **Discover**-Tab wechseln und von dort installieren.
+
+**Schritt 3 — Prüfen.** `/devline` in einer beliebigen Konversation eingeben. Wenn der Befehl erkannt wird, läuft alles.
