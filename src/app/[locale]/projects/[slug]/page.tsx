@@ -1,12 +1,14 @@
 import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { getProjectSlugs, getProjectSource } from "@/lib/content";
 import { mdxComponents } from "@/components/mdx/mdx-components";
 import { TechBadge } from "@/components/ui/tech-badge";
 import type { Locale, ProjectFrontmatter } from "@/lib/types";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
+import { siteConfig } from "@/lib/site-config";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -19,6 +21,43 @@ export async function generateStaticParams() {
   return locales.flatMap((locale) =>
     slugs.map((slug) => ({ locale, slug }))
   );
+}
+
+/**
+ * Generates per-project metadata from MDX frontmatter.
+ *
+ * The returned `title` is a bare project name; the layout's title template
+ * (`"%s | Marlon Kranz"`) appends the site name automatically.
+ *
+ * If the project source cannot be loaded (unknown slug, missing file, etc.)
+ * an empty metadata object is returned so Next.js falls back to layout defaults
+ * rather than throwing.
+ */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, slug } = await params;
+
+  let source: string;
+  try {
+    source = await getProjectSource(locale as Locale, slug);
+  } catch {
+    return {};
+  }
+
+  const { frontmatter } = await compileMDX<ProjectFrontmatter>({
+    source,
+    options: { parseFrontmatter: true },
+  });
+
+  return {
+    title: frontmatter.title,
+    description: frontmatter.summary,
+    openGraph: {
+      title: frontmatter.title,
+      description: frontmatter.summary,
+      url: `${siteConfig.url}/projects/${slug}`,
+      type: "article",
+    },
+  };
 }
 
 export default async function ProjectPage({ params, searchParams }: Props) {

@@ -66,17 +66,33 @@ export default async function Home({ params }: Props) {
   // Dynamic section numbering — Hero is not numbered
   let sectionCounter = 0;
   const idx = {
-    about:        toRoman(++sectionCounter), // I
-    experience:   toRoman(++sectionCounter), // III
-    education:    toRoman(++sectionCounter), // IV
-    projects:     toRoman(++sectionCounter), // V
+    about:        toRoman(++sectionCounter),
+    experience:   toRoman(++sectionCounter),
+    education:    toRoman(++sectionCounter),
+    projects:     toRoman(++sectionCounter),
     certificates: visibleCertificates.length > 0 ? toRoman(++sectionCounter) : undefined,
     publications: visiblePublications.length > 0 ? toRoman(++sectionCounter) : undefined,
     contact:      toRoman(++sectionCounter),
   };
 
+  /** JSON-LD Person structured data for Google rich results and knowledge graph. */
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: siteConfig.name,
+    jobTitle: siteConfig.jobTitle,
+    url: siteConfig.url,
+    email: `mailto:${siteConfig.email}`,
+    image: `${siteConfig.url}${siteConfig.photoPath}`,
+    sameAs: [siteConfig.github, siteConfig.linkedin],
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Hero name={siteConfig.name} projectCount={allProjects.length} />
       <About data={about} index={idx.about} />
       <Experience entries={experience} index={idx.experience} />

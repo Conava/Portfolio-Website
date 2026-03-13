@@ -17,6 +17,7 @@ import { routing } from "@/i18n/routing";
 import { Navbar } from "@/components/nav/navbar";
 import { DesignThemeProvider } from "@/components/ui/design-theme-provider";
 import { LS_KEY, DEFAULT_THEME, DESIGN_THEMES } from "@/lib/design-themes";
+import { siteConfig } from "@/lib/site-config";
 import "../globals.css";
 
 const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_URL;
@@ -65,10 +66,28 @@ const jost = Jost({
   weight: ["200", "300", "400", "500"],
 });
 
+const description =
+  "Full-stack software engineer based in Hamburg. B.Sc. Wirtschaftsinformatik at the University of Hamburg. Working student at OTTO. Builder of MinJ, BPMN DSL, and more.";
+
 export const metadata: Metadata = {
-  title: "Marlon Kranz - Portfolio",
-  description:
-    "Full-stack software engineer based in Hamburg. B.Sc. Wirtschaftsinformatik at the University of Hamburg. Working student at OTTO. Builder of MinJ, BPMN DSL, and more.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: "Marlon Kranz - Portfolio",
+    template: "%s | Marlon Kranz",
+  },
+  description,
+  openGraph: {
+    title: "Marlon Kranz - Portfolio",
+    description:
+      "Full-stack software engineer based in Hamburg. B.Sc. Wirtschaftsinformatik at the University of Hamburg.",
+    url: siteConfig.url,
+    siteName: "Marlon Kranz",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+  },
 };
 
 type Props = {

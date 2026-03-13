@@ -61,6 +61,16 @@ Use the typed `trackEvent(name, data?)` helper from `src/lib/analytics.ts` to in
 
 Server setup: `docker-compose.umami.yml` in the project root is a reference Compose snippet for deploying Umami + PostgreSQL behind Traefik.
 
+### SEO
+
+The site generates `sitemap.xml` (`src/app/sitemap.ts`) listing the home page and all non-hidden project pages, and `robots.txt` (`src/app/robots.ts`) allowing all crawlers with a reference to the sitemap.
+
+Metadata is configured in `layout.tsx` with `metadataBase` set to `siteConfig.url` and a title template `"%s | Marlon Kranz"`. Child pages (home, project detail) return bare titles; the layout template appends the site name. Open Graph and Twitter card metadata are set at the layout level and extended per-project in `src/app/[locale]/projects/[slug]/page.tsx` via `generateMetadata`, which pulls title, description, and image from MDX frontmatter.
+
+The home page injects JSON-LD `Person` structured data using `siteConfig` values (`name`, `url`, `jobTitle`, social links).
+
+`siteConfig` in `src/lib/site-config.ts` contains `url` (canonical site URL) and `jobTitle` in addition to the existing name and social link fields.
+
 ### Key Files
 
 | File | Purpose |
@@ -70,8 +80,10 @@ Server setup: `docker-compose.umami.yml` in the project root is a reference Comp
 | `src/lib/content.ts` | All filesystem content loaders |
 | `src/lib/types.ts` | All shared TypeScript types |
 | `src/lib/analytics.ts` | Typed `trackEvent()` helper for Umami analytics |
-| `src/lib/site-config.ts` | Name, social links — edit here to change personal info |
+| `src/lib/site-config.ts` | Name, URL, job title, social links — edit here to change personal info |
 | `src/app/[locale]/page.tsx` | Main page — assembles all sections, controls section numbering |
 | `src/components/nav/navbar.tsx` | Navigation — `sections` array must match page content |
+| `src/app/sitemap.ts` | Generates `/sitemap.xml` for all public pages |
+| `src/app/robots.ts` | Generates `/robots.txt` with sitemap reference |
 | `content/{locale}/data/*.json` | Editable content |
 | `content/{locale}/projects/*.mdx` | Project detail pages |
