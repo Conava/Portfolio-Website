@@ -1,5 +1,6 @@
 import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getProjectSlugs, getProjectSource } from "@/lib/content";
@@ -125,6 +126,20 @@ export default async function ProjectPage({ params, searchParams }: Props) {
             </a>
           )}
         </div>
+
+        {frontmatter.thumbnail && (
+          <div className="rounded-lg overflow-hidden mb-10 border border-[var(--color-border)]">
+            <Image
+              src={frontmatter.thumbnail}
+              alt={frontmatter.title}
+              width={0}
+              height={0}
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="w-full h-auto"
+              priority
+            />
+          </div>
+        )}
 
         <article>{content}</article>
       </div>

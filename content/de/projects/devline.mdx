@@ -1,21 +1,21 @@
 ---
-title: "devline: Agentische Entwicklungs-Pipeline für Claude Code"
+title: "devline: Agentische Dev-Pipeline für Claude Code"
 date: "2026 – Heute"
-summary: "Ein Claude-Code-Plugin, das KI-Coding in eine Multi-Agenten-Pipeline überführt: Spec Engineering, TDD-Planung, parallele Implementierung, automatisiertes Review und Sicherheits-Hooks, die Agenten autonom arbeiten lassen, ohne das Repo zu zerschießen."
+summary: "Ein Claude-Code-Plugin, das KI-Coding in eine Multi-Agenten-Pipeline überführt: TDD-Planung, parallele Implementierung, automatisiertes Review und Sicherheits-Hooks, die Agenten autonom arbeiten lassen, ohne das Repo zu zerschießen."
 tech: ["Claude Code", "Agents", "Hooks", "Skills", "MCP", "TDD", "Git"]
 githubUrl: "https://github.com/Conava/claude-devline"
-thumbnail: "/images/projects/devline.jpg"
+thumbnail: "/images/projects/devline/cover.jpg"
 featured: false
 status: "active"
 ---
 
 ## Überblick
 
-Die meisten KI-Coding-Tools arbeiten in einer einzelnen Konversation: Man beschreibt, was man will, das Modell schreibt Code, und man hofft auf das Beste. Bei allem, was nicht trivial ist, bricht das schnell zusammen. Das Modell halluziniert APIs, überspringt Tests, macht destruktive Änderungen am Repo und produziert Code, der kompiliert, aber in Produktion scheitert. Keine Struktur, keine Verifikation, nichts hält es davon ab, `rm -rf` auf dein Arbeitsverzeichnis loszulassen.
+Die meisten KI-Coding-Tools arbeiten in einer einzelnen Konversation: Man beschreibt, was man will, das Modell schreibt Code, und man hofft auf das Beste. Bei allem, was nicht trivial ist, bricht das schnell zusammen. Das Modell halluziniert APIs, überspringt Tests, macht destruktive Änderungen am Repo und produziert Code, der kompiliert, aber in Produktion scheitert. Keine Struktur, keine Verifikation, nichts hält es davon ab, `rm -rf` auf das Arbeitsverzeichnis loszulassen.
 
-devline ist ein [Claude Code](https://docs.anthropic.com/en/docs/claude-code)-Plugin, das diesen Ansatz durch eine Multi-Agenten-Pipeline ersetzt. Jedes Feature durchläuft Spec Engineering, TDD-Planung, parallele Implementierung, automatisiertes Review und Dokumentation. Jede Phase läuft auf einem spezialisierten Agenten mit dem passenden Modell, Tools und Fachwissen. Sicherheits-Hooks erzwingen Branch Protection, blockieren destruktive Befehle und fangen Credential Leaks ab, bevor sie auf die Platte geschrieben werden — so kann man die Agenten laufen lassen, ohne ihnen ständig über die Schulter schauen zu müssen.
+devline ist ein [Claude Code](https://docs.anthropic.com/en/docs/claude-code)-Plugin, das diesen Ansatz durch eine Multi-Agenten-Pipeline ersetzt. Statt einer einzelnen Konversation für alles übernehmen spezialisierte Agenten jede Phase, vom Brainstorming über die Implementierung bis zum Review. Sicherheits-Hooks erzwingen Branch Protection, blockieren destruktive Befehle und fangen Credential Leaks ab, bevor sie auf die Platte geschrieben werden — so kann man die Agenten laufen lassen, ohne ihnen ständig über die Schulter schauen zu müssen.
 
-Ich habe devline gebaut, weil ich klar definierte, aber zeitaufwändige Arbeit an KI delegieren wollte, ohne ständig prüfen zu müssen, ob etwas kaputtgegangen ist. Kein Vibe-Coding. Spec-getriebene Planung, striktes TDD und eine Review-Schleife, die Fehler abfängt, bevor sie den Branch erreichen.
+Ich habe devline gebaut, weil ich klar definierte Arbeit an KI delegieren wollte, ohne ständig prüfen zu müssen, ob etwas kaputtgegangen ist. Kein Vibe-Coding, sondern Spec-getriebene Planung, striktes TDD und eine Review-Schleife, die Fehler abfängt, bevor sie den Branch erreichen.
 
 <div style={{ margin: '2rem 0' }}>
 <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
@@ -84,27 +84,29 @@ Ich habe devline gebaut, weil ich klar definierte, aber zeitaufwändige Arbeit a
 </svg>
 </div>
 
-## Was es tut
+## Wie die Pipeline funktioniert
 
-Die Pipeline ist interaktiv, wo es darauf ankommt (Brainstorming, Planung, Approval Gates) und autonom, wo nicht (Implementierung, Review, Dokumentation). Man beschreibt eine grobe Idee, verfeinert sie in einem kurzen Dialog, genehmigt den Plan und lässt die Agenten arbeiten.
+Die ersten beiden Phasen sind interaktiv — man bleibt eingebunden. Alles danach läuft autonom.
 
-**Brainstorm** — Man beschreibt ein Feature in natürlicher Sprache. Der Brainstormer stellt 1-3 gezielte Fragen zu Scope, Grenzfällen und Constraints und liefert dann eine kurze Spezifikation.
+**Brainstorm** — Man beschreibt ein Feature in natürlicher Sprache. Der Brainstormer stellt ein paar gezielte Fragen zu Scope und Grenzfällen und liefert dann eine kurze Spezifikation.
 
-**Plan** — Ein TDD-First-Planner entwirft die Architektur, schlägt Bibliotheken über Echtzeit-Dokumentation nach (Context7 MCP), teilt die Arbeit in parallele Pakete mit Dateiisolierung auf und schreibt den Plan auf die Festplatte. Er hinterfragt seinen eigenen Ansatz und schlägt Alternativen vor. Man prüft und genehmigt, bevor etwas implementiert wird.
+**Plan** — Ein Planner entwirft die Architektur TDD-first, schlägt Bibliotheksdokumentation in Echtzeit über Context7 nach, teilt die Arbeit in parallele Pakete mit Dateiisolierung auf und schreibt den Plan auf die Festplatte. Er hinterfragt seinen eigenen Ansatz und schlägt Alternativen vor, bevor man ihn freigibt.
 
-**Implement** — Mehrere Agenten starten parallel, einer pro Arbeitspaket. Jeder folgt striktem TDD: erst fehlschlagende Tests schreiben, dann implementieren bis alles grün ist, dann refactoren. Jede Zeile Produktionscode hat einen Test, bevor sie existiert.
+**Implement** — Ein Agent pro Arbeitspaket, parallel laufend. Jeder folgt striktem TDD: fehlschlagende Tests schreiben, implementieren bis grün, refactoren. Kein Produktionscode existiert ohne Test.
 
-**Review** — Jedes Arbeitspaket wird auf Korrektheit, Sicherheit, Performance und Codequalität geprüft. Wenn ein Review durchfällt, bekommt der Implementierer einen zweiten Versuch. Scheitert auch der, übernimmt ein Debugger-Agent die systematische Ursachenanalyse. Erst dann wird an den Entwickler eskaliert.
+**Review** — Jedes Arbeitspaket wird auf Korrektheit, Sicherheit und Performance geprüft. Fällt das Review durch, bekommt der Implementierer einen zweiten Versuch. Scheitert auch der, übernimmt ein Debugger-Agent die Ursachenanalyse, bevor an den Entwickler eskaliert wird.
 
-**Documentation** — Ein Docs-Keeper-Agent erkennt, welche Dateien sich geändert haben, und aktualisiert die betroffene Dokumentation.
+![Implementer und Reviewer laufen parallel am Schachprojekt](/images/projects/devline/chess-development-example.png)
 
-**Deep Review** — Ein letztes Gate vor dem Merge: Security-Audit, Credential-Scanning, Codequalität, technische Schulden, Konventionsprüfung und Verifikation, dass jedes Kriterium aus dem Plan tatsächlich erfüllt wurde. Wenn etwas durchfällt, geht die Arbeit zurück an den Implementierer. Wenn das Problem architektonischer Natur ist, wird an den Planner eskaliert.
+**Docs** — Ein Docs-Keeper-Agent erkennt, welche Dateien sich geändert haben, und aktualisiert sie.
 
-**Du entscheidest** — Wenn alles durchläuft, hast du das letzte Wort. Freigeben und beenden, Änderungen anfordern, die zurück in die Pipeline gehen, oder devline automatisch committen und mergen lassen.
+**Deep Review** — Letztes Gate vor dem Merge: Security-Audit, Credential-Scanning, Codequalität, technische Schulden und Prüfung, ob jedes Akzeptanzkriterium aus dem Plan erfüllt wurde. Fehler gehen zurück an den Implementierer; architektonische Probleme werden an den Planner eskaliert.
+
+**Du entscheidest** — Freigeben, Änderungen anfordern, die zurück in die Pipeline gehen, oder devline automatisch committen und mergen lassen.
 
 ## Agenten-Architektur
 
-devline steuert 10 spezialisierte Agenten. Jeder hat ein bestimmtes Modell-Tier (Opus für reasoning-intensive Aufgaben, Sonnet für Durchsatz), ein Berechtigungslevel und injizierte Domain-Skills:
+devline steuert 10 spezialisierte Agenten, jeweils mit einem bestimmten Modell-Tier (Opus für reasoning-intensive Aufgaben, Sonnet für Durchsatz) und vorgeladenen Domain-Skills:
 
 | Agent | Modell | Rolle |
 |---|---|---|
@@ -119,41 +121,37 @@ devline steuert 10 spezialisierte Agenten. Jeder hat ein bestimmtes Modell-Tier 
 | Dependency Patcher | Sonnet | CVE-Patching über Repositories hinweg |
 | Dependency Migrator | Opus | Breaking-Change-Migrationen mit Code-Refactoring |
 
-Nichts wird zufällig aufgerufen. Jeder Agenten-Aufruf läuft über den Pipeline-Orchestrator oder einen expliziten Befehl. Fachwissen kommt aus komponierbaren Skill-Modulen (TDD-Methodik, Frontend-Patterns, Cloud-Infrastruktur, Debugging-Heuristiken), sodass jeder Agent sein Fachgebiet kennt, ohne Kontext mitzuschleppen, den er nicht braucht.
+Agenten werden ausschließlich über den Pipeline-Orchestrator oder einen expliziten Befehl aufgerufen. Fachwissen kommt aus komponierbaren Skill-Modulen — TDD-Methodik, Frontend-Patterns, Cloud-Infrastruktur, Debugging-Heuristiken — sodass jeder Agent nur den Kontext mitbekommt, den er tatsächlich braucht.
 
-## Sicherheitsschicht
+## Sicherheits-Hooks
 
-devline ist für Claude Codes Bypass-Permissions-Modus konzipiert, in dem Agenten mit voller Autonomie und ohne Approval-Prompts arbeiten. Das heißt: Die Sicherheits-Hooks sind das Einzige zwischen autonomen Agenten und der Codebasis.
+devline ist für Claude Codes Bypass-Permissions-Modus konzipiert, in dem Agenten mit voller Autonomie und ohne Bestätigungsdialoge arbeiten. Die Hooks sind das Einzige zwischen den Agenten und der Codebasis:
 
-- **Branch Protection** — Schreibzugriffe auf geschützte Branches (main, master, develop, release, production, staging) sind blockiert. Agenten müssen zuerst einen Feature-Branch erstellen.
-- **Destruktive Befehle blockieren** — `rm -rf` außerhalb des Arbeitsverzeichnisses, Force-Pushes, Hard-Resets, Operationen auf Festplattenebene, Datenbank-Drops und Paket-Publishing werden hart blockiert.
-- **Credential-Scanning** — Hartcodierte API-Keys, Private Keys, AWS-Credentials, GitHub-Tokens, JWTs und Secrets in `.env`-Dateien werden am Schreiben auf die Festplatte gehindert.
-- **Pipeline-Isolation** — Arbeitsdateien in `.devline/` können nicht gestaged oder committet werden.
-- **Commit-Validierung** — Conventional-Commit-Format standardmäßig erzwungen, pro Projekt konfigurierbar.
-- **External-Mutation-Guards** — HTTP-Mutationen zu Nicht-Localhost, SSH-Zugriff und Service-Control-Befehle brauchen explizite Bestätigung oder werden komplett blockiert.
+- Schreibzugriffe auf geschützte Branches (main, master, develop, release, production, staging) sind blockiert. Agenten müssen zuerst einen Feature-Branch erstellen.
+- Destruktive Befehle — `rm -rf` außerhalb des Arbeitsverzeichnisses, Force-Pushes, Hard-Resets, Datenbank-Drops, Paket-Publishing — werden hart blockiert.
+- Hartcodierte API-Keys, Private Keys, AWS-Credentials, GitHub-Tokens und Secrets in `.env`-Dateien werden abgefangen, bevor sie auf die Platte geschrieben werden.
+- Arbeitsdateien in `.devline/` können nicht gestaged oder committet werden.
+- Conventional-Commit-Format ist standardmäßig erzwungen, pro Projekt konfigurierbar.
+- HTTP-Mutationen zu Nicht-Localhost, SSH-Zugriff und Service-Control-Befehle brauchen explizite Bestätigung oder werden komplett blockiert.
 
 ## Praxiseinsatz
 
-Ich habe devline ausgiebig an meinem [Schachprojekt](/de/projects/chess-engine) eingesetzt, einer Multi-Modul-Java-Plattform, die ich ursprünglich im dritten Semester an der Uni gebaut habe. Damit habe ich die gesamte Oberfläche von Java Swing zu JavaFX migriert, ein animiertes cinematisches Hauptmenü gebaut und den Server von einem Proof-of-Concept zu einem produktionsfähigen System mit Authentifizierung, Spielstandspeicherung und gleichzeitiger Session-Verwaltung umgebaut. Die Pipeline hat Spec Engineering, parallele TDD-Implementierung und Review-Zyklen für all das übernommen.
+Ich habe devline ausgiebig an meinem [Schachprojekt](/de/projects/chess-engine) eingesetzt, einer Multi-Modul-Java-Plattform, die ich ursprünglich im dritten Semester gebaut habe. Damit habe ich die gesamte Oberfläche von Java Swing zu JavaFX migriert, ein animiertes cinematisches Hauptmenü gebaut und den Server von einem Proof-of-Concept zu einem produktionsfähigen System mit Authentifizierung, Spielstandspeicherung und gleichzeitiger Session-Verwaltung umgebaut. Die Pipeline hat Planung, paralleles TDD und Review-Zyklen für all das übernommen.
 
-devline ist auch mein Test, ob strukturierte KI-Workflows im professionellen Teamkontext funktionieren. Ich habe es mit dem Ziel gebaut, diesen Ansatz in mein Team bei [OTTO](https://www.otto.de) zu bringen.
+devline ist auch mein Test, ob strukturierte KI-Workflows im professionellen Teamkontext funktionieren können. Ich habe es mit dem Ziel gebaut, diesen Ansatz in mein Team bei [OTTO](https://www.otto.de) zu bringen.
 
 ## Installation
 
-devline ist über den Claude-Code-Plugin-Marketplace verfügbar.
-
-**Schritt 1 — Marketplace hinzufügen.** In Claude Code ausführen:
+Über das Claude-Code-Plugin-System installierbar:
 
 ```
-/plugin marketplace add Conava/claude-devline
+claude plugin add devline
 ```
 
-**Schritt 2 — Plugin installieren.**
+Oder während der Entwicklung aus einem lokalen Verzeichnis:
 
 ```
-/plugin install devline@conava-claude-devline
+claude plugin add /path/to/devline
 ```
 
-Oder den Plugin-Manager mit `/plugin` öffnen, zum **Discover**-Tab wechseln und von dort installieren.
-
-**Schritt 3 — Prüfen.** `/devline` in einer beliebigen Konversation eingeben. Wenn der Befehl erkannt wird, läuft alles.
+`/devline` in einer beliebigen Konversation eingeben, um zu prüfen, ob alles läuft.

@@ -56,7 +56,7 @@ export interface ProjectFrontmatter {
   summary: string;
   tech: string[];
   githubUrl?: string;
-  thumbnail: string;
+  thumbnail?: string;
   featured?: boolean;
   fullWidth?: boolean;
   hidden?: boolean;

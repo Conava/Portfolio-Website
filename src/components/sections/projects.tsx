@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { TechBadge } from "@/components/ui/tech-badge";
 import { Link } from "@/i18n/navigation";
@@ -61,12 +62,24 @@ function ProjectCard({
     >
       <motion.div
         layout
-        className="expandable-card border border-[var(--color-border)] bg-[var(--color-bg-card)] p-6 cursor-pointer flex flex-col transition-colors hover:bg-[var(--color-bg-card-hover)]"
+        className="expandable-card border border-[var(--color-border)] bg-[var(--color-bg-card)] cursor-pointer flex flex-col transition-colors hover:bg-[var(--color-bg-card-hover)] overflow-hidden"
         onClick={() => {
           if (!expanded) trackEvent("project-expand", { slug: project.slug });
           setExpanded(!expanded);
         }}
       >
+        {project.thumbnail && (
+          <div className="relative w-full h-32 sm:h-40">
+            <Image
+              src={project.thumbnail}
+              alt={project.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+        )}
+        <div className="p-6 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h3 className="text-xl font-semibold mb-1">{project.title}</h3>
@@ -129,6 +142,7 @@ function ProjectCard({
         <motion.p layout="position" className="text-xs text-[var(--color-text-muted)] mt-3">
           {expanded ? t("collapse") : t("read_more")}
         </motion.p>
+        </div>
       </motion.div>
     </motion.div>
   );

@@ -1,10 +1,10 @@
 ---
 title: "MinJ: A Programming Language for the JVM"
 date: "2024"
-summary: "A lightweight, statically-typed scripting language for the JVM, built from scratch with ANTLR4. Custom grammar, visitor-based interpreter, and full CI/CD pipeline."
-tech: ["Java", "ANTLR4", "Gradle", "ShadowJar", "GitHub Actions", "JVM"]
+summary: "A scripting language I designed and implemented from scratch: ANTLR4 grammar, tree-walking interpreter in Java, classes, methods, lists, and a CI/CD pipeline that ships fat-JARs on every release."
+tech: ["Java 21", "ANTLR4", "Gradle", "ShadowJar", "GitHub Actions", "JVM"]
 githubUrl: "https://github.com/conava/minj"
-thumbnail: "/images/projects/minj.jpg"
+thumbnail: "/images/projects/minj/cover.jpg"
 featured: true
 status: "completed"
 fullWidth: true
@@ -12,45 +12,29 @@ fullWidth: true
 
 ## Overview
 
-**MinJ** (*Minimalistic Java*) is a statically-typed scripting language for the JVM, built from scratch. The full pipeline, from ANTLR4 grammar to lexer/parser to visitor-based interpreter, is implemented in Java, packaged as a standalone fat-JAR, and shipped via an automated CI/CD pipeline. The language supports classes, methods, loops, lists, and built-in I/O, with complete ownership from grammar design through release automation.
+MinJ (Minimalistic Java) is a scripting language I designed and built to learn how interpreters work from the inside. Not a toy REPL that evaluates arithmetic — it has classes, methods, typed variables, loops, lists, and `return` with proper stack unwinding. The whole thing runs on the JVM: a 246-line ANTLR4 grammar generates the lexer and parser, a 730-line `EvalVisitor` tree-walks the parse tree and executes it, and the result ships as a single fat-JAR you can run anywhere Java runs.
 
-## Architecture
+I built it in my third semester. The goal was to understand every layer of a language implementation — lexical analysis, parsing, scoping, type checking, method dispatch — by actually building one, not just reading about it.
 
-MinJ processes source files in three stages:
+## How it works
 
-1. **Lexing & Parsing** – `MinJLexer` and `MinJParser` are generated from `MinJ.g4` by ANTLR4 during the Gradle build. The parser produces a typed parse tree.
-2. **AST Evaluation** – `EvalVisitor` extends `MinJBaseVisitor<Object>` and overrides one method per grammar rule. Each `visit*` call walks the tree and executes the corresponding logic: variable allocation, arithmetic, control flow, method dispatch.
-3. **Entry Point** – `Main.java` reads the source file via `CharStreams.fromPath()`, feeds it through the lexer and parser, then calls `visitor.visit(tree)`.
+Source code goes through three stages:
 
-The visitor pattern keeps the grammar and execution logic strictly separated. The `.g4` file defines structure, `EvalVisitor` defines behavior. Adding a new language construct requires touching exactly two places.
+1. `MinJ.g4` defines the grammar. During the Gradle build, ANTLR4 generates `MinJLexer` and `MinJParser` from it. The parser produces a typed parse tree.
+2. `EvalVisitor` extends ANTLR's `MinJBaseVisitor<Object>` and overrides one method per grammar rule. Each `visit*` call walks the tree and executes: variable allocation, arithmetic, control flow, method dispatch, object instantiation.
+3. `Main.java` reads a `.mj` file, feeds it through the lexer and parser, and calls `visitor.visit(tree)`.
 
-## Language Features
+The grammar and execution logic are strictly separate. The `.g4` file defines what MinJ programs look like; `EvalVisitor` defines what they do. Adding a new language construct means touching exactly two files.
 
-**Type system**
-- `var` – dynamically typed, mutable
-- `val` – immutable constant (single assignment enforced at runtime)
-- Explicit types: `int`, `float`, `double`, `boolean`, `char`, `String`
+Under the hood, the runtime uses `Cell` objects to track each variable's value, declared type, mutability, and whether it's dynamically typed. `return` statements throw a `ReturnSignal` (a RuntimeException subclass) to unwind the call stack — simple, and it means returns work correctly from inside nested loops and conditionals. Object instances deep-copy their class's field cells on construction, so each instance has its own state.
 
-**Control flow**
-- `if` / `elseif` / `else` blocks terminated by `end`
-- `while` loops
-- `for i = 1 to n [step s]` numeric loops
-- `foreach x in list` iteration
+## The language
 
-**Object-oriented**
-- `class` declarations with fields and `method` blocks
-- `new ClassName()` instantiation
-- Dot-call syntax: `obj.method(args)`
-- Global `func` declarations with `return`
+MinJ has `var` (mutable, dynamically typed), `val` (immutable, single assignment enforced at runtime), and explicit types (`int`, `float`, `double`, `boolean`, `char`, `String`). Typed declarations are checked at assignment — if you declare `int x` and try to assign a String, it fails.
 
-**Lists & I/O**
-- List literals: `[1, 2, 3]` with `foreach` iteration
-- `print(...)` for output, `input(...)` for interactive prompts
+Control flow: `if`/`elseif`/`else`, `while`, `for i = 1 to n step s`, and `foreach x in list`. All blocks are terminated with `end`. Boolean operators accept both symbols and words (`&&` or `and`, `||` or `or`, `!` or `not`).
 
-**Error checking**
-- Static type enforcement on typed declarations
-- `val` immutability violations (enforced at runtime, not statically)
-- Undefined name errors
+Classes have fields, methods, and `new`-based instantiation with dot-call syntax. Global functions use `func` and support multiple return values with destructuring (`var sum, product = addAndMultiply(3, 4)`). Comments work with `//`, `#`, or `/* */`.
 
 ## Examples
 
@@ -71,7 +55,7 @@ for i = 1 to limit do:
 end
 ```
 
-### Classes & Methods
+### Classes and methods
 
 ```minj
 class Counter:
@@ -90,7 +74,7 @@ c.inc()
 print c.get()   // 2
 ```
 
-### Recursive Factorial
+### Recursive factorial
 
 ```minj
 func factorial(n):
@@ -103,35 +87,34 @@ end
 print factorial(5)   // 120
 ```
 
-## Tooling & CI/CD
+## Tooling and CI/CD
 
-- **Gradle + ANTLR plugin** – `generateGrammarSource` regenerates the lexer and parser from `MinJ.g4` on every build; generated files live in `build/generated-src/antlr/main/`
-- **ShadowJar** – bundles the ANTLR runtime and all dependencies into a single fat-JAR; run any `.mj` file with `java -jar minjc-<VERSION>.jar <yourfile>.mj`
-- **GitHub Actions** – on every push to `release`: checkout → JDK 21 setup → build fat-JAR → run test suite → archive artifact → package with examples → publish versioned release asset
-- **GitHub Pages** – docs auto-deployed from `master` on each push via a separate Actions workflow
+The Gradle build uses the ANTLR plugin to regenerate the lexer and parser from `MinJ.g4` on every build. ShadowJar packages everything (ANTLR runtime included) into a single fat-JAR — run any `.mj` file with `java -jar minjc-0.3.0.jar yourfile.mj`.
 
-## Extending the Language
+A GitHub Actions pipeline runs on every push to the `release` branch: checks out the code, sets up JDK 21, builds the fat-JAR, runs tests, bundles the examples, and publishes a versioned release asset. Documentation auto-deploys to GitHub Pages on each push to `master`.
 
-The architecture makes adding grammar constructs mechanical. Here's how the `while` loop was added:
+## How to extend it
 
-**1. Add the grammar rule** in `MinJ.g4`:
+Adding a new language construct is mechanical. For example, the `while` loop:
+
+1. Grammar rule in `MinJ.g4`:
 ```antlr
 whileStmt : WHILE expr DO COLON block END ;
 ```
 
-**2. Register it** in the `statement` rule:
+2. Register it in the `statement` rule:
 ```antlr
 statement : varDecl | assign | printStmt | ifStmt | whileStmt ;
 ```
 
-**3. Add lexer tokens:**
+3. Lexer tokens:
 ```antlr
 WHILE : 'while' ;
 DO    : 'do' ;
 END   : 'end' ;
 ```
 
-**4. Implement the visitor** in `EvalVisitor.java`:
+4. Visitor override in `EvalVisitor.java`:
 ```java
 @Override
 public Object visitWhileStmt(MinJParser.WhileStmtContext ctx) {
@@ -142,9 +125,6 @@ public Object visitWhileStmt(MinJParser.WhileStmtContext ctx) {
 }
 ```
 
-**5. Rebuild:**
-```bash
-./gradlew clean shadowJar
-```
+5. Rebuild: `./gradlew clean shadowJar`
 
-Each new construct is fully self-contained: grammar rule, token definition, visitor override. No changes elsewhere in the codebase.
+Grammar rule, tokens, visitor method. That's it.

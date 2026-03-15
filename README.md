@@ -1,19 +1,19 @@
 # Portfolio — marlonkranz.com
 
-Personal portfolio website built with Next.js 16, featuring bilingual content (EN/DE), four switchable design themes each with dark/light variants, and a fully automated Docker-based CI/CD pipeline.
+Personal portfolio site built with Next.js 16. Bilingual (EN/DE), four switchable design themes with dark/light variants, self-hosted via Docker and Traefik.
 
-[Live Site](https://marlonkranz.com) · [LinkedIn](https://linkedin.com/in/marlon-kranz) · [Email](mailto:dev@marlonkranz.com)
+[Live Site](https://marlonkranz.com) · [LinkedIn](https://linkedin.com/in/marlon-kranz) · [Email](mailto:kontakt@marlonkranz.com)
 
 ## Features
 
-- Bilingual (EN/DE) with path-based routing via next-intl
 - Four design themes (Atelier, Iris, Manifesto, Cobalt), each with dark and light variants
-- Animated theme/language switcher with slot-machine locale animation
-- Project pages authored in MDX with full component support
-- Shareable URLs for theme and language preferences via query params
-- Fully automated deployment: push to `main` → Docker image built → live within ~2 minutes
+- Bilingual content (EN/DE) with path-based routing via next-intl
+- Per-theme hero animations built with Framer Motion
+- Project pages authored in MDX
+- Shareable URLs with theme preference via query params
+- Automated deployment: push to `main` -> Docker image built and deployed via GitHub Actions
 
-## Tech Stack
+## Tech stack
 
 | Layer | Technology |
 |---|---|
@@ -23,15 +23,15 @@ Personal portfolio website built with Next.js 16, featuring bilingual content (E
 | i18n | next-intl (EN/DE, path-based) |
 | Theming | next-themes + custom CSS custom properties |
 | Content | MDX via next-mdx-remote |
-| CI/CD | GitHub Actions → GHCR → Docker + Traefik |
+| CI/CD | GitHub Actions -> GHCR -> Docker + Traefik |
 
 ## Architecture
 
-The theming system has two independent layers that compose: dark/light mode (managed by next-themes, stored as a class on `<html>`) and design themes (four palettes applied via `data-theme`, stored in localStorage). An inline script in `<head>` reads both values before hydration to prevent flash.
+Theming has two independent layers: dark/light mode (managed by next-themes, stored as a class on `<html>`) and design themes (four palettes applied via `data-theme`, stored in localStorage). An inline script in `<head>` reads both before hydration to prevent flash.
 
-All site content lives in `content/{locale}/` — JSON files for structured data (experience, education, publications) and MDX for project detail pages. Server-side loaders read these at request time, keeping content changes deployable without touching application code.
+All site content lives in `content/{locale}/` — JSON files for structured data (experience, education, publications) and MDX for project detail pages. Content changes don't require touching application code.
 
-## Getting Started
+## Getting started
 
 ```bash
 pnpm install
@@ -51,13 +51,13 @@ All content lives in `content/{locale}/` and can be edited without touching appl
 - `content/{locale}/data/publications.json` — Publications
 - `content/{locale}/projects/*.mdx` — Project detail pages
 
-Where `{locale}` is `en` or `de`. The English locale is the source of truth; the German locale falls back to English where translations are missing.
+Where `{locale}` is `en` or `de`. English is the source of truth; German falls back to English where translations are missing.
 
 ## Deployment
 
-The site runs in Docker behind Traefik, deployed automatically via GitHub Actions. Pushing to `main` builds a Docker image, pushes it to GitHub Container Registry (GHCR), and SSHes into the server to pull and restart the container — live within ~2 minutes.
+The site runs in Docker behind Traefik, deployed via GitHub Actions. Pushing to `main` builds a Docker image, pushes it to GHCR, and SSHes into the server to pull and restart the container.
 
-### Server Setup
+### Server setup
 
 1. Install Docker and Docker Compose on the server
 2. Add the deployment public key to `~/.ssh/authorized_keys`
@@ -77,9 +77,9 @@ portfolio:
     - traefik
 ```
 
-### GitHub Actions Secrets
+### GitHub Actions secrets
 
-Add these in **Settings → Secrets and variables → Actions**:
+Add these in **Settings > Secrets and variables > Actions**:
 
 | Secret | Value |
 |---|---|
@@ -88,6 +88,6 @@ Add these in **Settings → Secrets and variables → Actions**:
 | `DEPLOY_KEY` | Private SSH key (unencrypted, contents of `~/.ssh/deploy_key`) |
 | `DEPLOY_PATH` | Absolute path to `docker-compose.yml` on the server |
 
-### Updating Content
+### Updating content
 
-Edit MDX/JSON files directly on GitHub and push. The pipeline runs automatically.
+Edit MDX/JSON files and push. The pipeline runs automatically.

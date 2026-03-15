@@ -1,64 +1,73 @@
 ---
 title: "Fortalis: Multiplayer Strategy Game"
 date: "2025 – Present"
-summary: "A multiplayer strategy game built from scratch, with an open-source authentication service, a modular Spring Modulith game backend, and a Unity client targeting Android, iOS, Web, and PC."
-tech: ["Java", "Spring Boot", "Spring Modulith", "JWT", "PostgreSQL", "Gradle", "Docker", "AWS", "REST APIs", "WebSocket", "Unity", "C#"]
+summary: "A multiplayer strategy game I'm building from scratch: an open-source auth service (Spring Boot 4, RS256 JWT, TOTP 2FA), a modular game backend with Spring Modulith, and a Unity client for Android, iOS, Web, and PC."
+tech: ["Java 21", "Spring Boot 4", "Spring Modulith", "JWT/JWKS", "PostgreSQL", "Redis", "Flyway", "Docker", "AWS", "REST APIs", "WebSocket", "Unity", "C#"]
 githubUrl: "https://github.com/conava/fortalis-auth"
-thumbnail: "/images/projects/fortalis.jpg"
+thumbnail: "/images/projects/fortalis/cover.jpg"
 featured: false
 status: "in-progress"
 ---
 
 ## Overview
 
-**Fortalis** is an online multiplayer strategy game being built from the ground up: every layer from authentication infrastructure to game logic to the client. The project spans three components, each at its own stage of development:
+Fortalis is a multiplayer strategy game I'm building from scratch — auth infrastructure, game backend, and client are all my own code. The idea is a castle-building strategy game where players manage resources, form alliances, and fight each other on a shared world map, similar to titles like Travian or Lords Mobile but with a backend architecture I actually want to work with.
 
-- **Auth Service** – issues RS256-signed JWTs, rotates refresh tokens, supports TOTP 2FA, and exposes a JWKS endpoint; open source, in active development
-- **Game Backend** – modular Spring Modulith server handling players, castles, alliances, combat, chat, and more; in active development
-- **Game Client** – Unity client targeting Android, iOS, Web, and PC; in early development
+The project has three components:
 
-## Auth Service
+- **Auth Service** — standalone Spring Boot 4 authentication backend, open source
+- **Game Backend** — Spring Modulith server with 8 domain modules, private repo
+- **Game Client** — Unity, targeting Android, iOS, Web, and PC from one codebase
 
-The auth service is a standalone authentication backend, designed to be the single source of identity for all Fortalis components. It is open source and in active development.
+## Auth service
 
-**Security model**
-- Passwords hashed with **Argon2id** (via Spring Security 6)
-- Short-lived **RS256-signed JWT** access tokens with `iss`, `sub`, `aud`, `exp`, and `mfa` claims
-- Opaque refresh tokens stored hashed in PostgreSQL, with rotation on every use and explicit revocation
-- Optional **TOTP multi-factor authentication** (RFC 6238, ±1 step tolerance)
-- **JWKS endpoint** (`/.well-known/jwks.json`) so region and game backends can verify tokens independently without calling Auth
+The auth service is its own deployable, separate from the game backend. It owns all account data and token issuance. Game backends never see passwords — they just fetch the JWKS endpoint and verify tokens locally.
 
-**Error handling** follows RFC 7807 Problem Details with typed error URIs, HTTP-appropriate status codes, and `Retry-After` headers on rate-limited responses.
+The stack is Spring Boot 4, Java 21, PostgreSQL, and Flyway for migrations. BouncyCastle handles the RSA key operations. Security headers are hardened out of the box (HSTS, `Content-Security-Policy: default-src 'none'`, X-Frame-Options DENY).
 
-**Rate limiting** is enforced per-IP (20 req/60s) and per-user on login attempts and MFA verification.
+**How authentication works:**
 
-**Status:** Core authentication flows are working. Email verification, password reset, and OAuth provider login (Google/Apple) are planned but not yet implemented.
+1. User registers with email and password (hashed with Argon2id)
+2. On login, the service issues a 15-minute RS256-signed JWT access token and an opaque refresh token (30-day TTL)
+3. Refresh tokens are stored hashed (SHA-256) in PostgreSQL, rotated on every use, and individually revocable
+4. If the user has TOTP 2FA enabled, login is two-step: `/auth/login/start` returns a 5-minute challenge ticket, then `/auth/login/complete` takes the ticket plus the TOTP code. TOTP secrets are encrypted at rest with AES-256-GCM. Each account also gets 10 hashed backup codes for recovery.
+5. Game backends verify access tokens by fetching the public key from `/.well-known/jwks.json`
 
-## Game Backend
+The JWT carries `iss`, `sub` (account UUID), `aud`, `exp`, and an `mfa` boolean claim so backends know whether the session was MFA-verified.
 
-The game backend is a **Spring Modulith** modular monolith: a single deployable service with enforced module boundaries that can be extracted into microservices later if needed. It is a private repository, in active development.
+**Rate limiting** runs per-IP (20 requests per 60 seconds), per-email (5 login attempts per 15 minutes), and per-ticket (10 MFA attempts per 15 minutes). Rate-limited responses include `Retry-After` headers.
 
-**Modules**
+All error responses follow RFC 7807 Problem Details with typed error URIs like `https://auth.fortalis.game/errors/invalid-credentials`, proper HTTP status codes, and machine-readable structure. There are 13 distinct error types covering validation, auth failures, rate limiting, and conflict cases.
 
-| Module | Responsibility |
+The identity model is built to support Google/Apple OAuth later — the `account_identity` table already has a provider + subject structure. Email verification and password reset are also planned.
+
+## Game backend
+
+The game backend is a Spring Modulith modular monolith — one deployable JAR, but with hard module boundaries that Spring Modulith enforces at test time. The idea: develop like a monolith now, extract into microservices later if the player count demands it. Built with Spring Boot 4, Java 21, PostgreSQL, Redis, and Spring Modulith 2.0.2.
+
+Each module follows the same internal structure: `api/` (controllers and DTOs), `domain/` (entities), `repository/` (data access), and `service/` (business logic).
+
+| Module | What it does |
 |---|---|
-| `player` | Registration, profiles, guest and account-based auth |
-| `castle` | Main castles, outposts, buildings, resources, troops, queues |
-| `alliance` | Guild creation, membership, roles, alliance resources |
-| `combat` | Marches, battles, battle reports |
-| `map` | World map objects, kingdoms, special buildings |
-| `mail` | Unified mailbox: DMs, reports, announcements, rewards |
-| `chat` | Real-time global, alliance, kingdom, and event channels |
-| `event` | Timed game events with player and alliance scoring |
+| `player` | Registration, profiles, guest auth via device binding, account linking |
+| `castle` | Main castles, outposts, building placement, resource production, troop queues |
+| `alliance` | Alliance creation, membership management, role-based permissions, shared resources |
+| `combat` | March dispatching, battle resolution, report generation |
+| `map` | World map with kingdoms, special buildings, and map objects |
+| `mail` | Unified mailbox — DMs, battle reports, system announcements, claimable rewards |
+| `chat` | Real-time chat over WebSocket with global, alliance, kingdom, and event channels |
+| `event` | Timed game events with individual and alliance scoring |
 
-**Authentication** integrates with the Auth service. The backend fetches the JWKS endpoint to verify RS256 tokens without a direct service call. Guest players authenticate via device binding.
+Modules communicate through Spring's `ApplicationEventPublisher` — loose coupling by design. When combat resolves a battle, it publishes a `BattleCompletedEvent`; the mail module picks it up and sends the battle report. No module calls another's internals directly.
 
-**Real-time** game state updates are delivered over **WebSocket**. Database migrations are managed with **Flyway**. The service is deployed on **AWS**.
+Authentication integrates with the auth service via JWKS: the backend fetches the public key and verifies RS256 tokens locally, no direct service call needed. Guest players authenticate through device binding and can later link a full account without losing progress.
 
-**Status:** In active development.
+A game loop scheduler runs timed ticks: build queue completion every 5 seconds, march arrival every 2 seconds (combat needs to feel responsive), resource production every 60 seconds (lazy-calculated on read), and map cleanup every 5 minutes. Game config and special building rules are stored as JSONB for flexibility.
 
-## Game Client
+Real-time updates go over WebSocket (STOMP protocol with SockJS fallback). Database migrations use Flyway. Redis is available for caching. The whole thing runs on AWS with Docker.
 
-The game client is being developed in **Unity**, targeting **Android**, **iOS**, **Web**, and **PC** from a single codebase. It will connect to the game backend over REST and WebSocket, and authenticate through the Auth service.
+The backend has Testcontainers-based integration tests that spin up PostgreSQL for each test run. Spring Modulith's test infrastructure verifies that module boundaries are respected — no module reaches into another's internals.
 
-**Status:** Early development.
+## Game client
+
+The client is being built in Unity (C#), targeting Android, iOS, Web, and PC from one codebase. It connects to the game backend over REST and WebSocket, and authenticates through the auth service. Currently in early development.

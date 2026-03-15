@@ -1,71 +1,76 @@
 ---
-title: "Portfolio-Website: Design, Code, Infrastruktur"
+title: "Portfolio-Website"
 date: "2026 – Heute"
-summary: "Die Website, auf der du dich gerade befindest. Ein von Grund auf selbst entwickeltes Portfolio mit wechselbaren Design-Themes, Animationen, Unterstützung für zwei Sprachen, MDX-Projektseiten und Self-Hosting auf meinem eigenen Linux-Server."
+summary: "Die Seite, auf der du dich gerade befindest. Von Grund auf gebaut mit vier wechselbaren Design-Themes (jeweils mit hellem und dunklem Modus), zweisprachig auf Deutsch und Englisch, MDX-Projektseiten und selbst gehostet auf meinem eigenen Linux-Server."
 tech: ["Next.js 16", "TypeScript", "React 19", "Tailwind CSS v4", "Framer Motion", "next-intl", "next-themes", "MDX", "Docker", "Traefik"]
 githubUrl: "https://github.com/Conava/Portfolio-Website"
-thumbnail: "/images/projects/portfolio.jpg"
+thumbnail: "/images/projects/portfolio/cover.jpg"
 featured: false
 status: "active"
 ---
 
 ## Überblick
 
-Das ist die Seite, auf der du dich gerade befindest. Ich habe sie von Grund auf selbst entwickelt, um volle Kontrolle über Design, Inhalte und Infrastruktur zu haben, anstatt eine Vorlage oder einen gehosteten Dienst zu nutzen. Das Ergebnis ist ein Portfolio mit mehreren Design-Themes, eigenem Design-System, flüssigen Animationen, zweisprachigen Inhalten, vollständiger Mobiloptimierung und Self-Hosted-Deployment auf meinem eigenen Server.
+Das hier ist die Seite, die du gerade siehst. Ich habe sie komplett selbst gebaut, um die volle Kontrolle über Design, Inhalte und Hosting zu haben, anstatt mich mit den Einschränkungen einer Vorlage wie Wordpress oder eines verwalteten Dienstes herumzuschlagen. Vier visuelle Themes, zweisprachige Inhalte, responsive Layouts und alles selbst gehostet auf meinem eigenen Linux-Server.
 
 ## Design-System
 
-Das auffälligste Merkmal ist eine **zweischichtige Theme-Architektur**, die unabhängig voneinander funktioniert:
+Das Theming funktioniert in zwei unabhängigen Schichten:
 
-**Schicht 1 – Dark / Light Mode** wird von `next-themes` verwaltet und als `class`-Attribut auf `<html>` gespeichert. Alle vier Design-Themes haben sowohl eine dunkle als auch eine helle Variante, jeweils sorgfältig auf Lesbarkeit und ästhetische Konsistenz abgestimmt.
+**Hell-/Dunkelmodus** wird von `next-themes` verwaltet und als Klasse auf `<html>` gespeichert. Jedes Design-Theme hat sowohl eine helle als auch eine dunkle Variante.
 
-**Schicht 2 – Design-Themes** sind vier visuelle Paletten, jede mit eigener Typografie, Farbsprache und Hero-Animation:
+**Design-Themes** sind vier visuelle Paletten mit jeweils eigener Typografie, Farbwelt und Hero-Animation:
 
-- **Atelier** *(Standard)* – luxuriöses Editorial. Goldene Linien, Cormorant Garamond als Display-Schrift, viel Weißraum. Inspiriert von hochwertigem Print-Design.
-- **Iris** – Traumlandschaft. Konzentrische leuchtende Ringe, Farbverlauf-Namensbehandlung, weiche Konstellationspunkte. Eine poetischere, ruhigere Ästhetik.
-- **Manifesto** – saure Editorial-Poster. Hoher Kontrast, verdichtete Schrift, Laufband, Umriss- vs. gefüllter Namenskontrast. Laut und typografisch.
-- **Cobalt** – Mission Control. Monospace-Schrift, Punkt-Raster-Hintergrund, Scanlines, HUD-Metriken-Panel. Fühlt sich wie ein Entwickler-Dashboard an.
+- **Atelier** *(Standard)* — editoriale Eleganz. Goldene Linien, Cormorant Garamond als Überschrift, viel Weißraum. Angelehnt an hochwertiges Printdesign.
+- **Iris** — Traumlandschaft. Leuchtende konzentrische Ringe, Farbverlauf im Namen, sanfte Sternenpunkte. Ruhiger und atmosphärischer.
+- **Manifesto** — plakativer Stil. Hoher Kontrast, gestauchte Schrift, Laufband, Umriss- gegen gefüllten Namenskontrast. Bewusst laut.
+- **Cobalt** — Leitstelle. Monospace-Schrift, Punktraster im Hintergrund, Scanlines, ein HUD-Panel mit Metriken. Soll sich wie ein Entwickler-Dashboard anfühlen.
 
-Das aktive Design-Theme wird in `localStorage` unter `portfolio-design-theme` gespeichert und als `data-theme`-Attribut auf `<html>` angewendet. Ein inline `<script>` im `<head>` liest localStorage vor der React-Hydration, um jegliches Aufblitzen des Standard-Themes zu verhindern. Das gesamte Komponentenstyling basiert ausschließlich auf CSS Custom Properties (`--color-bg`, `--color-accent`, `--font-sans` usw.), die jedes Theme über `[data-theme="x"]`-Selektoren in `globals.css` überschreibt. Dadurch ist jede Komponente automatisch theme-aware, ohne bedingte Logik im JSX.
+Ein Inline-Skript im `<head>` liest das gespeicherte Theme aus dem localStorage, bevor React hydriert. Dadurch blitzt beim Laden keine falsche Farbpalette auf. Das Styling aller Komponenten läuft über CSS Custom Properties, die jedes Theme überschreibt — bedingte Logik im JSX ist nicht nötig.
+
+Themes können direkt mit dem Theme-Switcher geändert werden:
+![Theme Switcher|sm](/images/projects/portfolio/theme-switcher.jpg)
 
 ## Hero-Animationen
 
-Jedes Design-Theme hat eine völlig eigenständige Hero-Sektion, die ihre Eingangsanimation neu abspielt, wenn das Theme gewechselt wird. Die Animationen sind mit **Framer Motion** gebaut und decken ein breites Spektrum ab: gleitende Goldlinien und Namens-Reveal (Atelier), Ring-Puls und Sternenkonstellation-Einblendung (Iris), Clip-Path-Namens-Reveal und Laufband (Manifesto), Schreibmaschinen-Cursor und Scanline-Overlay (Cobalt). Ein `key={theme}`-Prop auf dem Root-Element veranlasst React, die Sektion neu zu mounten, was alle Animationen sauber neustartet.
+Jedes Theme hat eine eigene Hero-Sektion mit individueller Eingangsanimation: gleitende Goldlinien und ein Name-Reveal bei Atelier, pulsierende Ringe und einblendende Sternenkonstellation bei Iris, Clip-Path-Reveal mit Laufband bei Manifesto, Schreibmaschinencursor mit Scanline-Overlay bei Cobalt. Beim Themenwechsel wird die Sektion über ein `key`-Prop neu gemountet, sodass die Animation sauber von vorn startet.
+
+<Video src="/images/projects/portfolio/hero-themes.mp4" caption="Alle vier Hero-Themes in Aktion" />
 
 ## Architektur
 
-Die Seite läuft auf dem **Next.js 16 App Router** mit allen Routen unter `src/app/[locale]/`. Das `[locale]`-Segment wird in `layout.tsx` validiert; ungültige Locales rufen `notFound()` auf.
+Die Seite läuft auf dem **Next.js 16 App Router** mit allen Routen unter `[locale]/`. Ungültige Locales liefern eine 404-Seite.
 
-**Inhalte** liegen in `content/{locale}/` und sind in zwei Arten aufgeteilt:
-- **JSON-Dateien** für strukturierte Daten: Erfahrung, Ausbildung, Zertifikate, Publikationen und About
-- **MDX-Dateien** für Projektdetailseiten, zur Anforderungszeit mit `gray-matter` geparst und via `next-mdx-remote` gerendert
+Inhalte liegen in `content/{locale}/` und kommen in zwei Formen:
+- **JSON** für strukturierte Daten (Berufserfahrung, Ausbildung, Zertifikate, Publikationen, Über mich)
+- **MDX** für Projektseiten wie diese hier, geparst mit `gray-matter` und gerendert über `next-mdx-remote`
 
-Projekt-Slugs werden aus englischen Dateinamen abgeleitet. Der Content-Loader fällt auf englisches MDX zurück, wenn keine locale-spezifische Datei existiert, sodass nur Projekte, die sich zwischen Sprachen wirklich unterscheiden, doppelte Dateien benötigen.
+Projekt-Slugs werden aus den englischen Dateinamen abgeleitet. Wenn keine deutsche MDX-Datei existiert, fällt der Loader auf die englische Version zurück — nur Inhalte, die sich wirklich unterscheiden, brauchen eine eigene Datei.
 
-**Sichtbarkeit von Sektionen** ist dynamisch: Sektionen wie Zertifikate und Publikationen werden von der Seite und der Navbar ausgeschlossen, wenn alle Einträge mit `hidden: true` markiert sind. Sektionsnummern werden zur Laufzeit mit römischen Ziffern berechnet, damit die Nummerierung konsistent bleibt.
+Sektionen wie Zertifikate und Publikationen werden automatisch aus Seite und Navigation entfernt, wenn alle ihre Einträge als versteckt markiert sind. Die Sektionsnummern in römischen Ziffern werden dynamisch berechnet.
 
 ## Internationalisierung
 
-UI-Strings liegen in `messages/{locale}.json` und werden via `next-intl` verwendet. Inhaltliche Strings (Bio, Jobbeschreibungen, Projektzusammenfassungen) liegen direkt in locale-spezifischen JSON- und MDX-Dateien unter `content/`. Diese Trennung erlaubt es, UI-Texte und Inhalte unabhängig voneinander zu übersetzen. Aktuell unterstützt: Englisch und Deutsch.
+UI-Strings (`messages/{locale}.json`) laufen über `next-intl`. Inhaltliche Texte (Bio, Jobbeschreibungen, Projekttexte) liegen direkt in den sprachspezifischen JSON- und MDX-Dateien. Beides lässt sich unabhängig voneinander übersetzen. Aktuell unterstützt: Englisch und Deutsch.
 
 ## Typografie
 
-Sechs Schriftfamilien werden beim Build-Zeitpunkt bedingungslos via `next/font/google` geladen und als CSS-Variablen auf `<html>` injiziert. Jedes Design-Theme überschreibt `--font-sans` und `--font-display`, um beim Palettenwechsel die Schriftfamilien zu tauschen:
+Sechs Schriftfamilien werden beim Build über `next/font/google` geladen. Jedes Theme tauscht `--font-sans` und `--font-display` gegen seine eigenen Schriften:
 
-- **Atelier**: Jost (Sans) + Cormorant Garamond (Display)
-- **Cobalt**: Plus Jakarta Sans (beides)
-- **Iris**: Sora (beides)
-- **Manifesto**: DM Mono (Sans) + Fraunces (Display)
+- **Atelier**: Jost + Cormorant Garamond
+- **Cobalt**: Plus Jakarta Sans
+- **Iris**: Sora
+- **Manifesto**: DM Mono + Fraunces
 
-Der Basis-Monospace-Stack verwendet JetBrains Mono durchgängig.
+JetBrains Mono wird durchgängig als Monospace-Schrift verwendet.
 
-## Mobile
+## Mobildarstellung
 
-Die Seite ist vollständig responsiv. Jede Sektion passt sich kleinen Bildschirmen an: Hero-Layouts wechseln zu einspaltiger Darstellung, Statistik-Panels stapeln sich vertikal, Projektkarten nutzen fluid Grids, und die gesamte Typografie skaliert mit `clamp()`, sodass nichts bei einer beliebigen Viewport-Breite bricht. Die Navbar klappt zu einem mobilen Menü zusammen, und Touch-Targets sind durchgängig angemessen groß.
+Jede Sektion passt sich an kleine Bildschirme an. Hero-Layouts wechseln in eine Spalte, Statistik-Panels stapeln sich, Projektkarten nutzen flexible Raster und die Typografie skaliert mit `clamp()`. Die Navigation klappt zu einem mobilen Menü zusammen, Tippflächen sind überall groß genug.
 
 ## Deployment
 
-Das Portfolio ist **self-hosted** auf meinem Heimserver als Docker-Container. Traefik fungiert als Reverse Proxy und übernimmt TLS-Terminierung und Routing. Kein Vercel, keine CDN-Abhängigkeit. Der Build läuft lokal und der Container wird direkt auf den Server deployed.
+Das Portfolio läuft als Docker-Container auf meinem Heimserver. Traefik übernimmt TLS und Routing. Ein Push auf `main` löst einen GitHub-Actions-Workflow aus, der das Image baut, es in die GHCR schiebt und automatisch auf dem Server ausrollt.
 
 ## Stack
 
@@ -80,4 +85,4 @@ Das Portfolio ist **self-hosted** auf meinem Heimserver als Docker-Container. Tr
 | i18n | next-intl |
 | Theming | next-themes + eigenes CSS-Variable-System |
 | Schriften | next/font/google (6 Familien) |
-| Deployment | Docker + Traefik (self-hosted) |
+| Deployment | Docker + Traefik (selbst gehostet) |

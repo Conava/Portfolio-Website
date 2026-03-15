@@ -1,21 +1,21 @@
 ---
-title: "devline: Agentic Development Pipeline for Claude Code"
+title: "devline: Agentic Dev Pipeline for Claude Code"
 date: "2026 – Present"
-summary: "A Claude Code plugin that structures AI coding into a multi-agent pipeline: spec engineering, TDD planning, parallel implementation, automated review, and security hooks that let agents run autonomously without wrecking your repo."
+summary: "A Claude Code plugin that structures AI coding into a multi-agent pipeline with TDD, parallel implementation, automated review, and security hooks that let agents run autonomously without wrecking your repo."
 tech: ["Claude Code", "Agents", "Hooks", "Skills", "MCP", "TDD", "Git"]
 githubUrl: "https://github.com/Conava/claude-devline"
-thumbnail: "/images/projects/devline.jpg"
+thumbnail: "/images/projects/devline/cover.jpg"
 featured: false
 status: "active"
 ---
 
 ## Overview
 
-Most AI coding tools work in a single conversation: you describe what you want, the model writes code, and you hope for the best. On anything non-trivial, this breaks down fast. The model hallucinates APIs, skips tests, makes destructive changes to your repo, and produces code that compiles but fails in production. No structure, no verification, nothing stopping it from running `rm -rf` on your working directory.
+Most AI coding tools work in a single conversation: you describe what you want, the model writes code, and you hope for the best. On anything non-trivial, this falls apart. The model hallucinates APIs, skips tests, makes destructive changes to your repo, and produces code that compiles but fails in production. No structure, no verification, nothing stopping it from running `rm -rf` on your working directory.
 
-devline is a [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that replaces this with a multi-agent pipeline. Every feature goes through spec engineering, TDD planning, parallel implementation, automated review, and documentation. Each stage runs on a specialized agent with the appropriate model, tools, and domain knowledge. Security hooks enforce branch protection, block destructive commands, and catch credential leaks before they hit disk, so you can let the agents run without babysitting them.
+devline is a [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that replaces this with a multi-agent pipeline. Instead of one conversation doing everything, specialized agents handle each stage, from brainstorming through implementation to review. Security hooks enforce branch protection, block destructive commands, and catch credential leaks before they hit disk, so you can let the agents run without babysitting them.
 
-I built this because I wanted to delegate well-defined but time-consuming work to AI without constantly checking whether it broke something. Not vibe-coding. Spec-driven planning, strict TDD, and a review loop that catches problems before they reach your branch.
+I built it because I wanted to hand off well-defined work to AI without constantly checking whether it broke something. Not vibe-coding, but spec-driven planning, strict TDD, and a review loop that catches problems before they reach your branch.
 
 <div style={{ margin: '2rem 0' }}>
 <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
@@ -84,27 +84,29 @@ I built this because I wanted to delegate well-defined but time-consuming work t
 </svg>
 </div>
 
-## What it does
+## How the pipeline works
 
-The pipeline is interactive where it matters (brainstorming, planning, approval gates) and autonomous where it doesn't (implementation, review, documentation). You describe a rough idea, refine it through a short dialogue, approve a plan, and walk away. The agents do the rest.
+The first two stages are interactive — you stay in the loop. Everything after that runs autonomously.
 
-**Brainstorm** — You describe a feature in plain language. The brainstormer asks 1-3 targeted questions to pin down scope, edge cases, and constraints, then produces a short spec.
+**Brainstorm** — You describe a feature in plain language. The brainstormer asks a few targeted questions about scope and edge cases, then produces a short spec.
 
-**Plan** — A TDD-first planner designs the architecture, looks up libraries via real-time documentation (Context7 MCP), breaks work into parallel packages with file-level isolation, and writes the full plan to disk. It questions its own approach and suggests alternatives. You review and approve before anything gets implemented.
+**Plan** — A planner designs the architecture TDD-first, looks up library docs in real time via Context7, splits work into parallel packages with file-level isolation, and writes the plan to disk. It questions its own approach and suggests alternatives before you approve.
 
-**Implement** — Multiple agents launch in parallel, one per work package. Each follows strict TDD: write failing tests first, implement until green, refactor. Every line of production code has a test behind it before it exists.
+**Implement** — One agent per work package, running in parallel. Each follows strict TDD: write failing tests, implement until green, refactor. No production code exists without a test behind it.
 
-**Review** — Each work package gets reviewed for correctness, security, performance, and code quality. If a review fails, the implementer gets another shot. If that fails too, a debugger agent does systematic root cause analysis. Only then does it escalate to you.
+**Review** — Each work package gets reviewed for correctness, security, and performance. If review fails, the implementer gets a second attempt. If that fails too, a debugger agent does root cause analysis before escalating to you.
 
-**Documentation** — A docs-keeper agent figures out which files need updating based on what changed, and updates them.
+![Implementers and reviewers running in parallel on the chess engine project](/images/projects/devline/chess-development-example.png)
 
-**Deep Review** — A final gate before merge: security audit, credential scanning, code quality, technical debt, convention checks, and verification that every criterion from the plan was actually met. If something fails, it sends the work back to the implementer. If the problem is architectural, it escalates to the planner.
+**Docs** — A docs-keeper agent figures out which files need updating based on what changed, and updates them.
 
-**You decide** — Once everything passes, you get the final call. Approve and exit, request changes that go back into the pipeline, or let devline commit and merge automatically.
+**Deep review** — The final gate before merge: security audit, credential scanning, code quality, tech debt, and verification that every acceptance criterion from the plan was met. Failures go back to the implementer; architectural issues escalate to the planner.
+
+**You decide** — Approve, request changes that re-enter the pipeline, or let devline commit and merge.
 
 ## Agent architecture
 
-devline runs 10 specialized agents. Each has a specific model tier (Opus for reasoning-heavy work, Sonnet for throughput), a permission level, and injected domain skills:
+devline runs 10 specialized agents, each assigned a model tier (Opus for reasoning-heavy work, Sonnet for throughput) and preloaded with domain-specific skills:
 
 | Agent | Model | Role |
 |---|---|---|
@@ -119,41 +121,37 @@ devline runs 10 specialized agents. Each has a specific model tier (Opus for rea
 | Dependency Patcher | Sonnet | CVE patching across repositories |
 | Dependency Migrator | Opus | Breaking-change migrations with code refactoring |
 
-Nothing fires randomly. Every agent invocation goes through the pipeline orchestrator or an explicit command. Domain knowledge comes from composable skill modules (TDD methodology, frontend patterns, cloud infrastructure, debugging heuristics), so each agent knows its domain well without carrying context it doesn't need.
+Agents are only invoked through the pipeline orchestrator or an explicit command. Domain knowledge comes from composable skill modules — TDD methodology, frontend patterns, cloud infrastructure, debugging heuristics — so each agent carries only the context it actually needs.
 
-## Security layer
+## Security hooks
 
-devline is built for Claude Code's bypass permissions mode, where agents run with full autonomy and no approval prompts. That means the security hooks are the only thing between autonomous agents and your codebase:
+devline is designed for Claude Code's bypass permissions mode, where agents run with full autonomy and no approval prompts. The hooks are the only thing between the agents and your codebase:
 
-- **Branch protection** — Writes are blocked on protected branches (main, master, develop, release, production, staging). Agents must create a feature branch first.
-- **Destructive command blocking** — `rm -rf` outside the working directory, force pushes, hard resets, disk-level operations, database drops, and package publishing are all hard-blocked.
-- **Credential scanning** — Hardcoded API keys, private keys, AWS credentials, GitHub tokens, JWTs, and secrets in `.env` files are blocked from being written to disk.
-- **Pipeline isolation** — Working files in `.devline/` can't be staged or committed.
-- **Commit validation** — Conventional commit format enforced by default, configurable per project.
-- **External mutation guards** — HTTP mutations to non-localhost, SSH access, and service control commands need explicit confirmation or are blocked outright.
+- Writes to protected branches (main, master, develop, release, production, staging) are blocked. Agents have to create a feature branch first.
+- Destructive commands — `rm -rf` outside the working directory, force pushes, hard resets, database drops, package publishing — are hard-blocked.
+- Hardcoded API keys, private keys, AWS credentials, GitHub tokens, and secrets in `.env` files get caught before they're written to disk.
+- Working files in `.devline/` can't be staged or committed.
+- Conventional commit format is enforced by default, configurable per project.
+- HTTP mutations to non-localhost, SSH access, and service control commands either need confirmation or are blocked outright.
 
 ## Real-world use
 
-I've used devline heavily on my [chess project](/en/projects/chess-engine), a multi-module Java platform I originally built in my third semester at university. With devline, I migrated the entire UI from Java Swing to JavaFX, built an animated cinematic main menu, and overhauled the server from a proof-of-concept into a production system with authentication, game persistence, and concurrent session management. The pipeline handled spec engineering, parallel TDD implementation, and review cycles for all of it.
+I've used devline heavily on my [chess project](/en/projects/chess-engine), a multi-module Java platform I originally built in my third semester. With devline I migrated the entire UI from Java Swing to JavaFX, built an animated cinematic main menu, and overhauled the server from a proof-of-concept into a production system with authentication, game persistence, and concurrent session management. The pipeline handled planning, parallel TDD, and review cycles for all of it.
 
-devline is also how I'm testing whether structured AI workflows can work in a professional team setting. I built it with the goal of bringing this approach to my team at [OTTO](https://www.otto.de).
+devline is also my test of whether structured AI workflows can work in a professional team setting. I built it with the goal of bringing this approach to my team at [OTTO](https://www.otto.de).
 
 ## Installation
 
-devline is available through the Claude Code plugin marketplace.
-
-**Step 1 — Add the marketplace.** Inside Claude Code, run:
+Install via the Claude Code plugin system:
 
 ```
-/plugin marketplace add Conava/claude-devline
+claude plugin add devline
 ```
 
-**Step 2 — Install the plugin.**
+Or from a local directory during development:
 
 ```
-/plugin install devline@conava-claude-devline
+claude plugin add /path/to/devline
 ```
 
-Or open the plugin manager with `/plugin`, go to the **Discover** tab, and install from there.
-
-**Step 3 — Verify.** Type `/devline` in any conversation. If the command is recognized, you're set.
+Type `/devline` in any conversation to verify it's working.

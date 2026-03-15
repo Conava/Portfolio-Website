@@ -1,10 +1,10 @@
 ---
-title: "Schach: Modulare Spielplattform und KI-Entwicklungs-Testbench"
+title: "The King's Game: Modulare Schachplattform"
 date: "2023 – Heute"
-summary: "Eine Multi-Modul-Java-Schachplattform mit Offline-Spiel, TCP-Multiplayer und einem Headless-API-Modus. Ursprünglich ein Uni-Projekt, heute meine Testumgebung für spezifikations- und testgetriebene KI-gestützte Entwicklungsworkflows."
-tech: ["Java 17", "JavaFX 21", "Maven", "TCP Networking", "JUnit 5", "Mockito", "Docker", "CSS Theming", "i18n"]
+summary: "Eine Multi-Modul-Java-Schachplattform mit lokalem und Online-Spiel, Chess 960, 6 visuellen Themes und einem parallelen TCP-Server mit Authentifizierung und Matchmaking. Gebaut mit Java 17, JavaFX 21 und 75 Testklassen."
+tech: ["Java 17", "JavaFX 21", "Maven", "TCP Networking", "SQLite", "JUnit 5", "Mockito", "Docker", "CSS Theming", "i18n"]
 githubUrl: "https://github.com/conava/chess"
-thumbnail: "/images/projects/chess.jpg"
+thumbnail: "/images/projects/chess-engine/cover.jpg"
 featured: false
 status: "in-progress"
 fullWidth: false
@@ -12,94 +12,115 @@ fullWidth: false
 
 ## Überblick
 
-Ein Maven-Projekt mit drei Modulen (Java 17 + JavaFX 21), das eine vollständige Schachplattform implementiert: einen JavaFX-Desktop-Client, eine reine Logik-Engine und einen TCP-Multiplayer-Server, jeweils mit strikten Modulgrenzen.
+Ein Maven-Projekt mit drei Modulen (Java 17 + JavaFX 21), das eine vollständige Schachplattform implementiert: einen Desktop-Client mit animiertem cinematischem Menü, eine reine Logik-Engine mit Unterstützung für Standard-Schach und Chess 960 sowie einen TCP-Multiplayer-Server mit Authentifizierung, Matchmaking und Spielstandspeicherung. Die Module haben strikte Abhängigkeitsgrenzen — `core` hat keinerlei externe Abhängigkeiten, und weder Client noch Server wissen voneinander.
 
-Das Projekt habe ich im zweiten Studienjahr begonnen. Seitdem hat es mehrere große Iterationen durchlaufen und dient heute einem doppelten Zweck: Es ist eine voll funktionsfähige Schachanwendung, und es ist meine primäre **Testumgebung für KI-gestützte Entwicklungsworkflows**. Ich nutze es, um spezifikations- und testgetriebene Ansätze für KI-assistierte Softwareentwicklung zu erproben und zu testen, wie zuverlässig diese Workflows hochwertigen Code auf einer realen, nicht-trivialen Codebasis produzieren. Bisherige Experimente umfassen ein vollständiges Refactoring von Swing zu JavaFX, großflächigen Abbau von Technical Debt und architektonische Umstrukturierungen. Ich plane, hier weiterhin neue Experimente durchzuführen, während sich das Tooling weiterentwickelt.
+Das Projekt habe ich im zweiten Studienjahr begonnen. Seitdem hat es mehrere große Umbauten durchlaufen, zuletzt eine vollständige Migration von Swing zu JavaFX und den Umbau des Servers zu einem persistenten System mit Benutzerkonten und Session-Verwaltung. Heute dient es außerdem als meine Testumgebung für agentische KI-Entwicklungsworkflows — ich nutze es, um zu evaluieren, wie gut Spec-getriebene und testgetriebene Ansätze auf einer realen Codebasis funktionieren.
+
+![Hauptmenü im Midnight-Theme](/images/projects/chess-engine/main-menu-midnight.png)
 
 ## Features
 
-- **Offline-Spiel** – zwei Spieler am selben Rechner, kein Netzwerk nötig
-- **Online-Multiplayer** – TCP-basiertes Lobby-System; Spiel erstellen oder per Code beitreten
-- **Headless / API-Modus** – Ausführung ohne GUI für programmatische Spielsteuerung (`nogui`-Flag)
-- **Bauernumwandlung** – interaktiver Figurenauswahl-Dialog während des Spiels
-- **Rochade** – kurze und lange Rochade mit Zughistorie-Tracking
-- **Board-Themes** – Classic-, Ocean- und Walnut-Farbschemata
-- **UI-Themes** – Light- und Dark-Modus mit CSS-basiertem Styling
-- **Lokalisierung** – Englisch und Deutsch über `ResourceBundle`-Propertydateien
-- **Paralleler Server** – bis zu 40 gleichzeitige Online-Partien
+- Lokales Spiel für zwei Spieler am selben Rechner
+- Online-Multiplayer mit TCP-Lobby, Join-Codes und automatischem Matchmaking
+- Standard-Schach und Chess 960 als Regelsets, pro Partie wählbar
+- Bauernumwandlung mit interaktivem Figurenauswahl-Dialog
+- Rochade (kurz und lang) mit Zughistorie-Validierung
+- 6 visuelle Themes — Midnight, Ember, Abyss (dunkel) und Manuscript, Fjord, Sakura (hell)
+- Englische und deutsche Lokalisierung über `ResourceBundle`
+- Headless-API-Modus für programmatische Spielsteuerung (`nogui`-Flag)
+- Server verarbeitet bis zu 40 gleichzeitige Partien
+
+![Lokales Spiel im Ember-Theme, Spielmitte mit Zughervorhebungen](/images/projects/chess-engine/local-game-ember.png)
 
 ## Architektur
 
 Das Projekt ist in drei Maven-Module mit strikten Abhängigkeitsregeln aufgeteilt:
 
-```text
-┌─────────────────────────────────────────────────────┐
-│                   application                       │
-│  JavaFX 21 UI · Controllers · Theming · i18n · Net  │
-│           depends on → core only                    │
-└──────────────────────┬──────────────────────────────┘
-                       │
-              ┌────────▼────────┐
-              │      core       │
-              │  Game engine ·  │
-              │  Pieces · Rules │
-              │  Observer · API │
-              │  (no deps)      │
-              └────────▲────────┘
-                       │
-┌──────────────────────┴──────────────────────────────┐
-│                    server                           │
-│       TCP server · Lobby · Move relay               │
-│           depends on → core only                    │
-└─────────────────────────────────────────────────────┘
-```
+<div style={{ margin: '2rem 0' }}>
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+  <defs>
+    <marker id="arr-ch" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0 0L10 3.5L0 7z" fill="var(--color-text-muted)" />
+    </marker>
+  </defs>
 
-**Architekturgesetze** gelten modulübergreifend:
+  <rect x="215" y="4" width="12" height="12" rx="3" fill="var(--color-accent)" fillOpacity="0.15" stroke="var(--color-accent)" strokeWidth="1" />
+  <text x="233" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Keine Abhängigkeiten</text>
+  <rect x="380" y="4" width="12" height="12" rx="3" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1" />
+  <text x="398" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Hängt nur von core ab</text>
 
-1. **Strikte Modulgrenzen** – `core` hat keinerlei Abhängigkeiten zu `application` oder `server`. `application` und `server` hängen ausschließlich von `core` ab, nie voneinander.
-2. **Facade-only API** – jede externe Interaktion mit der Game-Engine läuft über `Chess.java`. Direkte Instanziierung von `Game`-Unterklassen außerhalb von `core` ist nicht erlaubt.
-3. **Observer für Zustandspropagierung** – UI-Komponenten implementieren `GameObserver` und registrieren sich über `chess.addObserver()`. Kein Polling.
-4. **Core ist reine Logik** – keine UI-Imports, kein JavaFX, kein I/O in `core`.
-5. **Strategy-Pattern für Regelvarianten** – neue Regelsätze implementieren das `Ruleset`-Interface; Verzweigungen innerhalb von `Game` sind nicht erlaubt.
+  <rect x="100" y="28" width="520" height="56" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
+  <text x="360" y="52" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">application</text>
+  <text x="360" y="70" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">JavaFX 21 UI · Controllers · Theming · i18n · Networking</text>
+
+  <line x1="360" y1="84" x2="360" y2="124" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr-ch)" />
+
+  <rect x="185" y="130" width="350" height="60" rx="10" fill="var(--color-accent)" fillOpacity="0.08" stroke="var(--color-accent)" strokeWidth="1.5" />
+  <text x="360" y="155" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">core</text>
+  <text x="360" y="175" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Game engine · Pieces · Rules · Observer · Facade API</text>
+
+  <line x1="360" y1="232" x2="360" y2="196" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr-ch)" />
+
+  <rect x="100" y="238" width="520" height="56" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
+  <text x="360" y="262" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">server</text>
+  <text x="360" y="280" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">TCP · Lobby · Auth · Matchmaking · SQLite-Persistenz</text>
+</svg>
+</div>
+
+Architekturregeln gelten modulübergreifend:
+
+1. `core` hat keinerlei Abhängigkeiten zu `application` oder `server`. Client und Server hängen ausschließlich von `core` ab, nie voneinander.
+2. Jede externe Interaktion mit der Game-Engine läuft über die `Chess.java`-Facade. Direkte Instanziierung von `Game`-Unterklassen außerhalb von `core` ist nicht erlaubt.
+3. UI-Komponenten implementieren `GameObserver` und registrieren sich über `chess.addObserver()`. Kein Polling.
+4. `core` ist reine Logik — keine UI-Imports, kein JavaFX, kein I/O.
+5. Neue Regelvarianten implementieren das `Ruleset`-Interface. Keine Verzweigungen innerhalb von `Game` für verschiedene Regeln.
 
 ## Design Patterns
 
 | Pattern | Implementierung | Zweck |
 |---------|----------------|-------|
-| **Facade** | `Chess.java` | Einzelne API-Oberfläche für alle Spielinteraktionen |
-| **Observer** | `GameObserver` / `Observable` | Entkoppelte, push-basierte Zustandspropagierung zur UI |
-| **Strategy** | `Ruleset`-Interface + `StandardChessRuleset` | Austauschbare Regelvarianten ohne Bedingungen |
-| **Factory Method** | `Game.createGame()` / `Game.createServerGame()` | Erzwingt Modulgrenzen; hält Konstruktoren package-private |
-| **Template Method** | `Game.executeMove()` | Definiert Zugablauf; `OnlineGame` überschreibt für Netzwerk-Relay |
+| Facade | `Chess.java` | Einzelne API-Oberfläche für alle Spielinteraktionen |
+| Observer | `GameObserver` / `Observable` | Entkoppelte, push-basierte Zustandspropagierung zur UI |
+| Strategy | `Ruleset`-Interface + `StandardChessRuleset`, `Chess960Ruleset` | Austauschbare Regelvarianten ohne Bedingungen |
+| Factory Method | `Game.createGame()` / `Game.createServerGame()` | Erzwingt Modulgrenzen; hält Konstruktoren package-private |
+| Template Method | `Game.executeMove()` | Definiert Zugablauf; `OnlineGame` überschreibt für Netzwerk-Relay |
 
 ## Multiplayer-Server
 
-Der Server akzeptiert TCP-Verbindungen auf einem konfigurierbaren Port (Standard: 54321). Jede Client-Verbindung läuft in einem eigenen Thread. Spiele werden als isolierte `GameInstance`-Sessions verwaltet; der Server leitet Züge zwischen zwei Spielern weiter und übermittelt finale Spielstände.
+Der Server akzeptiert TCP-Verbindungen auf einem konfigurierbaren Port (Standard: 54321). Jeder Client bekommt einen eigenen Thread. Partien laufen als isolierte `GameInstance`-Sessions.
 
-- Bis zu 40 parallele Spiele (semaphore-begrenzt)
+- Bis zu 40 gleichzeitige Partien (Semaphore-begrenzt)
+- Join-Codes: 12-stellig alphanumerisch (`XXXX-XXXX-XXXX`), generiert mit `SecureRandom`, verfallen nach 10 Minuten automatisch
+- Automatische Matchmaking-Warteschlange neben manuellen Join-Codes
+- Benutzerauthentifizierung mit SQLite-gestützter Persistenz
 - Zeilenbasiertes Klartext-Protokoll
-- Join-Code-basierte Lobby: ein Spieler erstellt eine Partie, erhält einen Code, der andere tritt mit diesem Code bei
-- Automatischer Resignations-Sieg bei Verbindungsabbruch
+- Automatische Aufgabe bei Verbindungsabbruch
+
+![Online-Spielsetup mit Chess-960-Regelauswahl](/images/projects/chess-engine/online-setup-ember.png)
 
 ## Tests
 
-Das Projekt hat 23 Testklassen über alle drei Module:
+75 Testklassen über alle drei Module:
 
 | Modul | Tests | Fokus |
 |-------|-------|-------|
-| `core` | 15 Klassen | Board-State, Figuren-Konstruktion, Zuggenerierung, Observer-Benachrichtigungen, Regelsatz für alle 6 Figurentypen, Zug-Parsing, Game-Factory |
-| `application` | 5 Klassen | Facade, i18n, Settings, Theme-Manager, Hintergrund-Zugtask |
-| `server` | 3 Klassen | Server-Start, GameInstance-Lifecycle, ClientHandler-Integration |
+| `core` | 34 Klassen | Board-State, Figuren, Zuggenerierung, Observer-Benachrichtigungen, Regelsets (Standard + Chess 960), Rochade, Game-Factory |
+| `application` | 31 Klassen | Facade-API, i18n, Settings, Theme-Manager, cinematische Menükomponenten, CSS-Validierung |
+| `server` | 10 Klassen | Server-Lifecycle, Konfiguration, Spielverwaltung, Client-Handler, Matchmaking, Authentifizierung, Persistenz |
 
-## KI-Entwicklungs-Testbench
+![Schachmatt — Gewinnbildschirm mit Rematch-Option](/images/projects/chess-engine/local-game-win-screen.png)
 
-Das Projekt dient gleichzeitig als meine Umgebung zur Evaluation von KI-gestützter Softwareentwicklung. Die Codebasis ist groß genug, um realistisch zu sein (drei Module, strikte Architekturregeln, eine echte Testsuite), aber kompakt genug für schnelle Iterationen. Bisherige Experimente:
+![Einstellungen — 6 Themes, Sprachauswahl, Serverkonfiguration](/images/projects/chess-engine/settings-ember.png)
 
-- **Swing-zu-JavaFX-Migration** – vollständiger UI-Framework-Wechsel, gesteuert durch spezifikationsgetriebene KI-Workflows
-- **Technical-Debt-Abbau** – automatisierte Identifikation und Behebung von Code-Smells, totem Code und inkonsistenten Patterns
-- **Architektonische Umstrukturierung** – Durchsetzung von Modulgrenzen und Design Patterns durch KI-generierte Refactoring-Pläne
+## Als KI-Entwicklungs-Testumgebung
 
-Das Ziel ist, Methoden zu finden, die zuverlässig hochwertigen Code für größere Projekte produzieren. Jedes Experiment testet einen anderen Workflow (Spec-first, Test-first, Review-Loop) und ich bewerte die Ergebnisse anhand der Architekturgesetze und der Testsuite.
+Das Projekt dient außerdem als meine Testumgebung für agentische KI-Workflows. Die Codebasis hat genug Komplexität für einen echten Test (drei Module, strikte Architekturregeln, 75 Testklassen), aber ich kann trotzdem schnell iterieren. Bisherige Experimente:
+
+- Vollständige UI-Migration von Swing zu JavaFX, geplant und durchgeführt über Spec-getriebene agentische Workflows mit [devline](/de/projects/devline)
+- Großflächiger Technical-Debt-Abbau über alle Module
+- Architektonische Umstrukturierung zur Durchsetzung von Modulgrenzen durch KI-generierte Refactoring-Pläne
+
+Jedes Experiment testet einen anderen Ansatz (Spec-first, Test-first, Review-Schleifen) und ich bewerte die Ergebnisse anhand der Architekturregeln und der Testsuite.
 
 ## Tech Stack
 
@@ -110,5 +131,6 @@ Das Ziel ist, Methoden zu finden, die zuverlässig hochwertigen Code für größ
 | Build | Maven (Multi-Modul) |
 | Testing | JUnit 5, Mockito |
 | Networking | Java-Standardbibliothek (ServerSocket, ConcurrentHashMap, Semaphore) |
+| Persistenz | SQLite (serverseitige Benutzerkonten und Spieldaten) |
 | Lokalisierung | ResourceBundle (EN/DE) |
-| Theming | CSS (2 UI-Themes, 3 Board-Farbschemata) |
+| Theming | CSS (6 Themes: 3 dunkel, 3 hell) |

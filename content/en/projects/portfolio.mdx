@@ -1,71 +1,76 @@
 ---
-title: "Portfolio Website: Design, Code, Infrastructure"
+title: "Portfolio Website"
 date: "2026 – Present"
-summary: "The site you are on right now. A custom-built portfolio with four switchable design themes, per-theme hero animations, full EN/DE internationalization, MDX project pages, and self-hosted on my own Linux server."
+summary: "The site you're on right now. Built from scratch with four switchable design themes (each with dark/light variants), full EN/DE internationalization, MDX project pages, and self-hosted on my own Linux server."
 tech: ["Next.js 16", "TypeScript", "React 19", "Tailwind CSS v4", "Framer Motion", "next-intl", "next-themes", "MDX", "Docker", "Traefik"]
 githubUrl: "https://github.com/Conava/Portfolio-Website"
-thumbnail: "/images/projects/portfolio.jpg"
+thumbnail: "/images/projects/portfolio/cover.jpg"
 featured: false
 status: "active"
 ---
 
 ## Overview
 
-This is the site you are currently viewing. I built it from scratch to have full control over design, content, and infrastructure, rather than using a template or a hosted service. The result is a multi-theme portfolio with a custom design system, smooth animations, bilingual content, full mobile responsiveness, and self-hosted deployment on my own server.
+This is the site you're looking at right now. I built it from scratch because I wanted full control over design, content, and hosting rather than working within the constraints of a template or a managed platform. It has four visual themes, bilingual content, responsive layouts, and runs on my own server.
 
-## Design System
+## Design system
 
-The most distinctive feature is a **two-layer theming architecture** that composes independently:
+The theming works in two independent layers:
 
-**Layer 1 – Dark / Light mode** is handled by `next-themes` and stored as a `class` attribute on `<html>`. All four design themes ship with both a dark and a light variant, each carefully tuned for legibility and aesthetic consistency.
+**Dark/light mode** is handled by `next-themes` and stored as a class on `<html>`. Every design theme has both a dark and a light variant.
 
-**Layer 2 – Design themes** are four distinct visual palettes, each with its own typography, color language, and hero animation:
+**Design themes** are four visual palettes, each with its own typography, colors, and hero animation:
 
-- **Atelier** *(default)* – luxury editorial. Gold rules, Cormorant Garamond display type, generous whitespace. Inspired by high-end print design.
-- **Iris** – dreamscape. Concentric glowing rings, gradient name treatment, soft constellation dots. A more poetic, ambient aesthetic.
-- **Manifesto** – acid editorial poster. High-contrast, compressed type, marquee strip, outlined vs. filled name contrast. Loud and typographic.
-- **Cobalt** – mission control. Monospace font, dot-grid background, scanlines, HUD metrics panel. Built to feel like a developer dashboard.
+- **Atelier** *(default)* — editorial luxury. Gold rules, Cormorant Garamond headings, lots of whitespace. Draws from high-end print design.
+- **Iris** — dreamscape. Glowing concentric rings, gradient name treatment, soft constellation dots. Quieter and more ambient.
+- **Manifesto** — acid editorial. High contrast, compressed type, a marquee strip, outlined vs. filled name contrast. Loud on purpose.
+- **Cobalt** — mission control. Monospace font, dot-grid background, scanlines, a HUD metrics panel. Meant to feel like a developer dashboard.
 
-The active design theme is stored in `localStorage` under `portfolio-design-theme` and applied as a `data-theme` attribute on `<html>`. An inline `<script>` in `<head>` reads localStorage before React hydration to prevent any flash of the default theme. All component styling is driven exclusively by CSS custom properties (`--color-bg`, `--color-accent`, `--font-sans`, etc.), which each theme overrides via `[data-theme="x"]` selectors in `globals.css`. This means every component is automatically theme-aware without any conditional logic in JSX.
+An inline script in `<head>` reads the stored theme from localStorage before React hydrates, so there's no flash of wrong colors on load. All component styling goes through CSS custom properties that each theme overrides, which means components don't need conditional theme logic.
 
-## Hero Animations
+Themes can be changed easily on the fly with the theme switcher:
+![Theme Switcher|sm](/images/projects/portfolio/theme-switcher.jpg)
 
-Each design theme has a fully distinct hero section that replays its entrance animation whenever the theme changes. Animations are built with **Framer Motion** and cover a wide range: sliding gold rules and name reveal (Atelier), ring pulse and star constellation fade-in (Iris), clip-path name reveal and marquee strip (Manifesto), typewriter cursor and scanline overlay (Cobalt). A `key={theme}` prop on the root element triggers React to remount the section, which restarts all animations cleanly.
+## Hero animations
+
+Each theme has its own hero section with a distinct entrance animation: sliding gold rules and a name reveal for Atelier, ring pulses and a star constellation fade for Iris, clip-path name reveal with a marquee strip for Manifesto, typewriter cursor with a scanline overlay for Cobalt. Switching themes remounts the section via a `key` prop, so the animation replays cleanly.
+
+<Video src="/images/projects/portfolio/hero-themes.mp4" caption="All four hero themes in action" />
 
 ## Architecture
 
-The site runs on **Next.js 16 App Router** with all routes under `src/app/[locale]/`. The `[locale]` segment is validated in `layout.tsx`; invalid locales call `notFound()`.
+The site runs on **Next.js 16 App Router** with all routes under `[locale]/`. Invalid locales return a 404.
 
-**Content** lives in `content/{locale}/` and is split into two kinds:
-- **JSON files** for structured data: experience, education, certificates, publications, and about
-- **MDX files** for project detail pages, parsed at request time with `gray-matter` and rendered via `next-mdx-remote`
+Content lives in `content/{locale}/` and comes in two forms:
+- **JSON** for structured data (experience, education, certificates, publications, about)
+- **MDX** for project pages like this one, parsed with `gray-matter` and rendered via `next-mdx-remote`
 
-Project slugs are derived from English filenames. The content loader falls back to English MDX if no locale-specific file exists, so only projects that genuinely differ between languages need duplicate files.
+Project slugs come from the English filenames. If no German MDX file exists for a project, the loader falls back to the English version, so only content that actually differs needs a separate file.
 
-**Section visibility** is dynamic: sections like Certificates and Publications are omitted from the page and navbar if all their entries are marked `hidden: true`. Section numbers are computed at runtime using Roman numerals so the numbering stays consistent as sections appear and disappear.
+Sections like Certificates and Publications hide themselves (page and navbar) when all their entries are marked hidden. Section numbers use Roman numerals and recompute dynamically.
 
 ## Internationalization
 
-UI strings live in `messages/{locale}.json` and are consumed via `next-intl`. Content strings (bio, job descriptions, project summaries) live directly in locale-specific JSON and MDX files under `content/`. This separation means UI copy and content can be translated independently. Currently supported: English and German.
+UI strings (`messages/{locale}.json`) go through `next-intl`. Content (bios, job descriptions, project writeups) lives in locale-specific JSON and MDX files. The two can be translated independently. Currently supported: English and German.
 
 ## Typography
 
-Six font families are loaded unconditionally at build time via `next/font/google` and injected as CSS variables on `<html>`. Each design theme overrides `--font-sans` and `--font-display` to switch font families when the palette changes:
+Six font families load at build time via `next/font/google`. Each theme switches `--font-sans` and `--font-display` to pick its own typefaces:
 
-- **Atelier**: Jost (sans) + Cormorant Garamond (display)
-- **Cobalt**: Plus Jakarta Sans (both sans and display)
-- **Iris**: Sora (both sans and display)
-- **Manifesto**: DM Mono (sans) + Fraunces (display)
+- **Atelier**: Jost + Cormorant Garamond
+- **Cobalt**: Plus Jakarta Sans
+- **Iris**: Sora
+- **Manifesto**: DM Mono + Fraunces
 
-The base monospace stack uses JetBrains Mono throughout.
+JetBrains Mono is the monospace font across all themes.
 
 ## Mobile
 
-The site is fully responsive. Every section adapts to small screens: the hero layouts reflow to single-column, stat panels stack vertically, project cards use fluid grids, and all typography scales with `clamp()` so nothing breaks at any viewport width. The navbar collapses to a mobile menu, and touch targets are sized appropriately throughout.
+Every section adapts to small screens. Hero layouts reflow to a single column, stat panels stack, project cards use fluid grids, and typography scales with `clamp()`. The navbar collapses to a mobile menu with appropriately sized touch targets.
 
 ## Deployment
 
-The portfolio is **self-hosted** on my home server as a Docker container. Traefik acts as the reverse proxy, handling TLS termination and routing. No Vercel, no CDN dependency. The build runs locally and the container is deployed directly to the server.
+The portfolio is self-hosted on my home server as a Docker container. Traefik handles TLS and routing. Pushing to `main` triggers a GitHub Actions workflow that builds the image, pushes it to GHCR, and deploys it to the server automatically.
 
 ## Stack
 

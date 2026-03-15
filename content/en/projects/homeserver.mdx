@@ -1,40 +1,80 @@
 ---
-title: "VPS: Personal Cloud and Development Infrastructure"
+title: "VPS: Personal Cloud and Dev Infrastructure"
 date: "2025 – Present"
-summary: "A Linux VPS running all my personal services and project backends. Orchestrated with Docker Compose, routed through Traefik, with remote storage boxes for mass storage."
+summary: "Self-managed Linux VPS hosting personal services and project backends. Containerized with Docker Compose, routed through Traefik, with remote storage boxes for mass storage."
 tech: ["Linux", "Docker", "Traefik", "Nextcloud", "Matrix", "Navidrome", "Let's Encrypt", "MariaDB", "PostgreSQL", "Redis"]
-thumbnail: "/images/projects/homeserver.jpg"
+thumbnail: "/images/projects/homeserver/cover.jpg"
 featured: false
 status: "active"
 ---
 
 ## Overview
 
-A Linux VPS I run and maintain, hosting a mix of personal services and development infrastructure. Everything runs as Docker containers, grouped into Compose files per service category. Remote storage boxes are mounted for mass storage; Nextcloud data lives there rather than on the VPS disk.
+I manage a Linux VPS that handles both my everyday personal services and the backends for my side projects. Every service runs containerized — each category gets its own Docker Compose file, which keeps updates, rollbacks, and debugging isolated from each other. Mass storage lives on remote storage boxes rather than VPS disk, separating compute costs from storage costs.
 
-## Infrastructure
+<div style={{ margin: '2rem 0' }}>
+<svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+  <defs>
+    <marker id="arr-vps" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0 0L10 3.5L0 7z" fill="var(--color-text-muted)" />
+    </marker>
+  </defs>
 
-**Traefik** acts as the reverse proxy for all services: automatic SSL certificate issuance and renewal via Let's Encrypt, HSTS enforcement, and HTTP-to-HTTPS redirects. No manual certificate management.
+  <rect x="185" y="4" width="12" height="12" rx="3" fill="var(--color-accent)" fillOpacity="0.15" stroke="var(--color-accent)" strokeWidth="1" />
+  <text x="203" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Entry point</text>
+  <rect x="290" y="4" width="12" height="12" rx="3" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1" />
+  <text x="308" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Docker services</text>
+  <rect x="420" y="4" width="12" height="12" rx="3" fill="none" stroke="var(--color-border)" strokeWidth="1" strokeDasharray="3 2" />
+  <text x="438" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">External storage</text>
 
-## Personal Services
+  <rect x="235" y="30" width="250" height="56" rx="10" fill="var(--color-accent)" fillOpacity="0.08" stroke="var(--color-accent)" strokeWidth="1.5" />
+  <text x="360" y="54" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Traefik</text>
+  <text x="360" y="72" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Reverse proxy · Let's Encrypt · HSTS</text>
+
+  <line x1="310" y1="86" x2="190" y2="118" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr-vps)" />
+  <line x1="410" y1="86" x2="540" y2="118" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr-vps)" />
+
+  <rect x="20" y="124" width="340" height="82" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
+  <text x="190" y="148" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Personal services</text>
+  <text x="190" y="168" textAnchor="middle" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Nextcloud · Navidrome</text>
+  <text x="190" y="186" textAnchor="middle" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Matrix · Element · Coturn</text>
+
+  <rect x="380" y="124" width="320" height="82" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
+  <text x="540" y="148" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Dev deployments</text>
+  <text x="540" y="168" textAnchor="middle" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Fortalis Auth · Fortalis Backend</text>
+  <text x="540" y="186" textAnchor="middle" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Chess Server · Portfolio</text>
+
+  <line x1="190" y1="206" x2="190" y2="238" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr-vps)" />
+
+  <rect x="55" y="244" width="270" height="52" rx="10" fill="none" stroke="var(--color-border)" strokeWidth="1.5" strokeDasharray="5 3" />
+  <text x="190" y="266" textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">Remote Storage Boxes</text>
+  <text x="190" y="284" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Nextcloud data · Media libraries</text>
+</svg>
+</div>
+
+## Routing and TLS
+
+Traefik sits in front of all services as the reverse proxy. SSL certificates are issued and renewed automatically via Let's Encrypt, HSTS is enforced across the board, and HTTP gets redirected to HTTPS. I don't manage certificates by hand.
+
+## Services
 
 | Service | Purpose |
 |---|---|
-| **Nextcloud** | Personal cloud storage and file sync, backed by a remote storage box |
-| **Navidrome** | Self-hosted music streaming, reads the Nextcloud music library |
-| **Matrix / Synapse** | Self-hosted encrypted messaging homeserver |
-| **Element Web** | Web client for the Matrix homeserver |
-| **Coturn** | TURN server for Matrix audio and video calls |
+| **Nextcloud** | File sync and cloud storage, backed by a remote storage box |
+| **Navidrome** | Music streaming — reads directly from the Nextcloud music library |
+| **Matrix / Synapse** | Encrypted messaging homeserver |
+| **Element Web** | Web client for Matrix |
+| **Coturn** | TURN server for Matrix voice and video calls |
 
-## Development Infrastructure
+## Dev deployments
 
-The VPS also hosts development deployments of my personal projects:
+The same VPS also runs development builds of my projects:
 
-- **Fortalis Auth** – development build of the authentication service
-- **Fortalis Backend** – development build of the game backend
-- **Chess server** – backend for my chess engine project
-- **This portfolio** – served from the same host
+- **Fortalis Auth** – authentication microservice
+- **Fortalis Backend** – game backend API
+- **Chess server** – backend for my chess engine
+- **This portfolio** – also served from this host
 
-## Storage
+## Storage architecture
 
-Mass storage (Nextcloud data, media libraries) is handled via remote storage boxes mounted on the VPS. This keeps storage costs separate from compute and makes it straightforward to scale capacity independently.
+Compute and storage are deliberately separated. The VPS handles processing while remote storage boxes hold the data (Nextcloud files, media libraries). I can scale storage capacity without upgrading the server, and costs stay predictable.

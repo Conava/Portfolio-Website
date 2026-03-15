@@ -1,4 +1,5 @@
 import type { MDXComponents } from "mdx/types";
+import { MdxVideo } from "./mdx-video";
 
 export const mdxComponents: MDXComponents = {
   h1: (props) => (
@@ -41,15 +42,27 @@ export const mdxComponents: MDXComponents = {
       {...props}
     />
   ),
-  img: ({ src, alt, ...props }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt ?? ""}
-      className="rounded-xl border border-[var(--color-border)] my-6 w-full"
-      {...props}
-    />
-  ),
+  img: ({ src, alt: rawAlt, ...props }) => {
+    const sizeMap: Record<string, string> = {
+      sm: "max-w-sm",
+      md: "max-w-md",
+      lg: "max-w-lg",
+    };
+    const match = (rawAlt ?? "").match(/^(.*?)\|(\w+)$/);
+    const alt = match ? match[1].trim() : (rawAlt ?? "");
+    const sizeClass = match ? sizeMap[match[2]] ?? "" : "";
+
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt}
+        className={`rounded-xl border border-[var(--color-border)] my-6 w-full mx-auto block ${sizeClass}`}
+        {...props}
+      />
+    );
+  },
+  Video: MdxVideo,
   a: (props) => (
     <a
       className="text-[var(--color-accent)] hover:underline"

@@ -1,10 +1,10 @@
 ---
 title: "MinJ: Eine Programmiersprache für die JVM"
 date: "2024"
-summary: "Eine leichtgewichtige, statisch typisierte Skriptsprache für die JVM. Von Grund auf mit ANTLR4 entwickelt, mit eigener Grammatik, Visitor-basiertem Interpreter und vollständiger CI/CD-Pipeline."
-tech: ["Java", "ANTLR4", "Gradle", "ShadowJar", "GitHub Actions", "JVM"]
+summary: "Eine Skriptsprache, die ich selbst entworfen und implementiert habe: ANTLR4-Grammatik, Tree-Walking-Interpreter in Java, Klassen, Methoden, Listen und eine CI/CD-Pipeline, die fat-JARs bei jedem Release ausliefert."
+tech: ["Java 21", "ANTLR4", "Gradle", "ShadowJar", "GitHub Actions", "JVM"]
 githubUrl: "https://github.com/conava/minj"
-thumbnail: "/images/projects/minj.jpg"
+thumbnail: "/images/projects/minj/cover.jpg"
 featured: true
 status: "completed"
 fullWidth: true
@@ -12,45 +12,29 @@ fullWidth: true
 
 ## Überblick
 
-**MinJ** (*Minimalistic Java*) ist eine statisch typisierte Skriptsprache für die JVM, die von Grund auf entwickelt wurde. Die gesamte Pipeline, von der ANTLR4-Grammatik über Lexer/Parser bis zum Visitor-basierten Interpreter, ist in Java implementiert, als eigenständiges fat-JAR verpackt und über eine automatisierte CI/CD-Pipeline ausgeliefert. Die Sprache unterstützt Klassen, Methoden, Schleifen, Listen und eingebaute Ein-/Ausgabe, mit vollständiger Verantwortung vom Grammatikdesign bis zur Release-Automatisierung.
+MinJ (Minimalistic Java) ist eine Skriptsprache, die ich entworfen und gebaut habe, um zu verstehen, wie Interpreter von innen funktionieren. Kein Spielzeug-REPL, das Arithmetik auswertet — MinJ hat Klassen, Methoden, typisierte Variablen, Schleifen, Listen und `return` mit ordentlichem Stack-Unwinding. Das Ganze läuft auf der JVM: eine 246-Zeilen-ANTLR4-Grammatik generiert Lexer und Parser, ein 730-Zeilen-`EvalVisitor` traversiert den Parse-Tree und führt ihn aus, und das Ergebnis wird als einzelnes fat-JAR ausgeliefert, das überall läuft, wo Java läuft.
 
-## Architektur
+Ich habe MinJ im dritten Semester gebaut. Das Ziel war, jede Schicht einer Sprachimplementierung zu verstehen — lexikalische Analyse, Parsing, Scoping, Typprüfung, Methodenaufruf — indem ich eine baue, statt nur darüber zu lesen.
 
-MinJ verarbeitet Quelldateien in drei Stufen:
+## Wie es funktioniert
 
-1. **Lexing & Parsing** – `MinJLexer` und `MinJParser` werden von ANTLR4 während des Gradle-Builds aus `MinJ.g4` generiert. Der Parser erzeugt einen typisierten Parse-Tree.
-2. **AST-Auswertung** – `EvalVisitor` erweitert `MinJBaseVisitor<Object>` und überschreibt je eine Methode pro Grammatikregel. Jeder `visit*`-Aufruf traversiert den Baum und führt die entsprechende Logik aus: Variablenzuweisung, Arithmetik, Kontrollfluss, Methodenaufruf.
-3. **Einstiegspunkt** – `Main.java` liest die Quelldatei über `CharStreams.fromPath()`, leitet sie durch Lexer und Parser und ruft anschließend `visitor.visit(tree)` auf.
+Quellcode durchläuft drei Stufen:
 
-Das Visitor-Pattern hält Grammatik und Ausführungslogik strikt getrennt: die `.g4`-Datei definiert die Struktur, `EvalVisitor` definiert das Verhalten. Das Hinzufügen eines neuen Sprachkonstrukts erfordert Änderungen an genau zwei Stellen.
+1. `MinJ.g4` definiert die Grammatik. Während des Gradle-Builds generiert ANTLR4 daraus `MinJLexer` und `MinJParser`. Der Parser erzeugt einen typisierten Parse-Tree.
+2. `EvalVisitor` erweitert ANTLRs `MinJBaseVisitor<Object>` und überschreibt eine Methode pro Grammatikregel. Jeder `visit*`-Aufruf traversiert den Baum und führt aus: Variablenzuweisung, Arithmetik, Kontrollfluss, Methodenaufruf, Objektinstanziierung.
+3. `Main.java` liest eine `.mj`-Datei, schickt sie durch Lexer und Parser und ruft `visitor.visit(tree)` auf.
 
-## Sprachfeatures
+Grammatik und Ausführungslogik sind strikt getrennt. Die `.g4`-Datei definiert, wie MinJ-Programme aussehen; `EvalVisitor` definiert, was sie tun. Ein neues Sprachkonstrukt hinzuzufügen heißt, genau zwei Dateien anzufassen.
 
-**Typsystem**
-- `var` – dynamisch typisiert, veränderlich
-- `val` – unveränderliche Konstante (einmalige Zuweisung, zur Laufzeit erzwungen)
-- Explizite Typen: `int`, `float`, `double`, `boolean`, `char`, `String`
+Unter der Haube nutzt die Laufzeit `Cell`-Objekte, die für jede Variable den Wert, den deklarierten Typ, Veränderlichkeit und den Dynamisch-Flag tracken. `return`-Anweisungen werfen ein `ReturnSignal` (eine RuntimeException-Unterklasse), um den Call-Stack abzuwickeln — einfach, und damit funktionieren Returns korrekt aus verschachtelten Schleifen und Bedingungen heraus. Objektinstanzen kopieren die Feld-Cells ihrer Klasse bei der Konstruktion, sodass jede Instanz ihren eigenen Zustand hat.
 
-**Kontrollfluss**
-- `if` / `elseif` / `else`-Blöcke, abgeschlossen durch `end`
-- `while`-Schleifen
-- `for i = 1 to n [step s]` – numerische Schleifen
-- `foreach x in list` – Iteration über Listen
+## Die Sprache
 
-**Objektorientierung**
-- `class`-Deklarationen mit Feldern und `method`-Blöcken
-- Instanziierung mit `new ClassName()`
-- Punkt-Aufruf-Syntax: `obj.method(args)`
-- Globale `func`-Deklarationen mit `return`
+MinJ hat `var` (veränderlich, dynamisch typisiert), `val` (unveränderlich, einmalige Zuweisung zur Laufzeit erzwungen) und explizite Typen (`int`, `float`, `double`, `boolean`, `char`, `String`). Typisierte Deklarationen werden bei der Zuweisung geprüft — wer `int x` deklariert und einen String zuweisen will, bekommt einen Fehler.
 
-**Listen & Ein-/Ausgabe**
-- Listen-Literale: `[1, 2, 3]` mit `foreach`-Iteration
-- `print(...)` für Ausgabe, `input(...)` für interaktive Eingaben
+Kontrollfluss: `if`/`elseif`/`else`, `while`, `for i = 1 to n step s` und `foreach x in list`. Alle Blöcke werden mit `end` abgeschlossen. Boolesche Operatoren akzeptieren sowohl Symbole als auch Wörter (`&&` oder `and`, `||` oder `or`, `!` oder `not`).
 
-**Fehlerprüfung**
-- Statische Typprüfung bei typisierten Deklarationen
-- Verletzungen der `val`-Unveränderlichkeit (zur Laufzeit geprüft, nicht statisch)
-- Fehler bei undefinierten Namen
+Klassen haben Felder, Methoden und `new`-basierte Instanziierung mit Punkt-Aufruf-Syntax. Globale Funktionen verwenden `func` und unterstützen mehrere Rückgabewerte mit Destrukturierung (`var summe, produkt = addAndMultiply(3, 4)`). Kommentare funktionieren mit `//`, `#` oder `/* */`.
 
 ## Beispiele
 
@@ -71,7 +55,7 @@ for i = 1 to limit do:
 end
 ```
 
-### Klassen & Methoden
+### Klassen und Methoden
 
 ```minj
 class Counter:
@@ -103,35 +87,34 @@ end
 print factorial(5)   // 120
 ```
 
-## Tooling & CI/CD
+## Tooling und CI/CD
 
-- **Gradle + ANTLR-Plugin** – `generateGrammarSource` regeneriert Lexer und Parser bei jedem Build aus `MinJ.g4`; generierte Dateien liegen unter `build/generated-src/antlr/main/`
-- **ShadowJar** – bündelt die ANTLR-Laufzeitumgebung und alle Abhängigkeiten in einem einzelnen fat-JAR; beliebige `.mj`-Dateien lassen sich mit `java -jar minjc-<VERSION>.jar <yourfile>.mj` ausführen
-- **GitHub Actions** – bei jedem Push auf `release`: Checkout → JDK 21 Setup → fat-JAR bauen → Testsuite ausführen → Artefakt archivieren → mit Beispielen verpacken → versioniertes Release-Asset veröffentlichen
-- **GitHub Pages** – Dokumentation wird bei jedem Push auf `master` über einen separaten Actions-Workflow automatisch deployt
+Der Gradle-Build nutzt das ANTLR-Plugin, um Lexer und Parser bei jedem Build aus `MinJ.g4` neu zu generieren. ShadowJar packt alles (ANTLR-Runtime inklusive) in ein einzelnes fat-JAR — beliebige `.mj`-Dateien lassen sich mit `java -jar minjc-0.3.0.jar datei.mj` ausführen.
 
-## Sprache erweitern
+Eine GitHub-Actions-Pipeline läuft bei jedem Push auf den `release`-Branch: Code auschecken, JDK 21 aufsetzen, fat-JAR bauen, Tests ausführen, Beispiele bündeln und ein versioniertes Release-Asset veröffentlichen. Die Dokumentation wird bei jedem Push auf `master` automatisch auf GitHub Pages deployt.
 
-Die Architektur macht das Hinzufügen neuer Sprachkonstrukte zu einem mechanischen Vorgang. Hier am Beispiel der `while`-Schleife:
+## Wie man die Sprache erweitert
 
-**1. Grammatikregel hinzufügen** in `MinJ.g4`:
+Ein neues Sprachkonstrukt hinzuzufügen ist ein mechanischer Vorgang. Am Beispiel der `while`-Schleife:
+
+1. Grammatikregel in `MinJ.g4`:
 ```antlr
 whileStmt : WHILE expr DO COLON block END ;
 ```
 
-**2. Regel registrieren** in der `statement`-Regel:
+2. In der `statement`-Regel registrieren:
 ```antlr
 statement : varDecl | assign | printStmt | ifStmt | whileStmt ;
 ```
 
-**3. Lexer-Token hinzufügen:**
+3. Lexer-Token:
 ```antlr
 WHILE : 'while' ;
 DO    : 'do' ;
 END   : 'end' ;
 ```
 
-**4. Visitor implementieren** in `EvalVisitor.java`:
+4. Visitor-Override in `EvalVisitor.java`:
 ```java
 @Override
 public Object visitWhileStmt(MinJParser.WhileStmtContext ctx) {
@@ -142,9 +125,6 @@ public Object visitWhileStmt(MinJParser.WhileStmtContext ctx) {
 }
 ```
 
-**5. Neu bauen:**
-```bash
-./gradlew clean shadowJar
-```
+5. Neu bauen: `./gradlew clean shadowJar`
 
-Jedes neue Konstrukt ist vollständig in sich geschlossen: Grammatikregel, Token-Definition, Visitor-Override. Keine Änderungen an anderen Teilen der Codebasis nötig.
+Grammatikregel, Token, Visitor-Methode. Das war's.
