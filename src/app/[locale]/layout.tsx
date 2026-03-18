@@ -75,6 +75,9 @@ const description =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
+  alternates: {
+    canonical: "/",
+  },
   title: {
     default: "Marlon Kranz - Portfolio",
     template: "%s | Marlon Kranz",
