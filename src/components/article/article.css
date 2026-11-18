@@ -1,0 +1,256 @@
+/*
+ * Articles (/bpmnscript, /dux, /devline): Read mode. Running text, headings, code and
+ * figures come from prose.css (.pj-body on every section); this file adds the contents
+ * list, the article rhythm and the figure plate. Nothing here moves without input.
+ */
+
+/* ---- Shared ---- */
+.ar-toc ol {
+  margin: 0;
+  list-style: none;
+}
+/* Below 1180 the list sits under the lede: entries flow in lines, so the text starts sooner. */
+@media (max-width: 1179.98px) {
+  .ar-toc ol {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 20px;
+  }
+}
+.ar-toc a {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  text-decoration: none;
+  text-wrap: pretty;
+  /* Long German entries ("Editorunterstützung") break inside the narrow column instead of spilling out. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+@media (pointer: coarse) {
+  .ar-toc a {
+    min-height: 44px;
+  }
+}
+.ar-toc-label {
+  margin: 0 0 4px;
+  color: var(--s-mute);
+  font: 400 14px/1.45 var(--s-font-ui);
+}
+
+
+/* Figures keep their own width up to the figure column; the plate is the light ground of a printed figure. */
+.ar-fig {
+  width: fit-content;
+}
+.pj-fig.ar-fig img {
+  width: auto;
+  max-width: 100%;
+}
+.ar-plate {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 24px;
+  border-radius: var(--s-r-frame);
+  background: var(--s-plate);
+}
+.pj-fig .ar-plate img {
+  border: 0;
+  border-radius: 0;
+}
+
+/*
+ * Scroll cue for boxes wider than their column (plates, code, the compiled diagram): the edge
+ * with more content fades out, driven by the box's own scroll position. A box that does not
+ * scroll has an inactive timeline, so it is not masked at all. Thesis figures are the author's
+ * own; nothing under a licence that requires it unaltered sits in these boxes.
+ */
+@property --ar-fade-l {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --ar-fade-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@supports (animation-timeline: scroll(self inline)) {
+  .ar-plate,
+  .ar-body pre,
+  .ar-body .bs-diagram {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--ar-fade-l),
+      #000 calc(100% - var(--ar-fade-r)),
+      transparent
+    );
+    animation: ar-edge linear both;
+    animation-timeline: scroll(self inline);
+  }
+  /* The mask would clip the focus ring; a focused box shows its edges plainly. */
+  .ar-plate:focus-visible,
+  .ar-body pre:focus-visible,
+  .ar-body .bs-diagram:focus-visible {
+    mask-image: none;
+  }
+}
+@keyframes ar-edge {
+  0% {
+    --ar-fade-l: 0px;
+    --ar-fade-r: 48px;
+  }
+  8%,
+  92% {
+    --ar-fade-l: 48px;
+    --ar-fade-r: 48px;
+  }
+  100% {
+    --ar-fade-l: 48px;
+    --ar-fade-r: 0px;
+  }
+}
+.ar-credit {
+  display: block;
+}
+
+/* Wide figures may use the full content width; text keeps its measure. */
+:root[data-design] .ar-sec > .ar-fig.pj-fig {
+  max-width: min(100%, 880px);
+}
+:root[data-design] .ar-sec > .ar-fig.pj-fig[data-wide] {
+  max-width: 100%;
+}
+
+/* ======================== Ink ======================== */
+:root[data-design="keynote"] {
+  .ar-toc {
+    margin-top: var(--sp-7);
+  }
+  .ar-toc a {
+    color: var(--ink-2);
+    font: 400 15px/1.3 var(--sans);
+    text-underline-offset: 0.35em;
+    transition-property: color;
+  }
+  @media (hover: hover) {
+    .ar-toc a:hover {
+      color: var(--ink);
+    }
+  }
+
+  /* Sections: a hairline and the heading in the margin, as on project pages; tighter than there. */
+  .ar-body > .ar-sec {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-6);
+  }
+  .ar-body > .ar-sec:first-child {
+    margin-top: var(--section-md);
+  }
+  @media (min-width: 900px) {
+    .ar-sec > .ar-fig[data-wide] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* >= 1180: the contents list sits in columns 11-12 and stays in view; the body takes 1-10. */
+  @media (min-width: 1180px) {
+    .ar-article {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--gutter);
+    }
+    .ar-head {
+      grid-column: 1 / -1;
+    }
+    .ar-body {
+      grid-column: 1 / 11;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: subgrid;
+    }
+    .ar-body > .ar-sec {
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+    }
+    .ar-toc {
+      grid-column: 11 / -1;
+      grid-row: 2;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--hdr) + 24px);
+      /* level with the first section's heading */
+      margin-top: calc(var(--section-md) + var(--sp-6) + 1px);
+    }
+    .ar-toc a[aria-current] {
+      color: var(--ink);
+      text-decoration-line: underline;
+      text-decoration-thickness: 2px;
+      text-decoration-color: var(--accent);
+    }
+  }
+}
+
+/* ======================== Trace ======================== */
+:root:is([data-design="thread"], [data-design="flow"]) {
+  .ar-toc {
+    margin-top: var(--sp-7);
+  }
+  .ar-toc ol {
+    padding-left: 16px;
+    border-left: 1px solid var(--line-2);
+  }
+  .ar-toc a {
+    color: var(--fg-2);
+    font: 400 15px/1.3 var(--sans);
+    transition-property: color;
+  }
+  @media (hover: hover) {
+    .ar-toc a:hover {
+      color: var(--fg);
+    }
+  }
+
+  .ar-body > .ar-sec {
+    margin-top: var(--sp-9);
+  }
+  /* Wide plates stop at the figure column too; the contents list sits right of it. */
+  .ar-sec > .ar-fig.pj-fig[data-wide] {
+    max-width: min(100%, 880px);
+  }
+
+  /*
+   * >= 1180: the contents list stays in view on the right, as the homepage's station list does,
+   * but next to the figure column (880px) rather than at the window edge, so it reads with the
+   * text. On narrow windows it falls back to the rail (--pr); the body keeps a gap to it.
+   */
+  @media (min-width: 1180px) {
+    .ar-body {
+      padding-right: 24px;
+    }
+    .ar-toc {
+      --ar-side: max(0px, calc((100vw - var(--max)) / 2));
+      position: fixed;
+      top: calc(var(--hdr) + 40px);
+      left: min(
+        calc(var(--ar-side) + var(--pad) + var(--g) + 880px + 24px),
+        calc(100vw - var(--ar-side) - var(--pr))
+      );
+      z-index: var(--z-rail);
+      width: var(--pr);
+      margin: 0;
+      padding-left: 28px;
+    }
+    .ar-toc-label {
+      padding-left: 17px;
+    }
+    .ar-toc a {
+      color: var(--fg-3);
+      font-size: 14px;
+    }
+    .ar-toc a[aria-current] {
+      color: var(--fg);
+    }
+  }
+}
