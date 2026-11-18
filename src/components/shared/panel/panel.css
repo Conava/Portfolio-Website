@@ -1,0 +1,168 @@
+/* Detail panel: shared behavior, then the Ink (keynote) and Trace (thread) skins. */
+
+/* The trigger and the no-JS summary are secondary buttons (each design's `.btn`). */
+.dp-trigger,
+.dp-summary {
+  width: fit-content;
+  list-style: none;
+}
+.dp-summary::-webkit-details-marker {
+  display: none;
+}
+.dp-trigger svg,
+.dp-summary svg {
+  transition: transform var(--dur-panel-open) var(--ease-out-quart);
+}
+.dp-trigger[aria-expanded="true"] svg,
+.dp-details[open] > .dp-summary svg {
+  transform: rotate(180deg);
+}
+
+/* Height: grid rows 0fr -> 1fr. Transitions only, so a reversal retargets. */
+.dp-region {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-panel-close) var(--ease-drawer);
+}
+.dp-region[data-state="open"] {
+  grid-template-rows: 1fr;
+  transition-duration: var(--dur-panel-open);
+}
+.dp-inner {
+  overflow: hidden;
+  min-height: 0;
+  /* Closed content leaves the tab order and the accessibility tree once collapsed. */
+  visibility: hidden;
+  transition: visibility 0s linear var(--dur-panel-close);
+}
+.dp-region[data-state="open"] .dp-inner {
+  visibility: visible;
+  transition-delay: 0s;
+}
+.dp-body {
+  display: grid;
+  gap: 32px 48px;
+  padding: 8px 0 40px;
+  opacity: 0;
+  transition: opacity var(--dur-fade) var(--ease-std);
+}
+.dp-region[data-state="open"] .dp-body {
+  opacity: 1;
+  transition-delay: 80ms;
+}
+.dp-region[data-instant],
+.dp-region[data-instant] *,
+:is(.dp-trigger, .dp-actions):has(+ .dp-region[data-instant]) svg {
+  transition: none !important;
+}
+/* The global 1ms still lags a frame; the panel must be instant. */
+@media (prefers-reduced-motion: reduce) {
+  .dp-region,
+  .dp-region *,
+  .dp-trigger svg {
+    transition: none !important;
+  }
+}
+
+/* With JS the trigger drives it; the <details> summary is the no-JS control only. */
+@media (scripting: enabled) {
+  .dp-summary {
+    display: none;
+  }
+}
+@media (scripting: none) {
+  .dp-trigger {
+    display: none;
+  }
+  .dp-region {
+    grid-template-rows: 1fr;
+  }
+  .dp-inner {
+    visibility: visible;
+  }
+  .dp-body {
+    opacity: 1;
+  }
+  .dp-details:not([open]) {
+    padding-bottom: 8px;
+  }
+}
+
+.dp-prose {
+  min-width: 0;
+  text-wrap: pretty;
+}
+.dp-prose .dp-head {
+  margin: 0 0 6px;
+  color: var(--s-text);
+  font-family: var(--s-font-ui);
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+.dp-prose p {
+  margin: 0;
+  color: var(--s-text-2);
+}
+.dp-prose ul {
+  margin: 0;
+  padding-left: 1.1em;
+  list-style: disc;
+  color: var(--s-text-2);
+}
+.dp-prose li + li {
+  margin-top: 0.5em;
+}
+.dp-prose .dp-sig {
+  margin-top: 1em;
+  padding-left: 12px;
+  border-left: 2px solid var(--s-text-2);
+}
+.dp-prose .dp-sig strong {
+  color: var(--s-text);
+  font-weight: 650;
+}
+.dp-viz {
+  min-width: 0;
+  margin: 0;
+}
+.dp-viz:empty {
+  display: none;
+}
+
+/* ---- Ink: no container; serif prose, prose on columns 4-8, viz on 9-12 ---- */
+:root[data-design="keynote"] .dp-prose .dp-head {
+  font-size: 17px;
+}
+:root[data-design="keynote"] .dp-prose p,
+:root[data-design="keynote"] .dp-prose li {
+  font: 400 17px/1.6 var(--s-font-prose);
+  max-width: 60ch;
+}
+@media (min-width: 900px) {
+  :root[data-design="keynote"] .dp-body {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+  }
+  :root[data-design="keynote"] .dp-body > * {
+    grid-column: 4 / 9;
+  }
+  :root[data-design="keynote"] .dp-body > .dp-viz {
+    grid-column: 9 / 13;
+  }
+}
+
+/* ---- Trace: sans prose in --s-text-2, viz column 1.1fr ---- */
+:root:is([data-design="thread"], [data-design="flow"]) .dp-prose .dp-head {
+  font-size: 16px;
+}
+:root:is([data-design="thread"], [data-design="flow"]) .dp-prose p {
+  font: 400 15.5px/1.55 var(--s-font-ui);
+  max-width: 56ch;
+}
+@media (min-width: 960px) {
+  :root:is([data-design="thread"], [data-design="flow"]) .dp-body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  }
+}

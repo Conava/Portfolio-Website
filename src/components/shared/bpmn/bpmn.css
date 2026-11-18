@@ -1,0 +1,86 @@
+/* Static final-state skin for the BPMN scene data; scenes add their own motion. */
+.bpmn-diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--s-text);
+}
+.bpmn-diagram .nd {
+  fill: var(--s-raised);
+  stroke: var(--s-text);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.bpmn-diagram .nd.end {
+  stroke-width: 4;
+}
+.bpmn-diagram .ed {
+  fill: none;
+  stroke: var(--s-text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bpmn-diagram .ic {
+  fill: none;
+  stroke: var(--s-text);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+.bpmn-diagram .ic.x {
+  stroke-width: 2.5;
+}
+.bpmn-diagram .ic-fill {
+  fill: var(--s-text);
+}
+.bpmn-diagram text {
+  font-family: var(--s-font-ui);
+  font-size: 14px;
+  text-anchor: middle;
+  fill: var(--s-text);
+}
+.bpmn-diagram .lbl {
+  fill: var(--s-text-2);
+}
+
+.bpmn-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.bpmn-src {
+  margin: 0;
+  font-family: var(--s-font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--s-text-2);
+  overflow-x: auto;
+}
+.bpmn-src code {
+  font: inherit;
+}
+.bpmn-src .ln {
+  display: block;
+  white-space: pre;
+}
+.bpmn-src .tok-kw,
+.bpmn-src .tok-name,
+.bpmn-src .tok-punct {
+  color: var(--s-text);
+}
+.bpmn-src .tok-kw {
+  font-weight: 600;
+}
+.bpmn-src .tok-str {
+  color: var(--s-text-2);
+}
+.bpmn-src .tok-num {
+  color: var(--s-accent);
+}
+.bpmn-src .tok-comment {
+  color: var(--s-mute);
+}

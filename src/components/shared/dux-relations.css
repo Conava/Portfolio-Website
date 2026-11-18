@@ -1,0 +1,20 @@
+/* The line that ties dux-cast to Dux Player and Dux Plugins, and the bracket on the shared entry. */
+.dux-rel {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--s-text-2);
+}
+.dux-rel a {
+  color: var(--s-text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--s-accent);
+  text-underline-offset: 3px;
+  /* Skipping descenders broke the accent underline into dashes that read like the pending trace. */
+  text-decoration-skip-ink: none;
+}
+[data-dux-shared] {
+  border-left: 2px solid var(--s-accent);
+  padding-left: 16px;
+}

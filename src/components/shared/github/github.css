@@ -1,0 +1,26 @@
+.gh-list { list-style: none; margin: 0; padding: 0; }
+.gh-row { padding: 16px 0; border-top: 1px solid var(--s-line); }
+.gh-row:last-child { border-bottom: 1px solid var(--s-line); }
+.gh-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.gh-ref { font-family: var(--s-font-mono); font-size: 13px; color: var(--s-mute); }
+a.gh-ref { color: var(--s-text-2); text-decoration: underline; text-decoration-color: var(--s-line-2); text-underline-offset: 3px; }
+a.gh-ref:hover { text-decoration-color: currentColor; }
+.gh-title { color: var(--s-text); font-weight: 600; }
+.gh-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: var(--s-text-2); white-space: nowrap; }
+.gh-badge-icon { flex: none; }
+.gh-badge[data-pr-state="OPEN"] .gh-badge-icon { color: var(--s-open); }
+.gh-badge[data-pr-state="MERGED"] .gh-badge-icon { color: var(--s-merged); }
+.gh-badge[data-pr-state="CLOSED"] .gh-badge-icon { color: var(--s-closed); }
+.gh-meta { display: flex; flex-wrap: wrap; column-gap: 12px; margin: 4px 0 0; font-size: 13px; color: var(--s-mute); font-variant-numeric: tabular-nums; }
+.gh-blurb { margin: 6px 0 0; color: var(--s-text-2); max-width: 64ch; }
+.gh-facts { font-size: 13px; color: var(--s-mute); font-variant-numeric: tabular-nums; }
+/* Facts are spaced, not joined with a middle dot (design system 9.17); each stays whole. */
+.gh-facts > span { white-space: nowrap; }
+.gh-facts > span + span { margin-left: 12px; }
+/* min-width reserves room for the longer absolute text so the relative swap moves nothing */
+.gh-sync { min-width: 38ch; margin: 12px 0 0; font-size: 12.5px; color: var(--s-mute); font-variant-numeric: tabular-nums; }
+@media (hover: hover) { .gh-row:hover { background: var(--s-bg-alt); } }
+/* Trace: rows inset so the hover tint has room. Ink keeps flush ledger rules. */
+:root:is([data-design="thread"], [data-design="flow"]) .gh-row,
+:root:is([data-design="thread"], [data-design="flow"]) .gh-sync { padding-inline: 12px; }
+@media (max-width: 480px) { .gh-sync { min-width: 0; } }

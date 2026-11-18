@@ -1,0 +1,563 @@
+/*
+ * Project pages (/projects, /projects/[slug]) in both designs: page header, project rows
+ * and the article prose skin. Markup is shared; each design skins it below.
+ * The MDX files style their inline figures with the legacy --color-* / --font-sans
+ * aliases, which ink.css and trace.css map per design.
+ */
+
+/* ---- Shared structure ---- */
+.pj-back {
+  margin: 0;
+}
+.pj-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 15px;
+}
+.pj-title {
+  margin: 0;
+  text-wrap: balance;
+}
+.pj-sub {
+  display: block;
+  color: var(--s-text-2);
+}
+.pj-meta {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.pj-body {
+  color: var(--s-text-2);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.pj-body > * {
+  margin: 0;
+  min-width: 0;
+}
+.pj-body > * + * {
+  margin-top: 1.1em;
+}
+.pj-body :is(h2, h3) {
+  color: var(--s-text);
+  font-family: var(--s-font-display);
+  text-wrap: balance;
+  /* Ink hangs h2 in a narrow margin column; long German compounds break there instead of running into the text. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+.pj-body > :is(h2, h3) {
+  margin-top: 2.4em;
+}
+.pj-body > :is(h2, h3) + * {
+  margin-top: 0.6em;
+}
+.pj-body > :first-child {
+  margin-top: 0;
+}
+.pj-body strong {
+  color: var(--s-text);
+  font-weight: 600;
+}
+/*
+ * List, inline-code and table rules are for Markdown output, which has no class attribute.
+ * Components inside prose (PR rows, viz lists and tables) carry classes and keep their own styles.
+ */
+.pj-body :is(ul, ol):not([class]) {
+  padding-left: 1.25em;
+}
+/* Tailwind's preflight strips list markers; prose wants them back. */
+.pj-body ul:not([class]) {
+  list-style: disc;
+}
+.pj-body ol:not([class]) {
+  list-style: decimal;
+}
+.pj-body :is(ul, ol):not([class]) > li + li {
+  margin-top: 0.4em;
+}
+.pj-body li::marker {
+  color: var(--s-mute);
+  font-variant-numeric: tabular-nums;
+}
+.pj-body blockquote {
+  padding-left: 1.25em;
+  border-left: 1px solid var(--s-line-2);
+}
+.pj-body :not(pre) > code:not([class]) {
+  padding: 0.1em 0.3em;
+  border-radius: var(--s-r-tag);
+  background: var(--s-bg-alt);
+  color: var(--s-text);
+  overflow-wrap: anywhere;
+}
+.pj-body pre {
+  padding: 16px 20px;
+  overflow-x: auto;
+  background: var(--s-bg-alt);
+  color: var(--s-text);
+  font: 400 14px/1.6 var(--s-font-mono);
+  tab-size: 2;
+}
+.pj-body pre code {
+  font-size: inherit;
+}
+
+/* Figures: diagrams and tables scroll in their own box instead of shrinking past legibility. */
+.pj-body > div:has(> svg),
+.pj-table {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.pj-body > div:has(> svg) > svg {
+  display: block;
+  min-width: 720px;
+}
+.pj-body table:not([class]) {
+  width: 100%;
+  min-width: 30rem;
+  border-collapse: collapse;
+  font: 400 15px/1.45 var(--s-font-ui);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.pj-body table:not([class]) th {
+  padding: 0 24px 10px 0;
+  border-bottom: 1px solid var(--s-line-2);
+  color: var(--s-text);
+  font-weight: 600;
+  text-align: left;
+  vertical-align: bottom;
+}
+.pj-body table:not([class]) td {
+  padding: 10px 24px 10px 0;
+  border-bottom: 1px solid var(--s-line);
+  vertical-align: top;
+}
+.pj-fig img,
+.pj-fig video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-r-frame);
+}
+.pj-fig[data-size="sm"] {
+  max-width: 24rem;
+}
+.pj-fig[data-size="md"] {
+  max-width: 28rem;
+}
+.pj-fig[data-size="lg"] {
+  max-width: 32rem;
+}
+.pj-fig figcaption {
+  margin-top: 10px;
+  color: var(--s-mute);
+  font: 400 13px/1.4 var(--s-font-ui);
+}
+.pj-body > :is(div:has(> svg), .pj-table, .pj-fig) {
+  margin-block: 2em;
+}
+/* a figure that shared a markdown paragraph with text */
+.pj-body > div > .pj-fig {
+  margin-top: 1.1em;
+}
+
+/* Project rows (index): the whole row is the target. */
+.pj-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--s-line);
+}
+.pj-row {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  border-bottom: 1px solid var(--s-line);
+  transition: background-color var(--dur-hover) var(--ease-std);
+}
+.pj-row h2 {
+  margin: 0;
+  font-family: var(--s-font-display);
+  color: var(--s-text);
+  text-wrap: balance;
+}
+.pj-row h2 a {
+  text-decoration-color: transparent;
+}
+.pj-row h2 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.pj-row .pj-sub {
+  margin-top: 6px;
+  font: 400 15px/1.4 var(--s-font-ui);
+  letter-spacing: 0;
+}
+.pj-row-blurb {
+  margin: 0;
+  color: var(--s-text-2);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+.pj-row-year {
+  margin: 0;
+}
+@media (hover: hover) {
+  .pj-row:hover h2 a {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* ======================== Ink ======================== */
+:root[data-design="keynote"] {
+  .pj {
+    padding-block: clamp(48px, 8vw, 112px) var(--section-lg);
+  }
+  .pj-head {
+    row-gap: 0;
+  }
+  .pj-head > * {
+    grid-column: 1 / -1;
+  }
+  .pj-title {
+    margin-top: var(--sp-6);
+    font-family: var(--sans);
+    font-size: clamp(40px, 6vw, 88px);
+    font-weight: 650;
+    font-stretch: 90%;
+    line-height: 0.98;
+    letter-spacing: -0.022em;
+  }
+  .pj-title .pj-sub {
+    margin-top: 0.12em;
+    font-size: 0.56em;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+  /* The signature ink-blue period closes the title. */
+  .pj-dot {
+    color: var(--accent);
+  }
+  .pj-head .lede {
+    margin-top: var(--sp-6);
+  }
+  .pj-meta {
+    margin-top: var(--sp-6);
+  }
+  @media (min-width: 900px) {
+    .pj-title {
+      grid-column: 1 / span 11;
+    }
+    .pj-head .lede {
+      grid-column: 1 / span 7;
+      max-width: none;
+    }
+    .pj-meta {
+      grid-column: 9 / -1;
+      align-self: end;
+    }
+  }
+
+  /* Article: serif 18px at 62ch from column 4; h2 hang in the margin (columns 1-3). */
+  .pj-body {
+    margin-top: var(--section-md);
+    padding-top: var(--sp-7);
+    border-top: 1px solid var(--line);
+    font-family: var(--serif);
+    font-size: 18px;
+    align-items: baseline;
+  }
+  .pj-body > * {
+    grid-column: 1 / -1;
+    max-width: 62ch;
+  }
+  .pj-body > :is(div:has(> svg), .pj-table, .pj-fig:not([data-size])) {
+    max-width: 880px;
+  }
+  /* Code hugs its longest line, between the text measure and the figure width. */
+  .pj-body > pre {
+    width: max-content;
+    min-width: min(100%, 40rem);
+    max-width: min(100%, 880px);
+  }
+  .pj-body h2 {
+    font-size: 28px;
+    font-weight: 650;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .pj-body h3 {
+    font-size: 22px;
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 900px) {
+    .pj-body > * {
+      grid-column: 4 / span 7;
+    }
+    .pj-body > :is(div:has(> svg), .pj-table, .pj-fig, pre) {
+      grid-column: 4 / -1;
+    }
+    .pj-body > h2 {
+      grid-column: 1 / span 3;
+      max-width: 14ch;
+      margin-top: 0;
+    }
+    /* Section gap sits above the heading's row; the first paragraph shares that row. */
+    .pj-body > h2:not(:first-child),
+    .pj-body > h2:not(:first-child) + * {
+      margin-top: var(--sp-8);
+    }
+    .pj-body > h2 + * {
+      margin-top: 0;
+    }
+  }
+
+  /* Index */
+  .pj-index .pj-title {
+    margin-bottom: var(--sp-8);
+  }
+  .pj-row {
+    padding: var(--sp-5) 0;
+    column-gap: var(--gutter);
+  }
+  .pj-row h2 {
+    font-size: clamp(24px, 2.4vw, 34px);
+    font-weight: 650;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .pj-row-blurb {
+    font: 400 17px/1.55 var(--serif);
+  }
+  @media (min-width: 900px) {
+    .pj-row {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: baseline;
+      padding-block: var(--sp-6);
+    }
+    .pj-row h2 {
+      grid-column: 1 / span 3;
+    }
+    .pj-row-blurb {
+      grid-column: 4 / span 6;
+    }
+    .pj-row-year {
+      grid-column: 10 / -1;
+      text-align: right;
+    }
+  }
+  @media (hover: hover) {
+    .pj-row:hover {
+      background: color-mix(in oklab, var(--paper-2) 60%, transparent);
+    }
+  }
+}
+
+/* ======================== Trace ======================== */
+:root:is([data-design="thread"], [data-design="flow"]) {
+  .pj {
+    padding-top: calc(var(--hdr) + clamp(48px, 9vh, 104px));
+    padding-bottom: var(--section);
+  }
+  .pj-article,
+  .pj-index {
+    position: relative;
+  }
+  .pj-title {
+    margin-top: var(--sp-6);
+    font-size: clamp(38px, 5.6vw, 80px);
+    font-weight: 650;
+    font-stretch: 108%;
+    line-height: 1;
+    letter-spacing: -0.022em;
+  }
+  .pj-title .pj-sub {
+    margin-top: 0.15em;
+    font-size: 0.5em;
+    font-weight: 560;
+    font-stretch: 104%;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .pj-head .lede {
+    margin-top: var(--sp-6);
+    max-width: 52ch;
+    color: var(--fg-2);
+  }
+  .pj-meta {
+    margin-top: var(--sp-6);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px var(--sp-6);
+  }
+
+  .pj-body {
+    margin-top: var(--sp-9);
+    font-size: 17px;
+  }
+  .pj-body > * {
+    max-width: 64ch;
+  }
+  .pj-body > :is(div:has(> svg), .pj-table, .pj-fig:not([data-size])) {
+    max-width: 880px;
+  }
+  /* Code hugs its longest line, between the text measure and the figure width. */
+  .pj-body > pre {
+    width: max-content;
+    min-width: min(100%, 40rem);
+    max-width: min(100%, 880px);
+  }
+  .pj-body h2 {
+    font-size: clamp(26px, 2.8vw, 36px);
+    font-weight: 620;
+    font-stretch: 106%;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+  .pj-body h3 {
+    font-size: 21px;
+    font-weight: 620;
+    font-stretch: 104%;
+    line-height: 1.2;
+  }
+  .pj-body ul:not([class]) {
+    list-style-type: square;
+  }
+
+  /*
+   * The article's trace: one line down the gutter, a square start station on the title and
+   * a pad on every h2. Lit to the reading position by scroll-driven CSS where supported;
+   * without support or with reduced motion it rests fully lit (the final state).
+   */
+  .pj-article::before,
+  .pj-article::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--pad) + var(--g) / 2);
+    pointer-events: none;
+  }
+  .pj-article::before {
+    width: 1.25px;
+    margin-left: -0.625px;
+    background: var(--line-2);
+  }
+  .pj-article::after {
+    width: 1.5px;
+    margin-left: -0.75px;
+    background: var(--acc);
+    transform-origin: 50% 0;
+  }
+  .pj-article .pj-title::before,
+  .pj-body > h2::before,
+  .pj-body > h2::after {
+    content: "";
+    position: absolute;
+    z-index: var(--z-trace);
+    left: calc(var(--pad) + var(--g) / 2 - 5.5px);
+    width: 11px;
+    height: 11px;
+    box-sizing: border-box;
+    margin-top: calc(0.5lh - 5.5px);
+    pointer-events: none;
+  }
+  .pj-article .pj-title::before {
+    border-radius: 1px;
+    background: var(--acc);
+  }
+  .pj-body > h2::before {
+    border: 1.25px solid var(--line-2);
+    border-radius: 50%;
+    background: var(--bg);
+  }
+  .pj-body > h2::after {
+    border-radius: 50%;
+    background: var(--acc);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .pj-article {
+        view-timeline: --pj-read block;
+      }
+      .pj-article::after {
+        animation: pj-lit linear both;
+        animation-timeline: --pj-read;
+        /* Head at mid-viewport. The cover range ends short by the root's scroll-padding-top. */
+        animation-range: cover 50vh cover calc(100% - 50vh + var(--hdr) + 24px);
+      }
+      .pj-body > h2 {
+        view-timeline: --pj-pad block;
+      }
+      .pj-body > h2::after {
+        animation: pj-pad linear both;
+        animation-timeline: --pj-pad;
+        /* fills as the heading's first line crosses the middle of the viewport, like the line */
+        animation-range: cover 50vh cover calc(50vh + 1px);
+      }
+    }
+  }
+
+  /* Index */
+  .pj-index .pj-title {
+    margin-bottom: var(--sp-8);
+  }
+  .pj-row {
+    padding: var(--sp-6) 0;
+    gap: var(--sp-2) var(--sp-7);
+  }
+  .pj-row h2 {
+    font-size: clamp(22px, 2.3vw, 30px);
+    font-weight: 600;
+    font-stretch: 104%;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .pj-row-blurb {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  @media (min-width: 960px) {
+    .pj-row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    }
+    .pj-row h2 {
+      grid-row: 1 / span 2;
+    }
+  }
+  @media (hover: hover) {
+    .pj-row:hover {
+      background: var(--bg-2);
+    }
+  }
+}
+
+@keyframes pj-lit {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes pj-pad {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
