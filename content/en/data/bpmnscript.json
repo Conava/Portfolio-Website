@@ -1,0 +1,48 @@
+{
+  "repo": "BPMNscript/bpmnscript",
+  "intro": "The compiler turns BPMNscript into BPMN XML that Operaton runs as is, and the importer reads existing BPMN XML back into code. Developers keep the tools they know from code: line diffs, completion and errors while typing. When the importer can't represent a model, it refuses it or warns, so a process doesn't change unnoticed.",
+  "sample": "process invoice-approval {\n  start ReviewStart { form { amount: number \"Invoice amount\" } }\n  user ReviewInvoice(assignee: \"demo\")\n  if (amount > 1000) {\n    user SeniorApproval(assignee: \"manager\")\n  } else {\n    service AutoApprove(class: \"com.example.invoice.AutoApproveDelegate\")\n  }\n  end Done\n}",
+  "proof": {
+    "sentence": "3,858 of the 4,946 accepted models (78.0%) came back as the same process, 63.7% of all 6,060 deployed. Small models fare best: 77.3% of those with up to 10 elements come back equivalent, against 5.9% of those with more than 50.",
+    "steps": [
+      {
+        "label": "Deployed by Operaton",
+        "value": 6060
+      },
+      {
+        "label": "Accepted by the importer",
+        "value": 4946
+      },
+      {
+        "label": "Round-trip to an equivalent process",
+        "value": 3858
+      }
+    ]
+  },
+  "links": [
+    {
+      "label": "Playground",
+      "href": "/playground"
+    },
+    {
+      "label": "Read article",
+      "href": "/bpmnscript"
+    },
+    {
+      "label": "Thesis (PDF)",
+      "href": "/thesis.pdf"
+    },
+    {
+      "label": "GitHub",
+      "href": "https://github.com/BPMNscript/bpmnscript"
+    }
+  ],
+  "panel": {
+    "did": [
+      "Designed the language and wrote the compiler and the importer (TypeScript, Langium) for my bachelor thesis. The compiler turns structured blocks into BPMN 2.0 XML, and the importer restructures arbitrary process graphs into blocks with dominator analysis.",
+      "A VS Code language server and a command-line tool come from the same code base.",
+      "Evaluated the round trip in a reproducible pipeline: 2,000 fuzz-generated programs, each in three element orderings, and 6,000+ mined real-world models, each deployed to Operaton in Docker."
+    ],
+    "significant": "Of the 6,060 mined models that Operaton deploys, the importer accepts 4,946 and refuses 1,114. 78.0% of the accepted ones round-trip to an equivalent model."
+  }
+}

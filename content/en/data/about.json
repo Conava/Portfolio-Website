@@ -1,25 +1,23 @@
 {
-  "bio": "Software engineer based in Hamburg, currently finishing my B.Sc. in Wirtschaftsinformatik (Business Informatics) at the University of Hamburg. My focus is backend development, from microservices to infrastructure. I particularly enjoy picking up new technologies and domains. After a full academic year at San Diego State University, I returned to Hamburg to write my bachelor thesis while working as a student engineer at OTTO, helping build the next-generation product data onboarding platform.",
-  "skills": [
+  "name": "Marlon Kranz",
+  "lede": "Software engineer in Hamburg. I build distributed, enterprise-scale cloud services in Java at Adobe, and open-source projects in Go and TypeScript.",
+  "statement": [
+    "I build backend services and cloud architecture, and I enjoy a good interface when a project needs one, like this site.",
+    "At Adobe I own and plan the migration of a production pipeline, one of my team's biggest efforts, and on the side I'm active in the team's AI setup, from its harness to the shared repo of agent skills.",
+    "Beyond work I build my own tools: devline, the Claude Code plugin I use every day, and Dux Player, a music player, and I'm a core contributor to Dux Shell, a Linux desktop shell. My bachelor thesis at the University of Hamburg is a tool too: BPMNscript, a text language for business processes. The B.Sc. in Information Systems, with an exchange year at San Diego State University, is expected in December 2026."
+  ],
+  "links": [
     {
-      "category": "Languages",
-      "items": ["Java", "Kotlin", "Python", "C#", "Rust", "Go", "TypeScript / JavaScript", "Bash", "SQL"]
+      "label": "GitHub",
+      "href": "https://github.com/conava"
     },
     {
-      "category": "Backend & Infra",
-      "items": ["Spring Boot", "Kafka", "MongoDB", "PostgreSQL", "Hibernate", "Flyway", "REST APIs", "AWS", "S3", "Lambda", "ECS", "Docker", "Terraform"]
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/in/marlon-kranz"
     },
     {
-      "category": "Frontend & Desktop",
-      "items": ["React", "Next.js", "JavaFX", "HTML / CSS"]
-    },
-    {
-      "category": "Tooling",
-      "items": ["Git", "Linux", "Gradle", "Maven", "GitHub Actions", "DSL Design", "ANTLR4"]
-    },
-    {
-      "category": "Spoken Languages",
-      "items": ["🇩🇪 German (Native)", "🇺🇸 English (C2)", "🇫🇷 French (Basic)"]
+      "label": "Resume",
+      "href": "/resume.pdf"
     }
   ]
 }

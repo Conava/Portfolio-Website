@@ -1,0 +1,109 @@
+{
+  "jobs": [
+    {
+      "id": "adobe",
+      "brief": "Werkstudent bei Adobe",
+      "figures": {
+        "services": 5,
+        "moved": 9,
+        "apps": 10
+      },
+      "logo": {
+        "src": "/images/logos/adobe.svg",
+        "alt": "Adobe",
+        "width": 66.25,
+        "height": 16.75
+      },
+      "company": "Adobe",
+      "url": "https://www.adobe.com",
+      "role": "Cloud Software Engineer (Werkstudent)",
+      "location": "Hamburg, Deutschland",
+      "start": "2026-07",
+      "end": null,
+      "summary": "Ich bin Werkstudent in einem Team im Bereich Adobe Cloud Platform and Collaboration (ACPC). Wir betreiben fünf ereignisgesteuerte Java-Services auf AWS, die bei Adobe von Millionen Menschen genutzt werden, zum Beispiel für Kommentare, Teilen und Suchvorschläge, dazu eine Speicherschicht für Assets, auf der andere Teams aufbauen. Neben Entwicklung, Deployments und Code-Reviews verantworte ich die Umstellung einer Produktions-Pipeline auf GitOps mit Kubernetes und habe das gemeinsame Repo des Teams mit KI-Agent-Skills angelegt.",
+      "panel": {
+        "did": [
+          "Verantwortlich für die Migration einer Produktions-Pipeline von Spring Cloud Data Flow zu GitOps auf Kubernetes, von Anfang bis Ende. Ich habe das schlecht dokumentierte System kartiert, das Design geschrieben, in dem 9 der 10 Apps ohne Ausfallzeit umziehen, und es mit Senior-Engineers zu einer Roadmap über 5 Monate verfeinert.",
+          "Das schwierigste Stück ist eine zustandsbehaftete App, die kein Backup vollständig wiederherstellen konnte. Ich habe ihren Zustand auf ein Kafka-Streams-Changelog umgestellt. Sie übersteht jetzt Ausfälle, skaliert über mehrere Instanzen und baut ihren kleineren Zustand schneller auf.",
+          "Das Team-Repo mit KI-Agent-Skills für Wartung und wiederkehrende Aufgaben angelegt. Das Team nutzt und erweitert es inzwischen. Am AI-Harness des Teams mitgebaut: Kontext zu Tests, CI/CD, Architektur und typischen KI-Fehlern, für Entwickler und für KI-Reviews.",
+          "Den Großteil einer Multi-Region-CI/CD-Pipeline für neue AWS-Regionen gebaut und das Monitoring mit Splunk, Grafana und New Relic erweitert. Die Services laufen auf EKS, MSK, Aurora, Neptune, OpenSearch, SQS und S3, bisher mit über 30 Produktions-Deployments.",
+          "Beim Aufräumen von 4 übernommenen Services mitgeholfen, die in schlechtem Zustand ankamen: Fehler behoben, CI/CD (Jenkins, Argo Workflows) und Secrets-Handling vereinheitlicht, große Breaking-Upgrades abgeschlossen und einen großen Security-Rückstau abgearbeitet.",
+          "An der Abschaltung eines der Legacy-Services des Teams beteiligt.",
+          "Nebenbei behoben: ein Race, bei dem parallele CI- und Release-Läufe ungeprüfte Builds in Produktion bringen konnten, und ein jahrealter Fehler beim Account-Linking in den Teilen-Vorschlägen, den ein falsch konfigurierter Test als instabil versteckt hatte."
+        ]
+      }
+    },
+    {
+      "id": "uhh-ta",
+      "logo": {
+        "src": "/images/logos/uhh.svg",
+        "alt": "Universität Hamburg",
+        "width": 392.463,
+        "height": 127.19
+      },
+      "company": "Universität Hamburg",
+      "url": "https://www.uni-hamburg.de",
+      "role": "Tutor, Software Engineering II",
+      "location": "Hamburg, Deutschland",
+      "start": "2026-04",
+      "end": "2026-07",
+      "summary": "Einer von mehreren Tutoren für Software Engineering II im Sommersemester: eine wöchentliche Übungsgruppe, Korrekturen und Live-Coding in der Vorlesung im Wechsel.",
+      "panel": {
+        "did": [
+          "Eine Gruppe in der wöchentlichen Übung geleitet, etwa zwei Stunden pro Woche: Fragen beantwortet, Hinweise gegeben, wenn Studierende nicht weiterkamen, und Lösungen korrigiert und bewertet.",
+          "Im Wechsel mit zwei anderen Tutoren die Vorlesung mit Live-Coding vor mehreren hundert Studierenden unterstützt. Dabei habe ich den Stoff der Vorlesung praktisch gezeigt und bin auf Fragen eingegangen, die die Folien nicht abdeckten.",
+          "Später habe ich im selben Arbeitsbereich, Softwareentwicklungs- und -konstruktionsmethoden (SWK), meine Bachelorarbeit geschrieben, betreut von Dr. Oliver Kopp, der die Vorlesung gehalten hat."
+        ]
+      }
+    },
+    {
+      "id": "otto",
+      "logo": {
+        "src": "/images/logos/otto.svg",
+        "alt": "OTTO",
+        "width": 100,
+        "height": 37
+      },
+      "company": "OTTO",
+      "url": "https://www.otto.de",
+      "role": "Software Engineer (Werkstudent)",
+      "location": "Hamburg, Deutschland",
+      "start": "2025-08",
+      "end": "2026-06",
+      "summary": "Der Bereich Product Content bei OTTO baut eine verteilte Produktdaten-Plattform, die ein älteres monolithisches System rund um eine große Oracle-Datenbank ablösen soll. Mein crossfunktionales Team aus zehn Leuten war für das Onboarding von Produktdaten und dessen Anbindungen zuständig, und ich habe dafür Java-Microservices gebaut, von Architektur und Entwicklung bis zu Tests und Deployment.",
+      "panel": {
+        "did": [
+          "Java- und Spring-Boot-Microservices in hexagonaler Architektur gebaut, verbunden über ereignisgesteuerte Datenflüsse mit Kafka, auf AWS (ECS, Lambda, S3, CloudWatch) mit MongoDB Atlas und Terraform.",
+          "Ein KI-gestütztes Entwicklungs-Setup für das Team konzipiert und eingeführt: KI-Code-Reviews und eigene KI-Agenten, abgestimmt auf die Workflows und Konventionen des Teams.",
+          "Am Aufbau eines Media-Asset-Dienstes beteiligt: Er empfängt Produktdaten-Events über Kafka, validiert sie, bereitet den Upload in ein nachgelagertes Media-Asset-System vor und gleicht die Media Assets mit diesem System ab.",
+          "Den Dienst, der Excel-Vorlagen für Produktdaten erzeugt, vom internen Messaging gelöst, sodass er die externen Quell-Topics direkt liest, und eine öffentliche REST-API für Produktdaten umgesetzt, dokumentiert mit OpenAPI.",
+          "An Architekturplanung und Design-Entscheidungen, Refinements und Planning mitgearbeitet, CI/CD-Pipelines mit GitHub Actions aufgebaut, ein React-Frontend gepflegt und Schwachstellen behoben, die Wiz.io und Dependabot gemeldet haben."
+        ]
+      }
+    },
+    {
+      "id": "msg-life",
+      "logo": {
+        "src": "/images/logos/msg-life.svg",
+        "alt": "msg.life",
+        "width": 493.4,
+        "height": 157.7
+      },
+      "company": "msg.life",
+      "url": "https://www.msg-life.com",
+      "role": "Software Engineer (Werkstudent)",
+      "location": "Hamburg, Deutschland",
+      "start": "2023-10",
+      "end": "2024-07",
+      "summary": "msg.Pension Data ist eine Standardsoftware, die Rentendaten an einen zentralen staatlichen Dienst liefert. Als einziger deutschsprachiger Entwickler im Produkt war ich die Verbindung zwischen deutschen Kunden und Product Ownern und dem slowenischen Team. Ich habe die Software getestet, dokumentiert und in Java und Vue.js weiterentwickelt.",
+      "panel": {
+        "did": [
+          "Technische Anforderungen aus der Kommunikation mit Kunden abgeleitet und gegen regulatorische Vorgaben geprüft.",
+          "Verantwortlich für API- und Funktionstests: Tests selbstständig konzipiert, durchgeführt und dokumentiert (Postman, Jenkins), dazu manuelle QA und Code-Reviews.",
+          "Jira-User-Stories selbstständig umgesetzt, von kleinen Fixes bis zu größeren Fehlern und Features in Java (Spring Boot) und im Vue.js-Frontend.",
+          "Als erstes eigenständiges Projekt eine Documentation-as-Code-Pipeline konzipiert und gebaut, außerdem die Anwendungsdokumentation geprüft und erweitert."
+        ]
+      }
+    }
+  ]
+}

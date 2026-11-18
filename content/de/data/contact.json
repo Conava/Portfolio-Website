@@ -1,0 +1,9 @@
+{
+  "intro": "Am schnellsten erreicht man mich per E-Mail.",
+  "email": "kontakt@marlonkranz.com",
+  "links": [
+    { "label": "GitHub", "href": "https://github.com/conava" },
+    { "label": "LinkedIn", "href": "https://linkedin.com/in/marlon-kranz" },
+    { "label": "Lebenslauf", "href": "/resume.pdf" }
+  ]
+}

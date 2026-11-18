@@ -1,63 +1,78 @@
-[
-  {
-    "id": "bsc-uhh",
-    "institution": "University of Hamburg",
-    "degree": "B.Sc.",
-    "field": "Wirtschaftsinformatik (Business Informatics)",
-    "period": "2022 – Present",
-    "status": "in-progress",
-    "summary": "Interdisciplinary degree combining computer science, information systems, and business administration, currently in the 8th and final semester.",
-    "details": [
-      "Core focus on software engineering, databases, algorithms, and distributed systems",
-      "Currently writing my bachelor thesis on a domain-specific language for BPMN process modeling",
-      "The thesis is published open source and generates executable .bpmn files for Camunda and Operaton engines",
-      "8th semester, thesis phase, targeted graduation in 2026"
-    ],
-    "thesis": {
-      "title": "A Domain-Specific Language for Executable BPMN",
-      "summary": "Developing a DSL that lets developers describe business processes in a concise, code-first notation and compile them to executable BPMN files compatible with Camunda and Operaton process engines. The project is published as open source.",
-      "projectSlug": "bachelor-thesis",
-      "githubUrl": "https://github.com/conava/bpmn-dsl"
+{
+  "schools": [
+    {
+      "id": "gatech",
+      "brief": "M.S. in Computer Science at Georgia Tech",
+      "name": "Georgia Institute of Technology",
+      "url": "https://www.gatech.edu",
+      "logo": {
+        "src": "/images/logos/gatech.svg",
+        "alt": "Georgia Institute of Technology",
+        "width": 720,
+        "height": 162
+      },
+      "degree": "M.S.",
+      "field": "Computer Science",
+      "start": "2027-01",
+      "end": null,
+      "status": "upcoming",
+      "note": "Online, part-time, admitted.",
+      "panel": {
+        "did": [
+          "Admitted to the online, part-time M.S. in Computer Science. The program starts in January 2027."
+        ]
+      }
+    },
+    {
+      "id": "uhh",
+      "name": "University of Hamburg",
+      "url": "https://www.uni-hamburg.de",
+      "logo": {
+        "src": "/images/logos/uhh.svg",
+        "alt": "University of Hamburg",
+        "width": 392,
+        "height": 127
+      },
+      "degree": "B.Sc.",
+      "field": "Information Systems",
+      "start": "2022-10",
+      "end": "2026-12",
+      "status": "in-progress",
+      "note": "Thesis submitted in October 2026, degree expected in December 2026.",
+      "panel": {
+        "did": [
+          "German grade 1.97 so far (1.0 is the best grade, 4.0 the pass mark). The degree is expected in December 2026.",
+          "Thesis: BPMNscript, a domain-specific language and compiler for BPMN 2.0. The code is open source and the thesis is published on this site.",
+          "Teaching assistant for Software Engineering II, April to July 2026."
+        ],
+        "significant": "In the evaluation, the importer accepts 4,946 of the 6,060 public models that Operaton deploys, and 3,858 of them round-trip to an equivalent model."
+      }
+    },
+    {
+      "id": "sdsu",
+      "name": "San Diego State University",
+      "url": "https://www.sdsu.edu",
+      "logo": {
+        "src": "/images/logos/sdsu.svg",
+        "alt": "San Diego State University",
+        "width": 254,
+        "height": 42
+      },
+      "degree": "Exchange year",
+      "field": "Computer Science",
+      "start": "2024-08",
+      "end": "2025-05",
+      "status": "completed",
+      "gpa": {
+        "value": "3.87",
+        "scale": "4.00"
+      },
+      "note": "San Diego, California.",
+      "panel": {
+        "did": [
+          "Exchange year in Computer Science, August 2024 to May 2025, with a GPA of 3.87 out of 4.00."
+        ]
+      }
     }
-  },
-  {
-    "id": "sdsu-exchange",
-    "institution": "San Diego State University",
-    "degree": "Exchange Year",
-    "field": "Computer Science (B.Sc.)",
-    "period": "2024 – 2025",
-    "status": "completed",
-    "summary": "Full academic year abroad in San Diego, California as part of my B.Sc. program, focused on computer science theory, algorithms, and advanced programming concepts.",
-    "details": [
-      "Coursework in Algorithms & Data Structures, Advanced Programming Languages, and Software Systems",
-      "Deepened understanding of formal language theory, type systems, and compiler construction",
-      "Studied at an international research university, broadened perspective on engineering approaches and academic culture"
-    ]
-  },
-  {
-    "id": "btg-oldenburg",
-    "institution": "Bildungszentrum für Technik und Gestaltung, Oldenburg",
-    "degree": "Abitur",
-    "field": "Technical High School (Technisches Gymnasium)",
-    "period": "2019 – 2022",
-    "status": "completed",
-    "summary": "German university entrance qualification from a technical high school with an IT specialization. Final grade 1.3 (German scale, 1.0 best; approx. 4.0 GPA).",
-    "details": [
-      "Advanced classes: Information Technology, Mathematics, English",
-      "IT coursework covered graphical programming in C#, microcontroller development, computer fundamentals, binary logic, and electrical engineering basics",
-      "Took Information Processing and Business/Economics as part of the Abitur",
-      "Final grade 1.3 on the German scale (1.0 is highest; roughly equivalent to a 4.0 GPA)"
-    ]
-  },
-  {
-    "id": "msc-uhh",
-    "institution": "University of Hamburg",
-    "degree": "M.Sc.",
-    "field": "Wirtschaftsinformatik (Business Informatics)",
-    "period": "2026 – Present",
-    "status": "upcoming",
-    "summary": "Planned Master's program in Business Informatics, to begin after bachelor graduation.",
-    "details": [],
-    "hidden": true
-  }
-]
+  ]
+}

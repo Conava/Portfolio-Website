@@ -1,0 +1,9 @@
+{
+  "intro": "The quickest way to reach me is email.",
+  "email": "contact@marlonkranz.com",
+  "links": [
+    { "label": "GitHub", "href": "https://github.com/conava" },
+    { "label": "LinkedIn", "href": "https://linkedin.com/in/marlon-kranz" },
+    { "label": "Resume", "href": "/resume.pdf" }
+  ]
+}

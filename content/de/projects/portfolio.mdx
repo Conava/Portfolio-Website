@@ -1,76 +1,52 @@
 ---
 title: "Portfolio-Website"
-date: "2026 – Heute"
-summary: "Die Seite, auf der du dich gerade befindest. Von Grund auf gebaut mit vier wechselbaren Design-Themes (jeweils mit hellem und dunklem Modus), zweisprachig auf Deutsch und Englisch, MDX-Projektseiten und selbst gehostet auf meinem eigenen Linux-Server."
-tech: ["Next.js 16", "TypeScript", "React 19", "Tailwind CSS v4", "Framer Motion", "next-intl", "next-themes", "MDX", "Docker", "Traefik"]
+date: "2026–heute"
+summary: "Diese Website: vier Designs über denselben Inhalten, von einem WebGL-Tintenfluid bis zu einer three.js-Szene, die aus den Inhalten entsteht, und ein BPMNscript-Playground, der Language Server und Compiler im Browser ausführt."
+tech: ["Next.js 16", "TypeScript", "React 19", "Tailwind CSS v4", "next-intl", "next-themes", "MDX", "Monaco", "three.js", "Docker", "Traefik"]
 githubUrl: "https://github.com/Conava/Portfolio-Website"
 thumbnail: "/images/projects/portfolio/cover.jpg"
-featured: false
+featured: true
 status: "active"
 ---
 
 ## Überblick
 
-Das hier ist die Seite, die du gerade siehst. Ich habe sie komplett selbst gebaut, um die volle Kontrolle über Design, Inhalte und Hosting zu haben, anstatt mich mit den Einschränkungen einer Vorlage wie Wordpress oder eines verwalteten Dienstes herumzuschlagen. Vier visuelle Themes, zweisprachige Inhalte, responsive Layouts und alles selbst gehostet auf meinem eigenen Linux-Server.
+Ich habe diese Seite selbst gebaut, um Design, Inhalte und Hosting zu kontrollieren, statt eine Vorlage anzupassen. Sie hat vier Designs, Deutsch und Englisch, in MDX geschriebene Projektseiten, einen Playground für meine Sprache BPMNscript und GitHub-Zahlen aus Live-Daten. Unit- und End-to-End-Tests sichern sie ab.
 
-## Design-System
+## Designs
 
-Das Theming funktioniert in zwei unabhängigen Schichten:
+Design und Farbmodus wählt man unabhängig voneinander. Den Modus setzt `next-themes` als Klasse auf `<html>`. Ink, Trace und Type gibt es hell und dunkel, Flow nur dunkel. Das Symbol im Header schaltet der Reihe nach durch die vier Designs.
 
-**Hell-/Dunkelmodus** wird von `next-themes` verwaltet und als Klasse auf `<html>` gespeichert. Jedes Design-Theme hat sowohl eine helle als auch eine dunkle Variante.
+- **Ink** ist eine Seite, die mit Stift auf Papier geschrieben wird. Das Hero ist Tinte, die dem Cursor folgt.
+- **Trace** ist die Seite als Prozessdiagramm: eine Linie vom Namen zur E-Mail-Adresse, mit Nebenspuren, die sich aus den Daten in den Content-Dateien berechnen. Eine Spur entsteht dort, wo sich zwei Einträge zeitlich überschneiden.
+- **Flow** ist eine dunkle Seite um eine three.js-Szene: 640 Metallplättchen bilden für jeden Abschnitt eine neue Form und wandern beim Scrollen in die nächste.
+- **Type** setzt die Seite in großen Archivo-Buchstaben auf Papier. Beim Scrollen fliegt man durch die Punze eines Buchstabens in den nächsten Abschnitt.
 
-**Design-Themes** sind vier visuelle Paletten mit jeweils eigener Typografie, Farbwelt und Hero-Animation:
+Der Server wählt das Design bei jeder Anfrage: zuerst ein gültiges `design`-Cookie, dann die Umgebungsvariable `DESIGN`, dann der Standard. Schon das erste HTML-Byte trägt deshalb das richtige `data-design` auf `<html>`, ohne Aufblitzen und ohne Client-Skript. Ein Link mit `?design=thread` setzt das Cookie und leitet auf dieselbe URL ohne diesen Parameter um.
 
-- **Atelier** *(Standard)* — editoriale Eleganz. Goldene Linien, Cormorant Garamond als Überschrift, viel Weißraum. Angelehnt an hochwertiges Printdesign.
-- **Iris** — Traumlandschaft. Leuchtende konzentrische Ringe, Farbverlauf im Namen, sanfte Sternenpunkte. Ruhiger und atmosphärischer.
-- **Manifesto** — plakativer Stil. Hoher Kontrast, gestauchte Schrift, Laufband, Umriss- gegen gefüllten Namenskontrast. Bewusst laut.
-- **Cobalt** — Leitstelle. Monospace-Schrift, Punktraster im Hintergrund, Scanlines, ein HUD-Panel mit Metriken. Soll sich wie ein Entwickler-Dashboard anfühlen.
+## Inhalte und Sprachen
 
-Ein Inline-Skript im `<head>` liest das gespeicherte Theme aus dem localStorage, bevor React hydriert. Dadurch blitzt beim Laden keine falsche Farbpalette auf. Das Styling aller Komponenten läuft über CSS Custom Properties, die jedes Theme überschreibt — bedingte Logik im JSX ist nicht nötig.
+Fakten liegen in JSON-Dateien unter `content/{locale}/data/`, die Projektseiten sind MDX-Dateien mit Frontmatter, geparst mit `gray-matter` und gerendert über `next-mdx-remote`. Die Projekt-Slugs stammen aus den englischen Dateinamen. Fehlt eine deutsche MDX-Datei, wird die englische verwendet.
 
-Themes können direkt mit dem Theme-Switcher geändert werden:
-![Theme Switcher|sm](/images/projects/portfolio/theme-switcher.jpg)
+Englische Seiten liegen unter `/…`, deutsche unter `/de/…`, umgesetzt mit `next-intl`. Allein die URL bestimmt die Sprache: Es gibt kein Cookie und keine Erkennung über `Accept-Language`. UI-Texte stehen in `messages/{locale}.json`.
 
-## Hero-Animationen
+Ein Test vergleicht die Faktenfelder (IDs, Daten, URLs, Zahlen, Status) der englischen und deutschen Dateien und meldet den Pfad der ersten Abweichung. Ändert sich ein Fakt nur in einer Sprache, schlägt der Test fehl.
 
-Jedes Theme hat eine eigene Hero-Sektion mit individueller Eingangsanimation: gleitende Goldlinien und ein Name-Reveal bei Atelier, pulsierende Ringe und einblendende Sternenkonstellation bei Iris, Clip-Path-Reveal mit Laufband bei Manifesto, Schreibmaschinencursor mit Scanline-Overlay bei Cobalt. Beim Themenwechsel wird die Sektion über ein `key`-Prop neu gemountet, sodass die Animation sauber von vorn startet.
+## Live-GitHub-Daten
 
-<Video src="/images/projects/portfolio/hero-themes.mp4" caption="Alle vier Hero-Themes in Aktion" />
+Sterne und Releases der Repositories, der Stand der Pull Requests, die ich hervorhebe, und meine Pull-Request-Summen in der Dux-Organisation kommen aus einer einzigen GraphQL-Anfrage, die eine Stunde zwischengespeichert wird. Schlägt eine Anfrage fehl, bleibt das letzte gute Ergebnis in Gebrauch. Ohne Ergebnis zeigen die Seiten keine Zahlen, und von Hand eingetragen wird nichts.
 
-## Architektur
+## Playground
 
-Die Seite läuft auf dem **Next.js 16 App Router** mit allen Routen unter `[locale]/`. Ungültige Locales liefern eine 404-Seite.
+Der [Playground](/playground) führt den BPMNscript-Language-Server und den Compiler in einem Web Worker im Browser aus, mit Monaco als Editor und bpmn-js für das Diagramm. Der Worker liegt nicht in diesem Repository. Ein Skript baut `@bpmn-script/web` aus dem BPMNscript-Repository in einer festgelegten Version, bevor Dev-Server, Build und Tests laufen.
 
-Inhalte liegen in `content/{locale}/` und kommen in zwei Formen:
-- **JSON** für strukturierte Daten (Berufserfahrung, Ausbildung, Zertifikate, Publikationen, Über mich)
-- **MDX** für Projektseiten wie diese hier, geparst mit `gray-matter` und gerendert über `next-mdx-remote`
+## Analytics
 
-Projekt-Slugs werden aus den englischen Dateinamen abgeleitet. Wenn keine deutsche MDX-Datei existiert, fällt der Loader auf die englische Version zurück — nur Inhalte, die sich wirklich unterscheiden, brauchen eine eigene Datei.
-
-Sektionen wie Zertifikate und Publikationen werden automatisch aus Seite und Navigation entfernt, wenn alle ihre Einträge als versteckt markiert sind. Die Sektionsnummern in römischen Ziffern werden dynamisch berechnet.
-
-## Internationalisierung
-
-UI-Strings (`messages/{locale}.json`) laufen über `next-intl`. Inhaltliche Texte (Bio, Jobbeschreibungen, Projekttexte) liegen direkt in den sprachspezifischen JSON- und MDX-Dateien. Beides lässt sich unabhängig voneinander übersetzen. Aktuell unterstützt: Englisch und Deutsch.
-
-## Typografie
-
-Sechs Schriftfamilien werden beim Build über `next/font/google` geladen. Jedes Theme tauscht `--font-sans` und `--font-display` gegen seine eigenen Schriften:
-
-- **Atelier**: Jost + Cormorant Garamond
-- **Cobalt**: Plus Jakarta Sans
-- **Iris**: Sora
-- **Manifesto**: DM Mono + Fraunces
-
-JetBrains Mono wird durchgängig als Monospace-Schrift verwendet.
-
-## Mobildarstellung
-
-Jede Sektion passt sich an kleine Bildschirme an. Hero-Layouts wechseln in eine Spalte, Statistik-Panels stapeln sich, Projektkarten nutzen flexible Raster und die Typografie skaliert mit `clamp()`. Die Navigation klappt zu einem mobilen Menü zusammen, Tippflächen sind überall groß genug.
+Als Analytics dient ein selbst gehostetes Umami. Das Skript wird nur geladen, wenn Site-ID und URL von Umami konfiguriert sind. Events sind in einer typisierten Liste deklariert: Abschnittsansichten mit Verweildauer-Bereich, Scrolltiefe, ausgehende Klicks, Lebenslauf-Downloads sowie die Wechsel von Design, Sprache und Farbmodus.
 
 ## Deployment
 
-Das Portfolio läuft als Docker-Container auf meinem Heimserver. Traefik übernimmt TLS und Routing. Ein Push auf `main` löst einen GitHub-Actions-Workflow aus, der das Image baut, es in die GHCR schiebt und automatisch auf dem Server ausrollt.
+Ein GitHub-Actions-Workflow führt bei jedem Push und jedem Pull Request Typprüfung und Unit-Tests aus. Auf `main` baut er zusätzlich das Docker-Image, schiebt es nach GHCR und führt per SSH auf meinem Server `docker compose pull` und `up -d` aus. Traefik übernimmt TLS und Routing.
 
 ## Stack
 
@@ -79,10 +55,12 @@ Das Portfolio läuft als Docker-Container auf meinem Heimserver. Traefik überni
 | Framework | Next.js 16 (App Router) |
 | Sprache | TypeScript |
 | UI | React 19 |
-| Styling | Tailwind CSS v4 |
-| Animationen | Framer Motion |
-| Inhalte | MDX + gray-matter + next-mdx-remote |
+| Styling | Tailwind CSS v4 und CSS Custom Properties pro Design |
+| Inhalte | JSON und MDX (`gray-matter`, `next-mdx-remote`) |
 | i18n | next-intl |
-| Theming | next-themes + eigenes CSS-Variable-System |
-| Schriften | next/font/google (6 Familien) |
-| Deployment | Docker + Traefik (selbst gehostet) |
+| Theming | next-themes |
+| Playground | Monaco, monaco-languageclient, bpmn-js |
+| 3D | three.js (Flow) |
+| Schriften | Bricolage Grotesque, Source Serif 4, Spline Sans Mono, Mona Sans, Instrument Serif, Geist, Archivo (`next/font/google`), Geist Mono liegt im Repository (`next/font/local`) |
+| Tooling | Bun für Installation, Skripte und Tests, Node 24 zur Laufzeit |
+| Deployment | Docker, GHCR, Traefik (selbst gehostet) |

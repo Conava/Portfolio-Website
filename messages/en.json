@@ -1,46 +1,380 @@
 {
-  "nav": {
+  "sections": {
     "about": "About",
-    "experience": "Experience",
+    "work": "Work",
     "education": "Education",
+    "bpmnscript": "BPMNscript",
+    "dux": "Dux",
     "projects": "Projects",
-    "certificates": "Certificates",
-    "publications": "Publications",
     "contact": "Contact"
   },
-  "hero": {
-    "greeting": "Hi, I'm",
-    "tagline": "Full-Stack Engineer",
-    "cta_projects": "View Projects",
-    "cta_contact": "Get in Touch"
+  "panel": {
+    "more": "Read more",
+    "less": "Read less",
+    "significant": "Why it mattered",
+    "readMore": "Read more",
+    "readLess": "Read less",
+    "did": "What I did",
+    "region": "{name}, details"
   },
-  "sections": {
-    "about": "About Me",
-    "experience": "Experience",
-    "education": "Education",
-    "projects": "Projects",
-    "certificates": "Certificates",
-    "publications": "Publications",
-    "contact": "Contact",
-    "all_projects": "All Projects"
+  "dates": {
+    "present": "present",
+    "from": "from {date}"
   },
-  "common": {
-    "view_project": "View Project",
-    "view_details": "View Details",
-    "github": "GitHub",
-    "read_more": "Read More",
-    "collapse": "Show Less",
+  "education": {
+    "gpa": "GPA {value} of {scale}"
+  },
+  "github": {
+    "state": {
+      "OPEN": "Open",
+      "MERGED": "Merged",
+      "CLOSED": "Closed"
+    },
+    "merged_on": "merged {date}",
+    "reviews": "{count, plural, one {# review} other {# reviews}}",
+    "stars": "{count, plural, one {# star} other {# stars}}",
+    "release": "latest release {tag}",
+    "totals": "{merged, number} merged pull requests in {repos, plural, one {# repository} other {# repositories}}, {open, number} open.",
+    "synced": "Synced <t>{time}</t>",
+    "last_synced": "Last synced <t>{time}</t>",
+    "repo": "Repository",
+    "open": "Open",
+    "merged": "Merged",
+    "closed": "Closed",
+    "mergedOn": "merged {date}",
+    "lastSynced": "Last synced <t>{time}</t>",
+    "duxCounts": "{merged} merged pull requests in {repos, plural, one {# repository} other {# repositories}}, {open} open"
+  },
+  "viz": {
+    "perTask": "One agent per task, each reviewed",
+    "entry": "Entry",
+    "period": "Period",
+    "count": "Count",
+    "ongoing": "ongoing",
+    "workTimeline": "Work, month by month",
+    "timeline": "Work and education over time",
+    "eduTimeline": "Education, month by month"
+  },
+  "controls": {
+    "language": "Language",
+    "design": "Design",
+    "color_mode": "Color mode",
+    "to_dark": "Switch to dark mode",
+    "to_light": "Switch to light mode",
+    "designLabel": "Design",
+    "toDesign": "Switch to the {name} design",
+    "toDark": "Switch to dark mode",
+    "toLight": "Switch to light mode"
+  },
+  "contact": {
+    "email": "Email",
+    "copy": "Copy email address",
+    "copied": "Copied"
+  },
+  "project": {
     "back": "Back",
-    "view_certificate": "View Certificate",
-    "status_completed": "Completed",
-    "status_in_progress": "In Progress",
-    "status_upcoming": "Upcoming",
-    "status_active": "Active",
-    "status_discontinued": "Discontinued",
-    "view_publication": "View Publication",
-    "download_pdf": "Download PDF",
-    "see_all_projects": "See All Projects",
-    "copy_link": "Copy link (with theme)",
-    "copied": "Copied!"
+    "all": "All projects",
+    "github": "GitHub"
+  },
+  "nav": {
+    "skip": "Skip to content",
+    "start": "Start",
+    "about": "About",
+    "work": "Work",
+    "education": "Education",
+    "bpmnscript": "BPMNscript",
+    "dux": "Dux",
+    "projects": "Projects",
+    "contact": "Contact",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "sections": "Sections"
+  },
+  "hero": {
+    "resume": "Resume (PDF)",
+    "resumeShort": "Resume",
+    "statusFrom": "{what} from {date}"
+  },
+  "scene": {
+    "diagramLabel": "Compiled BPMN diagram of the invoice approval",
+    "diagramSteps": [
+      "Start: Review Start.",
+      "User task: Review Invoice.",
+      "Decision: if the amount is greater than 1000, go to Senior Approval, a user task.",
+      "Otherwise go to Auto Approve, a service task.",
+      "Both paths join, then the process ends at Done."
+    ],
+    "replay": "Replay",
+    "valid": "Valid BPMN 2.0 XML",
+    "recording": "Recording",
+    "compiled": "compiled {file}",
+    "source": "Source",
+    "diagram": "Diagram",
+    "xml": "XML",
+    "playground": "Playground",
+    "github": "GitHub",
+    "thesis": "Thesis"
+  },
+  "trace": {
+    "overlap": "{a} and {b} overlapped, {range}",
+    "overlapNote": "Overlaps with {b}",
+    "overlapDuring": "Alongside the {b}",
+    "career": "Work and education",
+    "careerNow": "running now",
+    "careerNext": "planned",
+    "keysHint": "j and k: next and previous entry"
+  },
+  "flow": {
+    "about": "Backend and distributed systems",
+    "work": "Work since {year}",
+    "education": "Information systems and computer science",
+    "bpmnscript": "A text language for BPMN",
+    "dux": "Core contributor to Dux Shell",
+    "projects": "devline and other projects",
+    "contact": "Contact"
+  },
+  "gallery": {
+    "previous": "Previous image",
+    "next": "Next image"
+  },
+  "projects": {
+    "back": "Back",
+    "github": "GitHub",
+    "all": "All projects",
+    "page": "Project page",
+    "article": "Read article",
+    "usedBy": "Used by <list></list>",
+    "uses": "Uses <h>{helper}</h>, like <list></list>"
+  },
+  "notFound": {
+    "message": "No page at this address.",
+    "home": "Back to the home page"
+  },
+  "date": {
+    "present": "present"
+  },
+  "playground": {
+    "meta": {
+      "title": "BPMNscript Playground",
+      "description": "A small IDE for BPMNscript in the browser: several files, the real language server, and the BPMN diagram of the open file. Import a .bpmn file to get it as BPMNscript source."
+    },
+    "crumbHome": "marlonkranz.com",
+    "version": "v{version}",
+    "presets": {
+      "label": "Examples",
+      "failed": "The example could not be loaded. Check the connection and try again.",
+      "groupSource": "Examples",
+      "groupBpmn": "BPMN files to import",
+      "labels": {
+        "invoice-approval": "Invoice approval",
+        "loan-approval": "Loan approval",
+        "parallel-approval": "Parallel approval",
+        "compensating-saga": "Compensating saga",
+        "support-ticket": "Support ticket",
+        "order-handling": "Order handling",
+        "invoice-handwritten": "Invoice, hand-written",
+        "invoice-receipt": "Invoice receipt",
+        "error-start": "Error start event",
+        "service-no-binding": "Service task without binding"
+      },
+      "hints": {
+        "invoice-handwritten": "Hand-written BPMN. It imports with one warning, about a gateway label.",
+        "invoice-receipt": "Camunda's invoice example. The importer drops its lanes and its data store.",
+        "error-start": "A process that starts on an error. The importer refuses it.",
+        "service-no-binding": "A service task with no binding. The importer refuses it."
+      }
+    },
+    "import": {
+      "button": "Import",
+      "drop": "Drop a .bpmn file to import it",
+      "refused": "No file was created.",
+      "dismiss": "Close message",
+      "tooLarge": "This file is larger than 2 MB. Import a smaller .bpmn file.",
+      "notText": "This file is not text. Import a .bpmn or .xml file.",
+      "warnings": "{n, plural, one {# construct changed or dropped} other {# constructs changed or dropped}}"
+    },
+    "export": {
+      "button": "Export",
+      "bpmn": "Active file as BPMN 2.0 XML (.bpmn)",
+      "bpmnscript": "Active file as BPMNscript (.bpmnscript)",
+      "disabled": "BPMN export needs source that compiles."
+    },
+    "share": {
+      "button": "Share",
+      "copied": "Copied",
+      "tooLong": "Too long for a link. Export the file instead.",
+      "invalid": "The link holds no readable source. Your files are unchanged."
+    },
+    "tabs": {
+      "source": "Source",
+      "sourceLabel": "BPMNscript source. Press Ctrl+M (Mac: Ctrl+Shift+M) to make Tab move focus.",
+      "diagram": "Diagram",
+      "xml": "XML",
+      "openFiles": "Open files",
+      "close": "Close {name}",
+      "unsaved": "unsaved changes"
+    },
+    "panel": {
+      "problems": "Problems",
+      "importLog": "Import log",
+      "noProblems": "No problems have been detected in the workspace.",
+      "noImport": "Nothing imported yet.",
+      "error": "Error",
+      "warning": "Warning",
+      "toggle": "Show or hide the panel"
+    },
+    "status": {
+      "starting": "Starting the language server",
+      "ready": "Language server ready",
+      "failed": "The language server did not start. Editing still works without completion.",
+      "retry": "Retry",
+      "compiled": "Compiles to BPMN",
+      "notCompiled": "Does not compile",
+      "firstError": "Does not compile, first error on line {line}",
+      "problems": "{errors, plural, one {# error} other {# errors}}, {warnings, plural, one {# warning} other {# warnings}}",
+      "cursor": "Ln {line}, Col {col}",
+      "spaces": "Spaces: 2",
+      "language": "BPMNscript"
+    },
+    "empty": "No source yet. Pick an example or import a .bpmn file.",
+    "noscript": "The playground needs JavaScript to edit and compile. This is the example it opens with.",
+    "diagram": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Fit to view",
+      "label": "BPMN diagram",
+      "keysHint": "Ctrl or Cmd with arrow keys: pan. Plus, minus and 0: zoom."
+    },
+    "explorer": {
+      "title": "Explorer",
+      "toggle": "Files",
+      "close": "Close files",
+      "newFile": "New file",
+      "rename": "Rename {name}",
+      "delete": "Delete {name}",
+      "confirmDelete": "Delete {name}? This cannot be undone.",
+      "nameLabel": "File name",
+      "nameInvalid": "Enter a name without slashes, up to 80 characters.",
+      "nameTaken": "A file with this name already exists.",
+      "problems": "{n, plural, one {# problem} other {# problems}}"
+    },
+    "noFile": {
+      "title": "No file open",
+      "hint": "Open a file in the explorer or pick an example."
+    },
+    "shortcuts": {
+      "title": "Keyboard shortcuts",
+      "save": "Save",
+      "newFile": "New file",
+      "closeTab": "Close tab",
+      "nextTab": "Next tab",
+      "prevTab": "Previous tab",
+      "explorer": "Show or hide the explorer",
+      "panel": "Show or hide the panel",
+      "rename": "Rename (in the explorer)"
+    }
+  },
+  "meta": {
+    "siteTitle": "Marlon Kranz, software engineer",
+    "siteDescription": "Software engineer in Hamburg. Working student at Adobe, finishing a B.Sc. in Information Systems at the University of Hamburg, author of BPMNscript, contributor to Dux.",
+    "ogImageAlt": "Marlon Kranz, software engineer in Hamburg"
+  },
+  "article": {
+    "contents": "Contents",
+    "updated": "Updated {date}",
+    "published": "Published {date}",
+    "links": "Links",
+    "credit": "Image: {source}",
+    "pullRequests": "Pull requests",
+    "figure": "Figure: {caption}"
+  },
+  "devline": {
+    "stages": "Stages",
+    "agents": "Agents",
+    "skills": "Skills",
+    "hooks": "Hooks",
+    "install": "Install",
+    "parallel": "{n} in parallel",
+    "approval": "You approve",
+    "model": "Model: {model}",
+    "version": "Current release: {tag}",
+    "counts": "{agents} agents, {skills} skills, {hooks} hooks",
+    "flowCaption": "How a run moves through devline. Implementation and review run once per task, side by side, so the number of agents follows the plan.",
+    "flowAlt": "Stages in order: brainstorm, plan, implement with a review for every task, documentation, deep review of the whole branch, then merge or iterate. You approve after the brainstorm, after the plan and at the end. Implement and review run one agent per task in parallel. A blocking review finding sends the task back to its implementer.",
+    "flowShort": {
+      "brainstorm": "Settle the scope",
+      "design": "UI changes only",
+      "plan": "Tasks in waves",
+      "implement": "Build and review each task",
+      "docs": "Docs match the diff",
+      "deep-review": "Review the whole branch",
+      "gate": "Merge or go again"
+    },
+    "flowGate": "You approve",
+    "flowTask": "Task {n}",
+    "flowTaskN": "Task N",
+    "flowImpl": "Implement",
+    "flowRev": "Review",
+    "flowEach": "One agent per task, all tasks of a wave at once",
+    "flowLoop": "A blocking finding goes back to the implementer, then the task is reviewed again"
+  },
+  "bpmnscript": {
+    "openInPlayground": "Open in the playground",
+    "thesis": "Thesis (PDF)",
+    "repository": "Repository",
+    "what": {
+      "drawn": "Drawn in BPMN",
+      "written": "Written in BPMNscript",
+      "terms": [
+        {
+          "term": "BPMN",
+          "text": "The standard notation for business processes: tasks, decisions and the paths between them, drawn as a diagram that a process engine can run."
+        },
+        {
+          "term": "Who uses it",
+          "text": "Business analysts draw the processes, developers make them run on an engine such as Operaton, and the people in charge of a process monitor it."
+        },
+        {
+          "term": "BPMNscript",
+          "text": "My text notation for the same diagrams. An `if` replaces the drawn diamond, so developers write, review and merge a process like any other code."
+        }
+      ]
+    },
+    "method": {
+      "figure": "Figure 1",
+      "title": "The round-trip test",
+      "lede": "The evaluation checks whether a real process comes back unchanged from a trip into BPMNscript and back. Each model went through these steps:",
+      "steps": [
+        {
+          "title": "Collect real models",
+          "text": "BPMN files from public GitHub projects, listed in a dataset by Türker et al. (2022). None of them are mine."
+        },
+        {
+          "title": "Deploy the original",
+          "text": "Operaton has to deploy the original, or the model doesn't count."
+        },
+        {
+          "title": "Import into BPMNscript",
+          "text": "The importer turns the model into code, or refuses it with an error that names the construct it can't write, such as a connector to an external service."
+        },
+        {
+          "title": "Compile back to BPMN",
+          "text": "The compiler turns that code into a new BPMN file."
+        },
+        {
+          "title": "Compare and deploy again",
+          "text": "The new file has to match the original in its flows, conditions, task settings and names, and Operaton has to deploy it."
+        }
+      ],
+      "deployed": "{count} models deploy",
+      "accepted": "{count} accepted",
+      "refused": "{count} refused, each with an error that names the construct",
+      "equivalent": "{count} come back equivalent and deploy",
+      "lost": "{count} come back different, or the tool fails on them"
+    }
+  },
+  "dux": {
+    "contributions": "Contributions",
+    "ownProjects": "Own projects"
   }
 }

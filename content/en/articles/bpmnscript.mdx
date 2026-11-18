@@ -1,0 +1,141 @@
+<Section id="overview">
+
+<InvoiceExample />
+
+BPMN 2.0 (Business Process Model and Notation) is a standard notation for business processes. A process is drawn as a diagram of tasks, events and gateways, the points where the flow splits or joins, and stored as XML. A process engine such as [Operaton](https://operaton.org/) runs that XML: it creates tasks for people, calls services and follows the flow to the end. Most processes are drawn in a modeling tool. BPMNscript writes the same process as source code. Steps run top to bottom, and structured blocks, e.g. `if` or `while`, describe the control flow. The compiler derives the gateways and sequence flows from these blocks and writes BPMN 2.0 XML that Operaton deploys as is, without a BPMNscript library at runtime.
+
+The invoice approval at the top is the running example on this page. A person reviews the invoice, an invoice with `amount > 1000` goes to a senior approval, and a Java class approves every other invoice.
+
+My thesis asks how developers can write executable BPMN 2.0 processes as source code and keep them exchangeable as BPMN 2.0 XML. It sets three requirements. Control flow is written as statements, and the gateways follow from them. The compiled XML runs on an existing engine without extra software. And existing BPMN XML can be imported back into editable source. None of the textual notations I found meets all three. The closest, the MontiCore Workflow DSL (Drave et al. 2022), writes every gateway by hand, and in my test its export of the invoice approval lost the branch condition, and Operaton rejected the result.
+
+</Section>
+
+<Section id="why-text">
+
+BPMNscript is meant for developers who know control flow from programming languages but have not learned the BPMN notation. The thesis assumes that statements suit them better than a diagram. Text also brings the tools they already use for code: diffs and merges line by line, completion, and errors while typing instead of at deployment.
+
+Adding an approval by the CFO for large invoices to the invoice approval takes <Num id="editLines" /> lines of source:
+
+```bpmnscript
+if (amount > 10000) {
+  user CfoApproval(assignee: "cfo")
+}
+```
+
+In the compiled XML without the diagram, a line diff shows <Num id="editXmlAdded" /> lines added and <Num id="editXmlRemoved" /> removed. The XML gains two exclusive gateways, a user task and five sequence flows, and one existing flow is replaced, since the identifier of a flow contains the identifiers of both its ends.
+
+</Section>
+
+<Section id="compiler">
+
+The compiler turns each block into gateways. An `if`/`else` chain becomes one exclusive split and one exclusive join: each condition sits on the flow into its branch, and the `else` branch is the split's default flow. A `while` loop becomes one exclusive gateway in front of its body, with a flow from the end of the body back to it. A `parallel` block becomes a parallel fork and join, and a `goto` becomes a single sequence flow to its target.
+
+Generated elements take their identifiers from the position of the statement that produced them, so unchanged source always compiles to the same identifiers. The diagram is laid out again on every compile by bpmn-auto-layout, so no line needs routing after a change. A layout arranged by hand in a modeling tool is lost on import.
+
+<Figure id="expense-claim" />
+
+In its default configuration, Operaton refuses a model without a history time to live, the period after which the engine may delete the records of a finished instance. The compiler therefore adds the default to every model that does not set one. A service task names what the engine calls: a Java class (`class:`), an expression, or an external task topic that a worker picks up.
+
+<Figure id="running-instance" />
+
+</Section>
+
+<Section id="import">
+
+Import reads BPMN XML and prints it as BPMNscript. This is the harder direction: compiling turns nested blocks into a graph, but a gateway graph drawn in a modeler need not have a block-structured equivalent.
+
+The printer analyzes the graph of each process with dominators and post-dominators. A node dominates another if every path from the start to it passes through the node, and post-dominance is the same toward the end. I compute both with the iterative procedure of Cooper et al. (2001). The nearest post-dominator of a split, the first node that all of its branches reach again, is the candidate for its join. Loops are found as strongly connected components, so a loop that can be entered at more than one node still gets a head.
+
+A catalogue of seven patterns then folds the graph into blocks. An exclusive split with its join prints as `if`, two kinds of back edge print as `while` and `do … while`, a parallel or inclusive fork with its join prints as `parallel`, and an event-based gateway prints as `await`. Every other edge prints as `goto`. In this excerpt (settings left out), a revised claim goes back to a policy check that is a task, so neither loop pattern applies:
+
+```bpmnscript
+service CheckPolicy(...)
+if (!compliant) {
+  user ReviseClaim(...)
+  goto CheckPolicy
+}
+```
+
+I also considered a printer built on the Refined Process Structure Tree, which would limit `goto` to the parts of a graph that have no block form at all. I chose the catalogue because it takes less effort to implement and test, and left the other printer for future work.
+
+The importer is meant not to change a process without saying so. When Operaton would fail the deployment, or when BPMNscript has no form for a construct, it refuses the file with an error and writes nothing. Content that it drops or rewrites gets a warning that names the element and says whether the rebuilt process runs differently. The evaluation found where this falls short: in <Num id="unwarned" /> of the <Num id="divergent" /> divergent models of the evaluation, at least one changed element carries no warning.
+
+The "Error start event" file in the playground starts its process on an error. Operaton ignores such a trigger, so the importer refuses it:
+
+```text
+Error: error-start.bpmn: element 'ShipmentFailed' cannot be imported: a process cannot start on an error
+  note: Operaton ignores the trigger and starts the process as if none were written
+  note: importing it would write back a document the engine runs differently from what it says
+  help: catch it with 'on error' inside the scope that raises it
+```
+
+Camunda's invoice example ("Invoice receipt" in the playground) imports with warnings. One of them concerns a form key that Operaton reads and BPMNscript does not carry:
+
+```text
+Warning: setting 'operaton:formKey' on 'StartEvent_1' was not imported
+  note: BPMNscript reads no such setting on a 'bpmn:startEvent'
+  note: Operaton reads it on the process's own start ('BpmnParse.parseStartFormHandlers'), so the rebuilt document runs without it
+```
+
+</Section>
+
+<Section id="evaluation">
+
+Importing existing BPMN XML is one of the three requirements of the thesis, and the evaluation checks it on real models: when a model goes into BPMNscript and comes back out as XML, is it still the same process, and does Operaton still run it?
+
+The evaluation runs in its own repository, pinned to the BPMNscript release 0.1.1. Each model goes through the same steps: Operaton 2.1.0 deploys the original, the importer turns it into source, the compiler builds a new document from that source, a comparison checks the rebuild against the original, and Operaton deploys the rebuild. A model passes when the rebuild is equivalent and deploys.
+
+The models come from the GitHub BPMN Artifacts Dataset of Türker et al. (2022), a list of BPMN files in public open-source repositories. They are not my models. The evaluation fetched the files that were still available in October 2026 and kept those that mark a process as executable and use the Operaton or Camunda extensions. Of these <Num id="screened" /> files, Operaton deploys <Num id="deployed" />.
+
+The importer refuses a model when Operaton would fail its deployment or BPMNscript has no form for one of its constructs, and the error names the reason. For an accepted model, the question is whether its rebuild is equivalent to the original.
+
+Equivalent means that the two models have the same fields: the sequence flows and their conditions, the settings of every task and event, and the names. The comparison ignores the layout and the identifiers that the compiler generates, and it tolerates ten differences that do not change which flows a new instance takes, such as a gateway that only passes the token on. It compares conditions as written and runs no instance, so it does not show that two equivalent models behave alike.
+
+<RoundTrip caption="Public models from the GitHub BPMN Artifacts Dataset of Türker et al. (2022) that Operaton deploys, and how many pass each step. 78.0% of the accepted models come back equivalent, and the share falls with the size of a model (table below)." />
+
+The importer accepts <Num id="accepted" /> of the <Num id="deployed" /> deployed models and refuses the other <Num id="refused" /> (<Pct of="refused" in="deployed" />) with an error that names the construct. Of the <Num id="accepted" /> accepted models, <Num id="equivalent" /> round-trip to an equivalent model, which is <Pct of="equivalent" in="accepted" /> of the accepted and <Pct of="equivalent" in="deployed" /> of the deployed models. Operaton deploys the rebuild of every one of them. Another <Num id="divergent" /> diverge, mostly in their routing, and for <Num id="toolError" /> the printed source fails the checks that BPMNscript runs before compiling.
+
+A refusal names the construct that stops the import, and seven kinds of construct account for <Num id="refusedTop" /> of the <Num id="refused" /> refused models: a connector, which calls an external service through an Operaton plug-in (<Num id="connector" />), several executable processes in one file (<Num id="multiProcess" />), a message without a name (<Num id="messageNoName" />), a compensation handler attached by an association (<Num id="compensation" />), a script that Operaton loads from an external resource (<Num id="externalScript" />), a call activity that starts a CMMN case (<Num id="cmmn" />) and a condition that declares its own language (<Num id="conditionLanguage" />).
+
+One of these tolerances accounts for most of the result: <Num id="httl" /> of the <Num id="equivalent" /> equivalent models lack a history time to live and come back with the default `P30D`. The setting only decides when the engine may delete the records of a finished instance and leaves the run of an instance unchanged. The evaluation turned off Operaton's check for it, as these originals would not deploy otherwise.
+
+The share of equivalent models falls with the size of a model, counted in flow nodes (activities, events and gateways):
+
+| Flow nodes | Equivalent models | Share |
+| --- | --- | --- |
+| 1 to 10 | <Num id="band1Eq" /> of <Num id="band1" /> | <Pct of="band1Eq" in="band1" /> |
+| 11 to 25 | <Num id="band2Eq" /> of <Num id="band2" /> | <Pct of="band2Eq" in="band2" /> |
+| 26 to 50 | <Num id="band3Eq" /> of <Num id="band3" /> | <Pct of="band3Eq" in="band3" /> |
+| more than 50 | <Num id="band4Eq" /> of <Num id="band4" /> | <Pct of="band4Eq" in="band4" /> |
+
+The official models of Operaton and Camunda, which the engine developers wrote to test the engine, round-trip more often: of the <Num id="officialAccepted" /> that the importer accepts, <Num id="officialEq" /> (<Pct of="officialEq" in="officialAccepted" />) are equivalent. All <Num id="generatedValid" /> valid programs among <Num id="generatedSeeds" /> from the generator of the fuzz test round-trip to an equivalent model. The results for every model are in the [evaluation repository](https://github.com/BPMNscript/validation/tree/v1.1.0).
+
+</Section>
+
+<Section id="editor">
+
+The editor support is a language server that the VS Code extension starts. It reports errors and warnings while typing, from the same checks that `bpmns build` runs, and offers completion, hover, go to definition, find references, rename and an outline.
+
+<Figure id="editor-missing-binding" />
+
+<Figure id="editor-diagnostic" />
+
+<Figure id="editor-completion-target" />
+
+<Figure id="editor-hover" />
+
+The server only speaks the Language Server Protocol, so another editor with an LSP client could start it, but I have not built or tested another integration. The [playground](/playground) runs the same language server and compiler in the browser. On the command line, `bpmns build` compiles a file and `bpmns parse` imports one.
+
+</Section>
+
+<Section id="limits">
+
+BPMNscript targets one engine, Operaton, since engines run BPMN differently. It has a construct for <Num id="coveredTypes" /> of the <Num id="elementTypes" /> element types that Operaton executes. The manual task imports as a plain step, as Operaton runs it like one. A compensation handler attached by an association is refused, since only the other form, an event sub-process, fits a block-structured language.
+
+A file holds one process. Pools, lanes and the drawn layout are dropped on import, each with a warning. Large models rarely round-trip to an equivalent model, and where the printer finds no block form, the source contains `goto`. A parallel split that the printer can only write as jumps gets a comment above it that asks for a repair by hand.
+
+The refused models show where the scope could grow: apart from the CMMN case, each of the seven largest groups of refusals in the evaluation is a construct BPMNscript could learn to write, the largest being the connector (<Num id="connector" /> models).
+
+The benefit for developers has not been studied empirically: the thesis does not test whether they work better with BPMNscript than with a modeling tool.
+
+</Section>

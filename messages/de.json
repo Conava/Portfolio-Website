@@ -1,46 +1,259 @@
 {
-  "nav": {
-    "about": "Über mich",
-    "experience": "Erfahrung",
-    "education": "Ausbildung",
-    "projects": "Projekte",
-    "certificates": "Zertifikate",
-    "publications": "Publikationen",
-    "contact": "Kontakt"
-  },
-  "hero": {
-    "greeting": "Hi, ich bin",
-    "tagline": "Full-Stack Entwickler",
-    "cta_projects": "Projekte ansehen",
-    "cta_contact": "Kontakt aufnehmen"
-  },
   "sections": {
     "about": "Über mich",
-    "experience": "Erfahrung",
+    "work": "Berufserfahrung",
     "education": "Ausbildung",
+    "bpmnscript": "BPMNscript",
+    "dux": "Dux",
     "projects": "Projekte",
-    "certificates": "Zertifikate",
-    "publications": "Publikationen",
-    "contact": "Kontakt",
-    "all_projects": "Alle Projekte"
+    "contact": "Kontakt"
   },
-  "common": {
-    "view_project": "Projekt ansehen",
-    "view_details": "Details ansehen",
-    "github": "GitHub",
-    "read_more": "Mehr lesen",
-    "collapse": "Weniger anzeigen",
+  "panel": {
+    "more": "Mehr lesen",
+    "less": "Weniger lesen",
+    "significant": "Warum es zählte",
+    "readMore": "Mehr lesen",
+    "readLess": "Weniger lesen",
+    "did": "Was ich gemacht habe",
+    "region": "{name}, Details"
+  },
+  "dates": {
+    "present": "heute",
+    "from": "ab {date}"
+  },
+  "education": {
+    "gpa": "GPA {value} von {scale}"
+  },
+  "github": {
+    "state": {
+      "OPEN": "Offen",
+      "MERGED": "Gemergt",
+      "CLOSED": "Geschlossen"
+    },
+    "merged_on": "gemergt am {date}",
+    "reviews": "{count, plural, one {# Review} other {# Reviews}}",
+    "stars": "{count, plural, one {# Stern} other {# Sterne}}",
+    "release": "aktuelle Version {tag}",
+    "totals": "{merged, number} gemergte Pull Requests in {repos, plural, one {# Repository} other {# Repositories}}, {open, number} offen.",
+    "synced": "Stand: <t>{time}</t>",
+    "last_synced": "Letzter Stand: <t>{time}</t>",
+    "repo": "Repository",
+    "open": "Offen",
+    "merged": "Gemergt",
+    "closed": "Geschlossen",
+    "mergedOn": "gemergt am {date}",
+    "lastSynced": "Letzter Stand: <t>{time}</t>",
+    "duxCounts": "{merged} gemergte Pull Requests in {repos, plural, one {# Repository} other {# Repositories}}, {open} offen"
+  },
+  "viz": {
+    "perTask": "Ein Agent je Aufgabe, jede mit eigenem Review",
+    "entry": "Eintrag",
+    "period": "Zeitraum",
+    "count": "Anzahl",
+    "ongoing": "laufend",
+    "workTimeline": "Berufserfahrung im Zeitverlauf",
+    "timeline": "Beruf und Ausbildung im Zeitverlauf",
+    "eduTimeline": "Ausbildung im Zeitverlauf"
+  },
+  "controls": {
+    "language": "Sprache",
+    "design": "Design",
+    "color_mode": "Farbmodus",
+    "to_dark": "Zum dunklen Modus wechseln",
+    "to_light": "Zum hellen Modus wechseln",
+    "designLabel": "Design",
+    "toDesign": "Zum Design {name} wechseln",
+    "toDark": "Zum dunklen Modus wechseln",
+    "toLight": "Zum hellen Modus wechseln"
+  },
+  "contact": {
+    "email": "E-Mail",
+    "copy": "E-Mail-Adresse kopieren",
+    "copied": "Kopiert"
+  },
+  "project": {
     "back": "Zurück",
-    "view_certificate": "Zertifikat ansehen",
-    "status_completed": "Abgeschlossen",
-    "status_in_progress": "In Entwicklung",
-    "status_upcoming": "Demnächst",
-    "status_active": "Aktiv",
-    "status_discontinued": "Eingestellt",
-    "view_publication": "Publikation ansehen",
-    "download_pdf": "PDF herunterladen",
-    "see_all_projects": "Alle Projekte",
-    "copy_link": "Link kopieren (mit Theme)",
-    "copied": "Kopiert!"
+    "all": "Alle Projekte",
+    "github": "GitHub"
+  },
+  "nav": {
+    "skip": "Zum Inhalt springen",
+    "start": "Start",
+    "about": "Über mich",
+    "work": "Berufserfahrung",
+    "education": "Ausbildung",
+    "bpmnscript": "BPMNscript",
+    "dux": "Dux",
+    "projects": "Projekte",
+    "contact": "Kontakt",
+    "menu": "Menü",
+    "closeMenu": "Menü schließen",
+    "sections": "Abschnitte"
+  },
+  "hero": {
+    "resume": "Lebenslauf (PDF)",
+    "resumeShort": "Lebenslauf",
+    "statusFrom": "{what} ab {date}"
+  },
+  "scene": {
+    "diagramLabel": "Kompiliertes BPMN-Diagramm der Rechnungsfreigabe",
+    "diagramSteps": [
+      "Start: Review Start.",
+      "User Task: Review Invoice.",
+      "Entscheidung: Ist der Betrag größer als 1000, geht es zu Senior Approval, einem User Task.",
+      "Sonst geht es zu Auto Approve, einem Service Task.",
+      "Beide Pfade laufen wieder zusammen, dann endet der Prozess bei Done."
+    ],
+    "replay": "Erneut abspielen",
+    "valid": "Gültiges BPMN-2.0-XML",
+    "recording": "Aufnahme",
+    "compiled": "kompiliert: {file}",
+    "source": "Quelltext",
+    "diagram": "Diagramm",
+    "xml": "XML",
+    "playground": "Playground",
+    "github": "GitHub",
+    "thesis": "Bachelorarbeit"
+  },
+  "trace": {
+    "overlap": "{a} und {b} überschnitten sich, {range}",
+    "overlapNote": "Überschneidet sich mit {b}",
+    "overlapDuring": "Neben dem {b}",
+    "career": "Berufserfahrung und Ausbildung",
+    "careerNow": "läuft gerade",
+    "careerNext": "geplant",
+    "keysHint": "j und k: nächster und vorheriger Eintrag"
+  },
+  "flow": {
+    "about": "Backend und verteilte Systeme",
+    "work": "Berufserfahrung seit {year}",
+    "education": "Wirtschaftsinformatik und Informatik",
+    "bpmnscript": "Eine Textsprache für BPMN",
+    "dux": "Core-Contributor der Dux Shell",
+    "projects": "devline und weitere Projekte",
+    "contact": "Kontakt"
+  },
+  "gallery": {
+    "previous": "Vorheriges Bild",
+    "next": "Nächstes Bild"
+  },
+  "projects": {
+    "back": "Zurück",
+    "github": "GitHub",
+    "all": "Alle Projekte",
+    "page": "Projektseite",
+    "article": "Artikel lesen",
+    "usedBy": "Genutzt von <list></list>",
+    "uses": "Nutzt <h>{helper}</h>, wie auch <list></list>"
+  },
+  "notFound": {
+    "message": "Unter dieser Adresse gibt es keine Seite.",
+    "home": "Zurück zur Startseite"
+  },
+  "date": {
+    "present": "heute"
+  },
+  "meta": {
+    "siteTitle": "Marlon Kranz, Softwareentwickler",
+    "siteDescription": "Softwareentwickler in Hamburg. Werkstudent bei Adobe, Bachelorstudent der Wirtschaftsinformatik an der Universität Hamburg, Autor von BPMNscript, Contributor bei Dux.",
+    "ogImageAlt": "Marlon Kranz, Softwareentwickler in Hamburg"
+  },
+  "article": {
+    "contents": "Inhalt",
+    "updated": "Aktualisiert am {date}",
+    "published": "Veröffentlicht am {date}",
+    "links": "Links",
+    "credit": "Bild: {source}",
+    "pullRequests": "Pull Requests",
+    "figure": "Abbildung: {caption}"
+  },
+  "devline": {
+    "stages": "Stufen",
+    "agents": "Agents",
+    "skills": "Skills",
+    "hooks": "Hooks",
+    "install": "Installation",
+    "parallel": "{n} parallel",
+    "approval": "Mit Freigabe",
+    "model": "Modell: {model}",
+    "version": "Aktuelle Version: {tag}",
+    "counts": "{agents} Agents, {skills} Skills, {hooks} Hooks",
+    "flowCaption": "So läuft ein Durchgang durch devline. Implementierung und Review laufen je Aufgabe nebeneinander, die Zahl der Agenten richtet sich also nach dem Plan.",
+    "flowAlt": "Stufen der Reihe nach: Brainstorm, Plan, Implementierung mit einem Review je Aufgabe, Dokumentation, Tiefenreview des ganzen Branches, dann Merge oder erneute Runde. Du gibst nach dem Brainstorm, nach dem Plan und am Ende frei. Implementierung und Review laufen mit einem Agenten je Aufgabe parallel. Ein blockierender Review-Befund schickt die Aufgabe zurück an den Implementierer.",
+    "flowShort": {
+      "brainstorm": "Umfang klären",
+      "design": "Nur bei UI-Änderungen",
+      "plan": "Aufgaben in Wellen",
+      "implement": "Jede Aufgabe bauen und prüfen",
+      "docs": "Doku passt zum Diff",
+      "deep-review": "Ganzen Branch prüfen",
+      "gate": "Mergen oder nochmal"
+    },
+    "flowGate": "Du gibst frei",
+    "flowTask": "Aufgabe {n}",
+    "flowTaskN": "Aufgabe N",
+    "flowImpl": "Implementieren",
+    "flowRev": "Review",
+    "flowEach": "Ein Agent je Aufgabe, alle Aufgaben einer Welle gleichzeitig",
+    "flowLoop": "Ein blockierender Befund geht zurück an den Implementierer, danach wird die Aufgabe erneut geprüft"
+  },
+  "bpmnscript": {
+    "openInPlayground": "Im Playground öffnen",
+    "thesis": "Bachelorarbeit (PDF)",
+    "repository": "Repository",
+    "what": {
+      "drawn": "Gezeichnet in BPMN",
+      "written": "Geschrieben in BPMNscript",
+      "terms": [
+        {
+          "term": "BPMN",
+          "text": "Die Standardnotation für Geschäftsprozesse: Aufgaben, Entscheidungen und die Wege dazwischen, gezeichnet als Diagramm, das eine Process Engine ausführen kann."
+        },
+        {
+          "term": "Wer damit arbeitet",
+          "text": "Business-Analysten zeichnen die Prozesse, Entwickler bringen sie auf einer Engine wie Operaton zum Laufen, und die Verantwortlichen eines Prozesses überwachen ihn."
+        },
+        {
+          "term": "BPMNscript",
+          "text": "Meine Textnotation für dieselben Diagramme. Ein `if` ersetzt die gezeichnete Raute, und Entwickler schreiben, prüfen und mergen einen Prozess wie jeden anderen Code."
+        }
+      ]
+    },
+    "method": {
+      "figure": "Abbildung 1",
+      "title": "Der Round-Trip-Test",
+      "lede": "Die Evaluation prüft, ob ein realer Prozess unverändert zurückkommt, wenn er nach BPMNscript und wieder zurück geht. Jedes Modell lief durch diese Schritte:",
+      "steps": [
+        {
+          "title": "Reale Modelle sammeln",
+          "text": "BPMN-Dateien aus öffentlichen GitHub-Projekten, erfasst im Datensatz von Türker et al. (2022). Keine davon stammt von mir."
+        },
+        {
+          "title": "Original deployen",
+          "text": "Operaton muss das Original deployen, sonst zählt das Modell nicht."
+        },
+        {
+          "title": "Nach BPMNscript importieren",
+          "text": "Der Importer macht aus dem Modell Code oder lehnt es mit einem Fehler ab, der das Konstrukt nennt, das er nicht schreiben kann, etwa einen Connector zu einem externen Service."
+        },
+        {
+          "title": "Zurück nach BPMN kompilieren",
+          "text": "Der Compiler macht aus diesem Code eine neue BPMN-Datei."
+        },
+        {
+          "title": "Vergleichen und erneut deployen",
+          "text": "Die neue Datei muss in Abläufen, Bedingungen, Task-Einstellungen und Namen dem Original entsprechen, und Operaton muss sie deployen."
+        }
+      ],
+      "deployed": "{count} Modelle lassen sich deployen",
+      "accepted": "{count} akzeptiert",
+      "refused": "{count} abgelehnt, jeweils mit einem Fehler, der das Konstrukt nennt",
+      "equivalent": "{count} kommen äquivalent zurück und lassen sich deployen",
+      "lost": "{count} kommen verändert zurück, oder das Werkzeug scheitert an ihnen"
+    }
+  },
+  "dux": {
+    "contributions": "Beiträge",
+    "ownProjects": "Eigene Projekte"
   }
 }

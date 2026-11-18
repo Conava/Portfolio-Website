@@ -1,0 +1,109 @@
+{
+  "jobs": [
+    {
+      "id": "adobe",
+      "brief": "Working student at Adobe",
+      "figures": {
+        "services": 5,
+        "moved": 9,
+        "apps": 10
+      },
+      "logo": {
+        "src": "/images/logos/adobe.svg",
+        "alt": "Adobe",
+        "width": 66.25,
+        "height": 16.75
+      },
+      "company": "Adobe",
+      "url": "https://www.adobe.com",
+      "role": "Cloud Software Engineer (Working Student)",
+      "location": "Hamburg, Germany",
+      "start": "2026-07",
+      "end": null,
+      "summary": "I'm a working student on a team in Adobe Cloud Platform and Collaboration (ACPC). We run five event-driven Java services on AWS that millions of people use across Adobe, for example for commenting, sharing and search suggestions, plus an asset storage layer that other teams build on. Besides development, deployments and code reviews, I own the move of a production pipeline to GitOps on Kubernetes and started the team's shared repo of AI agent skills.",
+      "panel": {
+        "did": [
+          "Own the migration of a production pipeline from Spring Cloud Data Flow to GitOps on Kubernetes, end to end. I mapped the poorly documented system, wrote the design, in which 9 of the 10 apps move without downtime, and refined it with senior engineers into a 5-month roadmap.",
+          "Its hardest piece is a stateful app that neither backup could fully restore. I moved its state onto a Kafka Streams changelog, so it survives failures, scales out across instances and rebuilds its smaller state faster.",
+          "Started the team's repo of AI agent skills for maintenance and repeated tasks. The team now uses it and adds to it. Helped build the team's AI harness: context on testing, CI/CD, architecture and AI pitfalls, for developers and for AI reviews.",
+          "Built most of a multi-region CI/CD pipeline for new AWS regions and extended monitoring with Splunk, Grafana and New Relic. The services run on EKS, MSK, Aurora, Neptune, OpenSearch, SQS and S3, with more than 30 production deployments so far.",
+          "Helped clean up 4 inherited services that arrived in poor shape: bug fixes, unified CI/CD (Jenkins, Argo Workflows) and secrets handling, major breaking upgrades and a large security backlog.",
+          "Involved in decommissioning one of the team's legacy services.",
+          "Fixes along the way include a race in which concurrent CI and release runs could ship unreviewed builds to production, and a years-old account-linking bug in sharing suggestions that a misconfigured test had hidden as flaky."
+        ]
+      }
+    },
+    {
+      "id": "uhh-ta",
+      "logo": {
+        "src": "/images/logos/uhh.svg",
+        "alt": "University of Hamburg",
+        "width": 392.463,
+        "height": 127.19
+      },
+      "company": "University of Hamburg",
+      "url": "https://www.uni-hamburg.de",
+      "role": "Teaching Assistant, Software Engineering II",
+      "location": "Hamburg, Germany",
+      "start": "2026-04",
+      "end": "2026-07",
+      "summary": "One of several tutors for Software Engineering II in the summer semester. I ran a weekly tutor group, graded solutions and took turns live coding in the lecture.",
+      "panel": {
+        "did": [
+          "Ran a tutor group in the weekly exercise session, about two hours a week: answered questions, gave hints when students were stuck, and corrected and graded their solutions.",
+          "Took turns with two other tutors supporting the lecture with live coding in front of several hundred students. I showed the lecture material in practice and adapted to questions the slides didn't cover.",
+          "Later I wrote my bachelor thesis in the same research group, Software Engineering and Construction Methods (SWK), supervised by Dr. Oliver Kopp, who gave the lecture."
+        ]
+      }
+    },
+    {
+      "id": "otto",
+      "logo": {
+        "src": "/images/logos/otto.svg",
+        "alt": "OTTO",
+        "width": 100,
+        "height": 37
+      },
+      "company": "OTTO",
+      "url": "https://www.otto.de",
+      "role": "Software Engineer (Working Student)",
+      "location": "Hamburg, Germany",
+      "start": "2025-08",
+      "end": "2026-06",
+      "summary": "OTTO's Product Content area builds a distributed product data platform that is meant to replace an older monolithic system built around one large Oracle database. My cross-functional team of ten owned product-data onboarding and its integrations, and I built Java microservices for it, from architecture and development to testing and deployment.",
+      "panel": {
+        "did": [
+          "Built Java and Spring Boot microservices in hexagonal architecture, connected by event-driven data flows over Kafka, on AWS (ECS, Lambda, S3, CloudWatch) with MongoDB Atlas and Terraform.",
+          "Designed and introduced an AI-assisted development setup for the team: AI code reviews and custom AI agents tuned to its workflows and conventions.",
+          "Helped build a media asset service: it consumes product-data events from Kafka, validates them, prepares uploads to a downstream media system and reconciles the media assets with that system.",
+          "Migrated the service that generates product-data Excel templates off internal messaging, so it reads the external source topics directly, and implemented a public REST API for product data, documented with OpenAPI.",
+          "Took part in architecture planning and design decisions, refinement and planning, built CI/CD pipelines with GitHub Actions, maintained a React frontend and patched vulnerabilities flagged by Wiz.io and Dependabot."
+        ]
+      }
+    },
+    {
+      "id": "msg-life",
+      "logo": {
+        "src": "/images/logos/msg-life.svg",
+        "alt": "msg.life",
+        "width": 493.4,
+        "height": 157.7
+      },
+      "company": "msg.life",
+      "url": "https://www.msg-life.com",
+      "role": "Software Engineer (Working Student)",
+      "location": "Hamburg, Germany",
+      "start": "2023-10",
+      "end": "2024-07",
+      "summary": "msg.Pension Data is a standard product that delivers pension data to a central government service. As the only German-speaking developer on it, I linked German clients and product owners with the Slovenian team, and I tested, documented and developed the product in Java and Vue.js.",
+      "panel": {
+        "did": [
+          "Turned client communication into technical requirements and checked them against regulatory requirements.",
+          "Owned API and functional testing: designed, ran and documented tests on my own with Postman and Jenkins, plus manual QA and code reviews.",
+          "Worked through Jira user stories on my own and grew from small fixes to larger bugs and features in Java (Spring Boot) and the Vue.js frontend.",
+          "Designed and built a documentation-as-code pipeline as my first standalone project, and reviewed and extended the product documentation."
+        ]
+      }
+    }
+  ]
+}

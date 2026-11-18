@@ -1,0 +1,128 @@
+{
+  "projects": [
+    {
+      "id": "devline",
+      "name": "devline",
+      "repo": "Conava/claude-devline",
+      "emphasis": true,
+      "blurb": "A Claude Code plugin that takes an idea to merge-ready code: a brainstorm, a test-driven plan, parallel implementation in git worktrees with a review for each task, documentation and a security review. Hooks block destructive commands, so the stages run without prompts.",
+      "tech": [
+        "Claude Code",
+        "Agents",
+        "Hooks",
+        "Git"
+      ],
+      "panel": {
+        "did": [
+          "A Claude Code plugin that takes a feature from an idea to merge-ready code: brainstorm, test-driven plan, implementation, review, documentation and a final deep review. I approve the spec and the plan and make the final merge call. The rest runs on its own.",
+          "The planner gives every task its own files and orders the tasks in waves by dependency, so agents implement a wave in parallel git worktrees without merge conflicts.",
+          "Every task gets its own review. Blocking findings go back to the implementer, and after three failed rounds the planner rewrites the approach.",
+          "Security hooks deny destructive commands and reads of secrets and ask before risky ones, which lets a run go unattended.",
+          "I use it daily on my own projects."
+        ],
+        "viz": {
+          "type": "pipeline",
+          "caption": "devline pipeline stages",
+          "stages": [
+            {
+              "label": "Brainstorm"
+            },
+            {
+              "label": "Plan"
+            },
+            {
+              "label": "Implement",
+              "perTask": true
+            },
+            {
+              "label": "Documentation"
+            },
+            {
+              "label": "Deep review"
+            }
+          ]
+        }
+      },
+      "url": "/devline"
+    },
+    {
+      "id": "chess",
+      "name": "The King's Game",
+      "slug": "chess-engine",
+      "repo": "Conava/chess",
+      "blurb": "A modular chess platform with a JavaFX client, Chess 960 and a TCP server for online games with accounts and matchmaking.",
+      "tech": [
+        "Java 17",
+        "JavaFX"
+      ],
+      "panel": {
+        "did": [
+          "Three Maven modules: a game engine with no dependencies, a JavaFX desktop client and a TCP server. Client and server depend only on the engine.",
+          "The server runs up to 40 games at once by default, checks every move with the same engine before relaying it, and handles login, matchmaking, join codes and reconnects. Accounts and games are stored in SQLite.",
+          "Rule variants implement one Ruleset interface, so Chess 960 went in without special cases in the game logic.",
+          "75 test classes across the three modules."
+        ],
+        "significant": "When I moved the client from Swing to JavaFX in March 2026, the rewrite touched only the client module. Engine and server stayed as they were."
+      }
+    },
+    {
+      "id": "portfolio",
+      "name": "Portfolio",
+      "slug": "portfolio",
+      "repo": "Conava/Portfolio-Website",
+      "blurb": "This site: four designs (Ink, Trace, Flow and Type) over the same typed content in English and German, and a BPMNscript playground that runs the language server and compiler in the browser.",
+      "tech": [
+        "Next.js",
+        "TypeScript",
+        "Docker"
+      ],
+      "panel": {
+        "did": [
+          "Designed and built four designs over one set of content. Ink has a WebGL ink fluid, Trace a BPMN line that runs the page as you scroll, Flow a three.js scene whose forms are built from the content, and in Type you fly through the counter of a letter into the next section.",
+          "A BPMNscript playground that runs the language server and compiler in a web worker in the browser, set up as a small IDE: files, tabs, a Problems panel, a live diagram and BPMN export.",
+          "The content is typed JSON and MDX in English and German. A test fails as soon as a fact (a date, URL or number) differs between the two languages.",
+          "End-to-end tests run against the production server, and a visual harness screenshots every design and fails on page errors, overflow or scroll jank."
+        ]
+      }
+    },
+    {
+      "id": "minj",
+      "name": "MinJ",
+      "slug": "minj",
+      "repo": "Conava/MinJ",
+      "blurb": "A scripting language for the JVM that I built to learn how interpreters work: an ANTLR4 grammar and a tree-walking interpreter in Java, with classes, methods and lists.",
+      "tech": [
+        "Java 21",
+        "ANTLR4"
+      ],
+      "panel": {
+        "did": [
+          "Designed the grammar in ANTLR4 and wrote a tree-walking interpreter in Java 21 for it: classes, methods, typed and dynamic variables, loops and lists.",
+          "Each variable is a cell that knows its type and whether it may change, so assigning a string to an int or writing to a val fails at runtime.",
+          "A return throws an exception that unwinds the call stack, so it works from inside nested loops and conditionals.",
+          "A GitHub Actions workflow builds a single JAR for each release branch and publishes it as a GitHub release."
+        ]
+      }
+    },
+    {
+      "id": "homeserver",
+      "name": "VPS homeserver",
+      "slug": "homeserver",
+      "blurb": "A personal cloud on a Linux VPS: Docker Compose services behind Traefik, among them Nextcloud, Matrix and Navidrome.",
+      "tech": [
+        "Docker",
+        "Traefik",
+        "Linux"
+      ],
+      "panel": {
+        "did": [
+          "I run my own Linux VPS: Nextcloud, a Matrix server with voice and video calls, Navidrome for music, and the backends of my projects, all in Docker.",
+          "Traefik sits in front of every service and gets the Let's Encrypt certificates.",
+          "Each category of service has its own Compose file, so I can update, roll back or debug one without touching the rest.",
+          "Files and media live on remote storage boxes, so storage grows without a bigger server.",
+          "This site deploys there: GitHub Actions builds the image, pushes it to GHCR and restarts the container over SSH."
+        ]
+      }
+    }
+  ]
+}

@@ -1,136 +1,123 @@
 ---
 title: "The King's Game: Modular Chess Platform"
-date: "2023 – Present"
-summary: "A multi-module Java chess platform with local and online play, Chess 960, 6 visual themes, and a concurrent TCP server with authentication and matchmaking. Built with Java 17, JavaFX 21, and 75 test classes."
+date: "2023–Present"
+summary: "A chess platform in Java 17 and JavaFX 21 with three Maven modules: a desktop client, a game engine without dependencies, and a TCP server for online play with accounts and matchmaking. Standard chess and Chess 960."
 tech: ["Java 17", "JavaFX 21", "Maven", "TCP Networking", "SQLite", "JUnit 5", "Mockito", "Docker", "CSS Theming", "i18n"]
-githubUrl: "https://github.com/conava/chess"
+githubUrl: "https://github.com/Conava/chess"
 thumbnail: "/images/projects/chess-engine/cover.jpg"
-featured: false
+featured: true
 status: "in-progress"
 fullWidth: false
 ---
 
 ## Overview
 
-A three-module Maven project (Java 17 + JavaFX 21) that implements a complete chess platform: a desktop client with a cinematic animated menu, a pure-logic game engine supporting Standard Chess and Chess 960, and a TCP multiplayer server with authentication, matchmaking, and game persistence. The modules have strict dependency boundaries — `core` has zero external dependencies, and neither the client nor the server knows about the other.
+The project has three Maven modules. `application` is the JavaFX desktop client, `core` is the game engine for standard chess and Chess 960, and `server` hosts online games over TCP, with accounts, matchmaking and persistence. `core` has no external dependencies, and client and server depend on `core` only. Neither knows about the other.
 
-I started this during my second year at university. It has gone through several major rewrites since then, most recently a full migration from Swing to JavaFX and an overhaul of the server into a persistent system with user accounts and session management. Today it also doubles as my testbench for agentic AI development workflows — I use it to evaluate how well spec-driven and test-driven approaches work on a real codebase.
+I started it in my second year at university. The client was rewritten from Swing to JavaFX in March 2026, and the server keeps user accounts, sessions and games in SQLite. I use the project to see how spec-driven and test-driven agent workflows hold up on a codebase where architecture rules and tests can check the result.
 
 ![Main menu with the Midnight theme](/images/projects/chess-engine/main-menu-midnight.png)
 
 ## Features
 
 - Local play for two players on the same machine
-- Online multiplayer with a TCP lobby, join codes, and automatic matchmaking
-- Standard Chess and Chess 960 rulesets, selectable per game
-- Pawn promotion with an interactive piece-selection dialog
-- Castling (king-side and queen-side) with move-history validation
-- 6 visual themes — Midnight, Ember, Abyss (dark) and Manuscript, Fjord, Sakura (light)
-- English and German localization via `ResourceBundle`
-- Headless API mode for programmatic game control (`nogui` flag)
-- Server handles up to 40 concurrent games
+- Online play with a TCP lobby, join codes and automatic matchmaking
+- Standard chess and Chess 960, selectable per game
+- Full rule enforcement: castling, en passant, promotion with a piece-selection dialog, stalemate, the 50-move rule, threefold repetition and insufficient material
+- Six themes: Midnight, Ember and Abyss (dark), Manuscript, Fjord and Sakura (light)
+- English and German through `ResourceBundle`
+- A headless mode for programmatic game control (`nogui` flag)
+- An animated main menu drawn in code, which a Reduced Motion setting turns off
 
 ![Local game in the Ember theme, mid-game with move highlights](/images/projects/chess-engine/local-game-ember.png)
 
 ## Architecture
 
-The project is split into three Maven modules with strict dependency rules:
-
-<div style={{ margin: '2rem 0' }}>
-<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: 'auto' }}>
+<div tabIndex="0" role="group" aria-label="Module diagram of the chess platform" style={{ margin: '2rem 0' }}>
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The application and server modules both depend on core, which depends on nothing." style={{ width: '100%', height: 'auto' }}>
   <defs>
     <marker id="arr-ch" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
       <path d="M0 0L10 3.5L0 7z" fill="var(--color-text-muted)" />
     </marker>
   </defs>
 
-  <rect x="230" y="4" width="12" height="12" rx="3" fill="var(--color-accent)" fillOpacity="0.15" stroke="var(--color-accent)" strokeWidth="1" />
-  <text x="248" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Zero dependencies</text>
+  <rect x="190" y="4" width="12" height="12" rx="3" fill="var(--color-accent)" fillOpacity="0.15" stroke="var(--color-accent)" strokeWidth="1" />
+  <text x="208" y="15" fontSize="12" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Zero dependencies</text>
   <rect x="380" y="4" width="12" height="12" rx="3" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1" />
-  <text x="398" y="14" fontSize="11" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Depends on core only</text>
+  <text x="398" y="15" fontSize="12" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Depends on core only</text>
 
   <rect x="100" y="28" width="520" height="56" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
   <text x="360" y="52" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">application</text>
-  <text x="360" y="70" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">JavaFX 21 UI · Controllers · Theming · i18n · Networking</text>
+  <text x="360" y="71" textAnchor="middle" fontSize="12" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">JavaFX 21 UI, controllers, theming, i18n, networking</text>
 
   <line x1="360" y1="84" x2="360" y2="124" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr-ch)" />
 
-  <rect x="185" y="130" width="350" height="60" rx="10" fill="var(--color-accent)" fillOpacity="0.08" stroke="var(--color-accent)" strokeWidth="1.5" />
+  <rect x="165" y="130" width="390" height="60" rx="10" fill="var(--color-accent)" fillOpacity="0.08" stroke="var(--color-accent)" strokeWidth="1.5" />
   <text x="360" y="155" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">core</text>
-  <text x="360" y="175" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Game engine · Pieces · Rules · Observer · Facade API</text>
+  <text x="360" y="175" textAnchor="middle" fontSize="12" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">Game engine, pieces, rules, observer, facade API</text>
 
   <line x1="360" y1="232" x2="360" y2="196" stroke="var(--color-text-muted)" strokeWidth="1.5" markerEnd="url(#arr-ch)" />
 
   <rect x="100" y="238" width="520" height="56" rx="10" fill="var(--color-bg-card)" stroke="var(--color-border)" strokeWidth="1.5" />
   <text x="360" y="262" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--color-text)" fontFamily="var(--font-sans)">server</text>
-  <text x="360" y="280" textAnchor="middle" fontSize="10.5" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">TCP · Lobby · Auth · Matchmaking · SQLite persistence</text>
+  <text x="360" y="281" textAnchor="middle" fontSize="12" fill="var(--color-text-muted)" fontFamily="var(--font-sans)">TCP, lobby, auth, matchmaking, SQLite persistence</text>
 </svg>
 </div>
 
-Architecture rules enforced across all modules:
+Five rules hold across the modules:
 
-1. `core` has zero dependencies on `application` or `server`. The client and server depend on `core` only, never on each other.
-2. All external interaction with the game engine goes through the `Chess.java` facade. Direct instantiation of `Game` subclasses from outside `core` is not allowed.
-3. UI components implement `GameObserver` and register via `chess.addObserver()`. No polling.
-4. `core` is pure logic — no UI imports, no JavaFX, no I/O.
-5. New rule variants implement the `Ruleset` interface. No branching inside `Game` for different rules.
+1. `core` has no dependency on `application` or `server`. Client and server depend on `core` only, never on each other.
+2. All access to the game engine goes through the `Chess.java` facade. Code outside `core` does not instantiate `Game` subclasses directly.
+3. UI components implement `GameObserver` and register with `chess.addObserver()`. Nothing polls.
+4. `core` is logic only: no UI imports, no JavaFX, no I/O.
+5. A new rule variant implements the `Ruleset` interface. `Game` does not branch on the variant.
 
 ## Design patterns
 
 | Pattern | Implementation | Purpose |
 |---------|----------------|---------|
-| Facade | `Chess.java` | Single API surface for all game interaction |
-| Observer | `GameObserver` / `Observable` | Decoupled, push-based state propagation to UI |
-| Strategy | `Ruleset` interface + `StandardChessRuleset`, `Chess960Ruleset` | Pluggable rule variants without conditionals |
-| Factory Method | `Game.createGame()` / `Game.createServerGame()` | Enforces module boundaries; keeps constructors package-private |
-| Template Method | `Game.executeMove()` | Defines move sequence; `OnlineGame` overrides for network relay |
+| Facade | `Chess.java` | One entry point for all access to the engine |
+| Observer | `GameObserver` / `Observable` | Pushes state changes to the UI and the network layer without coupling them to `core` |
+| Strategy | `Ruleset` with `StandardChessRuleset` and `Chess960Ruleset` | Rule variants without conditionals in the game logic |
+| Factory Method | `Game.createGame()` / `Game.createServerGame()` | Keeps constructors package-private, which enforces the module boundaries |
+| Template Method | `Game.executeMove()` | Fixes the order of a move, and `OnlineGame` overrides the step that relays it over the network |
 
 ## Multiplayer server
 
-The server accepts TCP connections on a configurable port (default 54321). Each client gets its own thread. Games run as isolated `GameInstance` sessions.
+The server accepts TCP connections on a configurable port (default 54321) and speaks a line-based text protocol. Port, game limit, timeouts and expiry come from `server.properties`.
 
-- Up to 40 concurrent games (semaphore-limited)
-- Join codes: 12-character alphanumeric (`XXXX-XXXX-XXXX`), generated with `SecureRandom`, auto-expire after 10 minutes
-- Automatic matchmaking queue alongside manual join codes
-- User authentication with SQLite-backed persistence
-- Newline-delimited plain-text protocol
-- Automatic resignation on disconnect
+- Up to 40 games at once by default, limited by a semaphore.
+- Join codes have 12 characters from A–Z and 0–9, shown as `XXXX-XXXX-XXXX`. They come from `SecureRandom` and expire after 10 minutes by default.
+- A matchmaking queue pairs opponents who do not use a join code.
+- Login, registration and token-based sessions, with SQLite storing users, sessions and games.
+- Every move is validated by the same engine before it is relayed, and illegal moves are rejected.
+- When a player disconnects, the game pauses. If the player has not returned after 300 seconds (the default), the opponent wins by timeout.
 
 ![Online game setup with Chess 960 ruleset selection](/images/projects/chess-engine/online-setup-ember.png)
 
 ## Testing
 
-75 test classes across all three modules:
+The three modules together have 75 test classes.
 
-| Module | Tests | Focus |
-|--------|-------|-------|
-| `core` | 34 classes | Board state, pieces, move generation, observer notifications, rulesets (Standard + Chess 960), castling, game factory |
-| `application` | 31 classes | Facade API, i18n, settings, theme manager, cinematic menu components, CSS validation |
-| `server` | 10 classes | Server lifecycle, config, game management, client handler, matchmaking, authentication, persistence |
+| Module | Test classes | Focus |
+|--------|--------------|-------|
+| `core` | 34 | Board state, move generation, all piece types, both rulesets, castling, observer notifications, game factory, online game protocol |
+| `application` | 31 | Facade API, i18n, settings, theme manager, menu components, controller logic, CSS validation |
+| `server` | 10 | Server lifecycle, configuration, game management, client handler, matchmaking, authentication, persistence |
 
-![Checkmate — win screen with rematch option](/images/projects/chess-engine/local-game-win-screen.png)
+![Checkmate: win screen with rematch option](/images/projects/chess-engine/local-game-win-screen.png)
 
-![Settings — 6 themes, language selection, server configuration](/images/projects/chess-engine/settings-ember.png)
-
-## As an AI development testbench
-
-This project is also where I test agentic AI workflows. The codebase has enough complexity to be a real test (three modules, strict architecture rules, 75 test classes) but I can still iterate quickly. Experiments I've run:
-
-- Full UI migration from Swing to JavaFX, planned and executed through spec-driven agentic workflows using [devline](/en/projects/devline)
-- Large-scale technical debt cleanup across all modules
-- Architectural restructuring to enforce module boundaries through AI-generated refactoring plans
-
-Each experiment tests a different approach (spec-first, test-first, review loops) and I evaluate results against the architecture rules and test suite.
+![Settings with six themes, language selection and server configuration](/images/projects/chess-engine/settings-ember.png)
 
 ## Tech stack
 
 | Layer | Technology |
 |-------|-----------|
 | Language | Java 17 |
-| UI | JavaFX 21 (FXML + CSS theming) |
+| UI | JavaFX 21 (FXML and CSS theming) |
 | Build | Maven (multi-module) |
 | Testing | JUnit 5, Mockito |
 | Networking | Java standard library (ServerSocket, ConcurrentHashMap, Semaphore) |
-| Persistence | SQLite (server-side user accounts and game data) |
+| Persistence | SQLite (user accounts, sessions and games on the server) |
 | Localization | ResourceBundle (EN/DE) |
-| Theming | CSS (6 themes: 3 dark, 3 light) |
+| Theming | CSS (three dark, three light) |

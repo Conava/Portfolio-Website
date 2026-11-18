@@ -1,0 +1,457 @@
+{
+  "meta": {
+    "title": "Dux",
+    "description": "My features and bug fixes in Dux Shell, a desktop shell for Wayland compositors, with the live state of their pull requests, and the music player and Cast plugin I build for it.",
+    "lede": "I'm one of the core contributors to Dux Shell, a desktop shell for Wayland compositors. This page shows the features I built, the bugs I fixed, and the music player and Cast plugin I build for it.",
+    "published": "2026-11-11",
+    "updated": "2026-11-17",
+    "ogImage": {
+      "src": "/images/og/dux.jpg",
+      "alt": "Network settings in Dux Shell: wired, Wi-Fi, hotspot, VPN and cellular connections in one list",
+      "width": 1200,
+      "height": 630
+    },
+    "sections": [
+      {
+        "id": "shell",
+        "title": "Dux Shell"
+      },
+      {
+        "id": "contributions",
+        "title": "Features"
+      },
+      {
+        "id": "pull-requests",
+        "title": "Pull requests"
+      },
+      {
+        "id": "projects",
+        "title": "Own projects"
+      }
+    ],
+    "links": [
+      {
+        "label": "Website",
+        "href": "https://duxlabs.dev"
+      },
+      {
+        "label": "Docs",
+        "href": "https://duxlabs.dev/docs"
+      },
+      {
+        "label": "Discord",
+        "href": "https://discord.gg/ppWTpKmPgT"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/duxlabs-dev"
+      },
+      {
+        "label": "Plugin registry",
+        "href": "https://plugins.duxlabs.dev"
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "player-bars",
+      "src": "/images/dux-player/bars.webp",
+      "alt": "Dux Player's bottom bar and side panel, each in the Bento and the Material style",
+      "width": 1600,
+      "height": 1088,
+      "caption": "Bottom bar and side panel, Bento and Material styles"
+    }
+  ],
+  "numbers": [],
+  "contributions": [
+    {
+      "id": "profiles",
+      "title": "Config profiles",
+      "summary": "Config profiles are copies of the settings that can be switched, compared, exported and imported: for different workloads, as a one-click backup of a working setup, or to share a configuration.",
+      "prs": [
+        {
+          "ref": "duxlabs-dev/dux-shell#3867",
+          "title": "feat(settings): Add config profiles",
+          "note": "Save and switch between sets of settings"
+        }
+      ],
+      "images": [
+        {
+          "src": "/images/dux-shell/pr3867-1.webp",
+          "alt": "Profiles under Wallpaper & colors, with the right-click menu of a profile: Apply, Partial apply, Edit and Delete",
+          "width": 1600,
+          "height": 1368,
+          "caption": "Profiles in Settings"
+        },
+        {
+          "src": "/images/dux-shell/pr3867-5.webp",
+          "alt": "The Profiles page with two profiles, Default and one with a desktop screenshot as its image, and the Import and New profile buttons",
+          "width": 1600,
+          "height": 1368,
+          "caption": "Profiles page"
+        },
+        {
+          "src": "/images/dux-shell/pr3867-6.webp",
+          "alt": "New profile page with the groups Theme & colors, Layout, Appearance and Other, each with its own switch",
+          "width": 1600,
+          "height": 1368,
+          "caption": "New profile"
+        },
+        {
+          "src": "/images/dux-shell/pr3867-8.webp",
+          "alt": "Editing a profile: its preview image, Update from current settings, Export, Compare and Delete profile",
+          "width": 1600,
+          "height": 1368,
+          "caption": "Editing a profile"
+        }
+      ]
+    },
+    {
+      "id": "sysmon",
+      "title": "System monitor",
+      "summary": "The System Monitor window shows the app a process belongs to, its GPU and video use, its internet connections and its download and upload, and has pages for performance, disks and system information.",
+      "prs": [
+        {
+          "ref": "duxlabs-dev/dux-shell#3768",
+          "title": "feat(sysmon): rework the system monitor window",
+          "note": "A new system monitor window"
+        },
+        {
+          "ref": "duxlabs-dev/dux-gop#50",
+          "title": "gops: add data for the DMS system monitor rework",
+          "note": "Per-process GPU, disk and network data, collected faster"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4137",
+          "title": "sysmon: process pause and priority",
+          "note": "Pause a process or change its priority"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4219",
+          "title": "sysmon: expand merged process rows",
+          "note": "Expand a row into the processes behind it"
+        },
+        {
+          "ref": "duxlabs-dev/dux-gop#56",
+          "title": "gops: show correct gpu names",
+          "note": "Correct graphics card names"
+        }
+      ],
+      "images": [
+        {
+          "src": "/images/dux-shell/pr3768-7.webp",
+          "alt": "The process list with app icons and names and columns for CPU, memory, GPU, VRAM, disk, connections, download and upload",
+          "width": 1600,
+          "height": 1184,
+          "caption": "Processes"
+        },
+        {
+          "src": "/images/dux-shell/pr4219-2.webp",
+          "alt": "A merged Steam row expanded into its nine processes, each with its own values",
+          "width": 1600,
+          "height": 1181,
+          "caption": "Merged rows"
+        },
+        {
+          "src": "/images/dux-shell/pr4137-1.webp",
+          "alt": "An expanded process row with the Priority menu open on Lowest, next to the Resume, Restart and Quit buttons",
+          "width": 1600,
+          "height": 1188,
+          "caption": "Priority and pause"
+        },
+        {
+          "src": "/images/dux-shell/pr3768-2.webp",
+          "alt": "The CPU page with a graph per thread, clock, temperature, process and thread counts",
+          "width": 1600,
+          "height": 1184,
+          "caption": "CPU"
+        },
+        {
+          "src": "/images/dux-shell/pr3768-10.webp",
+          "alt": "The GPU page with a usage and VRAM graph, clocks, temperature, power, fan and the top process",
+          "width": 1600,
+          "height": 1184,
+          "caption": "GPU"
+        },
+        {
+          "src": "/images/dux-shell/pr3768-12.webp",
+          "alt": "A drive card with a read and write graph, health, SMART values and its partitions",
+          "width": 1600,
+          "height": 1184,
+          "caption": "Disks"
+        },
+        {
+          "src": "/images/dux-shell/pr3768-11.webp",
+          "alt": "The System page with displays, network, storage and a list of temperature and fan sensors, with Copy summary and Copy report buttons",
+          "width": 1600,
+          "height": 1184,
+          "caption": "System"
+        }
+      ]
+    },
+    {
+      "id": "network",
+      "title": "Network connections",
+      "summary": "Network connections can be created and edited in Settings: Ethernet, Wi-Fi, WireGuard and other VPNs, Bluetooth and cellular, including 802.1X and most other kinds of enterprise networks.",
+      "prs": [
+        {
+          "ref": "duxlabs-dev/dux-shell#3727",
+          "title": "feat(network): edit NetworkManager connections from Settings",
+          "note": "Create and edit network connections in Settings"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4281",
+          "title": "network: log in to plugin VPNs before activating them",
+          "note": "Log in to more VPN types before connecting"
+        }
+      ],
+      "images": [
+        {
+          "src": "/images/dux-shell/network-overview.webp",
+          "alt": "The Network page in Settings with rows for Wi-Fi, Hotspot, Ethernet, VPN, Tailscale, Status and Manage all connections",
+          "width": 1600,
+          "height": 1375,
+          "caption": "Network page"
+        },
+        {
+          "src": "/images/dux-shell/network-editor-connections.webp",
+          "alt": "The Connections page listing saved Ethernet, Wi-Fi, hotspot, VPN and cellular profiles, with Add and Import buttons",
+          "width": 1600,
+          "height": 1374,
+          "caption": "Saved connections"
+        },
+        {
+          "src": "/images/dux-shell/network-editor-wifi.webp",
+          "alt": "Editing a Wi-Fi profile: name, autoconnect, priority, metered, network name, mode, hidden and band",
+          "width": 1600,
+          "height": 1374,
+          "caption": "Editing a Wi-Fi profile"
+        },
+        {
+          "src": "/images/dux-shell/connections-hotspot.webp",
+          "alt": "The Hotspot page with a running hotspot and the buttons Edit, Show QR Code and Stop",
+          "width": 1600,
+          "height": 1374,
+          "caption": "Hotspot"
+        }
+      ]
+    },
+    {
+      "id": "wallpapers",
+      "title": "Wallpapers",
+      "summary": "Wallpapers can come from several folders, and the wallpaper picker, Next, Previous and automatic cycling can be limited to the folders the user selects.",
+      "prs": [
+        {
+          "ref": "duxlabs-dev/dux-shell#4150",
+          "title": "wallpaper: list wallpapers through the background process",
+          "note": "List wallpapers reliably, even with unusual file names"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4155",
+          "title": "wallpaper: add wallpaper folders",
+          "note": "Wallpapers from several folders"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4288",
+          "title": "wallpaper: hide wallpapers that don't fit the display",
+          "note": "Hide wallpapers that don't fit the display"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4130",
+          "title": "wallpaper: scroll the dash grid freely and add a paged grid layout",
+          "note": "Scroll the wallpaper grid freely"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4148",
+          "title": "wallpaper: fix keyboard focus after closing the file picker",
+          "note": "Keyboard focus after the file picker closes"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3824",
+          "title": "fix(wallpaper): keep a loading wallpaper when the surface regenerates",
+          "note": "Keep a new wallpaper when the fill mode changes"
+        }
+      ],
+      "images": [
+        {
+          "src": "/images/dux-shell/pr4155-2.webp",
+          "alt": "A wallpaper folder's page in Settings with the Show and Include subfolders switches above its wallpapers",
+          "width": 1600,
+          "height": 1374,
+          "caption": "One folder"
+        },
+        {
+          "src": "/images/dux-shell/pr4155-4.webp",
+          "alt": "The wallpaper grid with the folder menu open: All, one folder, Browse and Settings",
+          "width": 1227,
+          "height": 654,
+          "caption": "Folder menu"
+        },
+        {
+          "src": "/images/dux-shell/pr4130-2.webp",
+          "alt": "Wallpaper grid options with the layouts Grid, Paged grid and Carousel",
+          "width": 1227,
+          "height": 789,
+          "caption": "Grid layouts"
+        }
+      ]
+    },
+    {
+      "id": "popouts",
+      "title": "Connected popouts",
+      "summary": "Popouts opened from the bar or the island can connect to it, as in connected frame mode, but without the frame around the screen.",
+      "prs": [
+        {
+          "ref": "duxlabs-dev/dux-shell#4129",
+          "title": "feat(bar): connected popouts for bar & island variants",
+          "note": "Popouts that attach to the bar"
+        }
+      ],
+      "images": [
+        {
+          "src": "/images/dux-shell/pr4129-3.webp",
+          "alt": "The Control Center popout joined to the island at the top of the screen as one shape",
+          "width": 849,
+          "height": 835,
+          "caption": "Connected popouts on"
+        },
+        {
+          "src": "/images/dux-shell/pr4129-1.webp",
+          "alt": "The same popout floating below the island with a gap",
+          "width": 849,
+          "height": 835,
+          "caption": "Off, the default"
+        }
+      ]
+    },
+    {
+      "id": "theming",
+      "title": "Theming",
+      "summary": "Wallpaper colors reach more of the desktop: the user picks which color of the wallpaper the scheme is built from, Qt applications can follow the theme through qtengine, and terminals get background opacity and colors tinted toward the wallpaper.",
+      "prs": [
+        {
+          "ref": "duxlabs-dev/dux-shell#3020",
+          "title": "feat(theme): add a selectable source color mode for wallpaper palettes",
+          "note": "Choose which wallpaper color the theme is built from"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3019",
+          "title": "feat(theme): support qtengine as a Qt platform theme",
+          "note": "Qt apps follow the theme"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3662",
+          "title": "feat(theme): terminal background opacity and wallpaper-tinted colors",
+          "note": "Terminal transparency and wallpaper-tinted colors"
+        }
+      ],
+      "images": [
+        {
+          "src": "/images/dux-shell/pr3020-1.webp",
+          "alt": "Desktop with a file manager, a terminal and Settings in cyan accents, with Source Color set to Dominant",
+          "width": 1600,
+          "height": 900,
+          "caption": "Source Color: Dominant"
+        },
+        {
+          "src": "/images/dux-shell/pr3020-2.webp",
+          "alt": "The same desktop and wallpaper in orange accents, with Source Color set to Colorful",
+          "width": 1600,
+          "height": 900,
+          "caption": "Source Color: Colorful"
+        },
+        {
+          "src": "/images/dux-shell/pr3662-1.webp",
+          "alt": "App theming settings with terminal Opacity, Colors from wallpaper and Intensity set to Medium",
+          "width": 1129,
+          "height": 1216,
+          "caption": "Terminal settings"
+        }
+      ]
+    },
+    {
+      "id": "fixes",
+      "title": "Bug fixes",
+      "summary": "A selection of the bugs I fixed in the shell, in dux-gop and in the QML components shared by the Dux apps. The system monitor fixes are listed with the system monitor above.",
+      "prs": [
+        {
+          "ref": "duxlabs-dev/dux-shell#3665",
+          "title": "fix(frame): make connected mode honor the settings it overrides",
+          "note": "Connected frame mode follows its settings"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3655",
+          "title": "fix(hyprland): write window rules Hyprland 0.56 accepts, keep DMS windows opaque",
+          "note": "Window rules that work on Hyprland 0.56"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3670",
+          "title": "fix(notifications): edit rules from the menu instead of deleting them",
+          "note": "Unmute keeps the notification rule"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3791",
+          "title": "fix(cli): time out when the DMS server doesn't answer",
+          "note": "The command line stops waiting when the shell doesn't answer"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3667",
+          "title": "fix(screenshot): copy a saved screenshot as a file, not only image bytes",
+          "note": "Copy a saved screenshot as a file"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3666",
+          "title": "fix(lock): show the lock screen on every display when none is selected",
+          "note": "Lock screen on every display"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3844",
+          "title": "fix(notifications): close popups when their screen stops showing them",
+          "note": "Notification popups close with their screen"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#3921",
+          "title": "matugen: keep user templates when config.toml has no [config] table",
+          "note": "Keep custom color templates"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4199",
+          "title": "island: fix pill alignment and bar flicker in a bar",
+          "note": "Island alignment and bar flicker"
+        },
+        {
+          "ref": "duxlabs-dev/dux-shell#4258",
+          "title": "popout: fix hover popouts closing in the gap to the bar",
+          "note": "Hover popouts stay open on the way to them"
+        },
+        {
+          "ref": "duxlabs-dev/dux-qml-common#37",
+          "title": "dialog: keep focus inside an open overlay",
+          "note": "Keyboard focus stays inside open dialogs"
+        }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "dux-player",
+      "summary": [
+        "Dux Player is a music player for Linux in the style of Dux Shell. It runs natively in the shell, with its settings and theme, or standalone in any other shell, and plays local libraries and streams from Navidrome, Subsonic and Jellyfin servers. A Go daemon handles playback, the library and the servers. The window is QML on Quickshell.",
+        "Rules keep server tracks on the device (favorites, most played, an album or a playlist), and the server catalogs are stored locally. Browsing and search keep working while a server is unreachable. When the queue ends, the player can continue with similar tracks, picked from the artists, genres and playlists of the whole session. Lyrics are fetched automatically from the server or from online sources, matched to the track and synced word by word, and their timing can be matched to the audio.",
+        "It scrobbles to ListenBrainz and Last.fm, casts through dux-cast, the helper behind the Cast plugin, and has custom pages with their own filter rules and columns and a CLI for keybinds and status bars. The bar, the side panel and the full view come in a Bento and a Material style, with elements the user can arrange. I check the interface with headless scenarios against a fake Subsonic server, including the animations frame by frame. The player is still an alpha."
+      ]
+    },
+    {
+      "id": "dux-plugins",
+      "summary": [
+        "Dux Plugins holds my plugins for Dux Shell. The first one, Cast, mirrors the screen with sound to Chromecast, Google TV and AirPlay devices and plays files, music, playlists, slideshows and links on Chromecast, from the bar or the Control Center. Files a device can't play, such as 8K video or HEIC photos, are converted on the GPU first. Its device handling lives in dux-cast, which Dux Player casts through as well."
+      ]
+    },
+    {
+      "id": "dux-cast",
+      "summary": [
+        "dux-cast is the helper program behind Cast, written in Go. One helper runs per user, and every app connected to it sees and controls the same cast. Dux Player casts through it as well."
+      ]
+    }
+  ]
+}

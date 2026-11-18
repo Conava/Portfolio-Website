@@ -1,0 +1,48 @@
+{
+  "repo": "BPMNscript/bpmnscript",
+  "intro": "Der Compiler übersetzt BPMNscript in BPMN-XML, das Operaton unverändert ausführt, und der Importer liest vorhandenes BPMN-XML zurück in Code. Entwickler behalten die Werkzeuge, die sie von Code kennen: zeilenweise Diffs, Vervollständigung und Fehler schon beim Tippen. Kann der Importer ein Modell nicht abbilden, lehnt er es ab oder warnt, damit sich ein Prozess nicht unbemerkt ändert.",
+  "sample": "process invoice-approval {\n  start ReviewStart { form { amount: number \"Invoice amount\" } }\n  user ReviewInvoice(assignee: \"demo\")\n  if (amount > 1000) {\n    user SeniorApproval(assignee: \"manager\")\n  } else {\n    service AutoApprove(class: \"com.example.invoice.AutoApproveDelegate\")\n  }\n  end Done\n}",
+  "proof": {
+    "sentence": "3.858 der 4.946 akzeptierten Modelle (78,0 %) kommen als derselbe Prozess zurück, das sind 63,7 % aller 6.060 deployten. Kleine Modelle schneiden am besten ab: Von denen mit bis zu 10 Elementen kommen 77,3 % äquivalent zurück, von denen mit mehr als 50 nur 5,9 %.",
+    "steps": [
+      {
+        "label": "Von Operaton deployt",
+        "value": 6060
+      },
+      {
+        "label": "Vom Importer akzeptiert",
+        "value": 4946
+      },
+      {
+        "label": "Round-Trip zu äquivalentem Prozess",
+        "value": 3858
+      }
+    ]
+  },
+  "links": [
+    {
+      "label": "Playground",
+      "href": "/playground"
+    },
+    {
+      "label": "Artikel lesen",
+      "href": "/bpmnscript"
+    },
+    {
+      "label": "Bachelorarbeit (PDF)",
+      "href": "/thesis.pdf"
+    },
+    {
+      "label": "GitHub",
+      "href": "https://github.com/BPMNscript/bpmnscript"
+    }
+  ],
+  "panel": {
+    "did": [
+      "Sprache, Compiler und Importer (TypeScript, Langium) für meine Bachelorarbeit entworfen und geschrieben. Der Compiler macht aus strukturierten Blöcken BPMN-2.0-XML, der Importer ordnet beliebige Prozessgraphen mit Dominator-Analyse zu Blöcken.",
+      "Ein VS-Code-Language-Server und ein Kommandozeilenwerkzeug stammen aus derselben Codebasis.",
+      "Den Round-Trip in einer reproduzierbaren Pipeline evaluiert: 2.000 per Fuzzing erzeugte Programme in je drei Reihenfolgen und über 6.000 gesammelte reale Modelle, jedes in Operaton in Docker deployt."
+    ],
+    "significant": "Von den 6.060 gesammelten Modellen, die Operaton deployt, akzeptiert der Importer 4.946 und lehnt 1.114 ab. 78,0 % der akzeptierten durchlaufen den Round-Trip äquivalent."
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "projects": [
+    {
+      "id": "devline",
+      "name": "devline",
+      "repo": "Conava/claude-devline",
+      "emphasis": true,
+      "blurb": "Ein Claude-Code-Plugin, das eine Idee zu mergefähigem Code bringt: Brainstorm, testgetriebener Plan, parallele Umsetzung in Git-Worktrees mit je einem Review, Dokumentation und Security-Review. Hooks blockieren zerstörerische Befehle, sodass die Stufen ohne Rückfragen laufen.",
+      "tech": [
+        "Claude Code",
+        "Agents",
+        "Hooks",
+        "Git"
+      ],
+      "panel": {
+        "did": [
+          "Ein Claude-Code-Plugin, das ein Feature von der Idee bis zu mergefähigem Code bringt: Brainstorm, testgetriebener Plan, Umsetzung, Review, Dokumentation und zum Schluss ein Deep Review. Ich gebe Spezifikation und Plan frei und entscheide am Ende über den Merge, den Rest erledigt es allein.",
+          "Der Planer teilt jeder Aufgabe eigene Dateien zu und ordnet die Aufgaben nach Abhängigkeiten in Wellen. Agenten setzen eine Welle parallel in Git-Worktrees um, ohne Merge-Konflikte.",
+          "Jede Aufgabe bekommt ein eigenes Review. Blockierende Befunde gehen zurück an die Umsetzung, und nach drei gescheiterten Runden schreibt der Planer den Ansatz neu.",
+          "Security-Hooks verweigern zerstörerische Befehle und das Lesen von Secrets und fragen bei riskanten nach. Deshalb kann ein Lauf unbeaufsichtigt durchgehen.",
+          "Ich nutze es täglich für meine eigenen Projekte."
+        ],
+        "viz": {
+          "type": "pipeline",
+          "caption": "Stufen der devline-Pipeline",
+          "stages": [
+            {
+              "label": "Brainstorm"
+            },
+            {
+              "label": "Plan"
+            },
+            {
+              "label": "Implementierung",
+              "perTask": true
+            },
+            {
+              "label": "Dokumentation"
+            },
+            {
+              "label": "Deep Review"
+            }
+          ]
+        }
+      },
+      "url": "/devline"
+    },
+    {
+      "id": "chess",
+      "name": "The King's Game",
+      "slug": "chess-engine",
+      "repo": "Conava/chess",
+      "blurb": "Eine modulare Schachplattform mit JavaFX-Client, Chess 960 und einem TCP-Server für Online-Partien mit Konten und Matchmaking.",
+      "tech": [
+        "Java 17",
+        "JavaFX"
+      ],
+      "panel": {
+        "did": [
+          "Drei Maven-Module: eine Spiel-Engine ohne Abhängigkeiten, ein JavaFX-Desktop-Client und ein TCP-Server. Client und Server hängen nur von der Engine ab.",
+          "Der Server führt standardmäßig bis zu 40 Partien gleichzeitig, prüft jeden Zug mit derselben Engine, bevor er ihn weitergibt, und kümmert sich um Login, Matchmaking, Beitrittscodes und Wiederverbindungen. Konten und Partien speichert er in SQLite.",
+          "Regelvarianten implementieren ein gemeinsames Ruleset-Interface. So kam Chess 960 ohne Sonderfälle in der Spiellogik dazu.",
+          "75 Testklassen über die drei Module."
+        ],
+        "significant": "Als ich den Client im März 2026 von Swing auf JavaFX umgestellt habe, betraf der Umbau nur das Client-Modul. Engine und Server blieben, wie sie waren."
+      }
+    },
+    {
+      "id": "portfolio",
+      "name": "Portfolio",
+      "slug": "portfolio",
+      "repo": "Conava/Portfolio-Website",
+      "blurb": "Diese Website: vier Designs (Ink, Trace, Flow und Type) auf denselben typisierten Inhalten auf Deutsch und Englisch, dazu ein BPMNscript-Playground, der Language-Server und Compiler im Browser ausführt.",
+      "tech": [
+        "Next.js",
+        "TypeScript",
+        "Docker"
+      ],
+      "panel": {
+        "did": [
+          "Vier Designs auf denselben Inhalten entworfen und gebaut. Ink hat ein WebGL-Tintenfluid, Trace eine BPMN-Linie, die beim Scrollen die Seite ausführt, Flow eine three.js-Szene, deren Formen aus den Inhalten entstehen, und in Type fliegt man durch die Punze eines Buchstabens in den nächsten Abschnitt.",
+          "Ein BPMNscript-Playground, der Language-Server und Compiler in einem Web Worker im Browser ausführt, aufgebaut wie eine kleine IDE: Dateien, Tabs, ein Problems-Panel, ein Live-Diagramm und BPMN-Export.",
+          "Die Inhalte sind typisiertes JSON und MDX auf Deutsch und Englisch. Ein Test schlägt fehl, sobald ein Fakt (ein Datum, eine URL, eine Zahl) zwischen den Sprachen abweicht.",
+          "End-to-End-Tests laufen gegen den Produktionsserver, und ein visuelles Test-Harness macht Screenshots jedes Designs und schlägt bei Seitenfehlern, Überlauf oder ruckelndem Scrollen fehl."
+        ]
+      }
+    },
+    {
+      "id": "minj",
+      "name": "MinJ",
+      "slug": "minj",
+      "repo": "Conava/MinJ",
+      "blurb": "Eine Skriptsprache für die JVM, die ich gebaut habe, um zu verstehen, wie Interpreter funktionieren: eine ANTLR4-Grammatik und ein Tree-Walking-Interpreter in Java, mit Klassen, Methoden und Listen.",
+      "tech": [
+        "Java 21",
+        "ANTLR4"
+      ],
+      "panel": {
+        "did": [
+          "Die Grammatik in ANTLR4 entworfen und dazu einen Tree-Walking-Interpreter in Java 21 geschrieben: Klassen, Methoden, typisierte und dynamische Variablen, Schleifen und Listen.",
+          "Jede Variable ist eine Zelle, die ihren Typ kennt und weiß, ob sie sich ändern darf. Einen String an einen int zuzuweisen oder einen val zu überschreiben, schlägt deshalb zur Laufzeit fehl.",
+          "Ein return wirft eine Exception, die den Aufrufstack abbaut, und funktioniert so auch aus verschachtelten Schleifen und Bedingungen heraus.",
+          "Ein GitHub-Actions-Workflow baut für jeden Release-Branch eine einzelne JAR und veröffentlicht sie als GitHub-Release."
+        ]
+      }
+    },
+    {
+      "id": "homeserver",
+      "name": "VPS-Homeserver",
+      "slug": "homeserver",
+      "blurb": "Eine private Cloud auf einem Linux-VPS: Docker-Compose-Dienste hinter Traefik, darunter Nextcloud, Matrix und Navidrome.",
+      "tech": [
+        "Docker",
+        "Traefik",
+        "Linux"
+      ],
+      "panel": {
+        "did": [
+          "Ich betreibe einen eigenen Linux-VPS: Nextcloud, einen Matrix-Server mit Sprach- und Videoanrufen, Navidrome für Musik und die Backends meiner Projekte, alles in Docker.",
+          "Traefik steht vor jedem Dienst und holt die Let's-Encrypt-Zertifikate.",
+          "Jede Kategorie von Diensten hat eine eigene Compose-Datei. So kann ich einen Dienst aktualisieren, zurückrollen oder debuggen, ohne den Rest anzufassen.",
+          "Dateien und Medien liegen auf externen Storage-Boxen, sodass der Speicher ohne größeren Server wächst.",
+          "Diese Website läuft dort: GitHub Actions baut das Image, schiebt es nach GHCR und startet den Container per SSH neu."
+        ]
+      }
+    }
+  ]
+}

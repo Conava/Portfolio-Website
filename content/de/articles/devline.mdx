@@ -1,0 +1,55 @@
+<Section id="what">
+
+devline ist ein Plugin für Claude Code, den Coding-Agent von Anthropic im Terminal. Ein Befehl, `/devline` mit einer Idee dahinter, startet die ganze Pipeline: ein Brainstorm, der den Umfang klärt, ein testgetriebener Plan, die Umsetzung in parallelen Git-Worktrees mit einem Review für jede Aufgabe, eine Runde Dokumentation und zum Schluss ein Review des ganzen Branches.
+
+Freigeben muss ich zweimal, nach dem Brainstorm und nach dem Plan, denn dort lässt sich eine falsche Entscheidung noch günstig korrigieren. Am Ende entscheide ich, ob gemergt wird oder eine weitere Runde folgt. Kleine Änderungen nehmen die Abkürzung: umsetzen, einmal prüfen, committen.
+
+<DevlineCounts />
+
+</Section>
+
+<Section id="pipeline">
+
+<DevlinePipeline />
+
+<StageList />
+
+Der Plan teilt jeder Aufgabe die Dateien zu, die ihr gehören. Aufgaben einer Welle können deshalb nebeneinander laufen, weil keine zwei dieselbe Datei anfassen, und die nächste Welle beginnt erst, wenn jede Aufgabe der aktuellen geprüft und gemergt ist.
+
+Was ein Lauf entscheidet, landet in Dateien im Projekt (Spezifikation, Pläne, offene Review-Befunde). Verliert ein Lauf seinen Kontext, macht er dort weiter, wo er stand.
+
+</Section>
+
+<Section id="agents">
+
+Jeder Agent ist eine Markdown-Datei mit seiner Rolle, den Werkzeugen, die er benutzen darf, und seinem Modell. Wissen über die Rolle hinaus, etwa der testgetriebene Ablauf für den Implementer, kommt aus einem Skill, der beim Start geladen wird.
+
+<AgentList />
+
+</Section>
+
+<Section id="skills">
+
+Skills sind entweder Befehle, die ich aufrufe, oder Wissensbasen, die die Agents laden.
+
+<SkillList />
+
+</Section>
+
+<Section id="hooks">
+
+devline läuft bei mir im Auto-Accept-Modus von Claude Code, damit die Agents nicht bei jedem Befehl auf eine Bestätigung warten. Sicher genug ist das für mich wegen der Hooks: Sie prüfen jeden Befehl und jeden Dateizugriff, bevor er ausgeführt wird. Gestoppt wird, was sich nicht rückgängig machen lässt oder Zugangsdaten preisgibt, zum Beispiel ein Force Push, `rm -rf` außerhalb des Arbeitsverzeichnisses, `npm publish`, ein `DROP TABLE` oder das Lesen eines privaten Schlüssels oder einer `.env`-Datei. Workflow-Regeln wie das Format der Commit-Message oder Pushes auf einen geschützten Branch prüfen die Hooks nicht.
+
+<HookList />
+
+</Section>
+
+<Section id="install">
+
+<DevlineVersion />
+
+<Install />
+
+Nach der Installation legt `/devline:setup` eine `CLAUDE.md` mit Projektkontext für die Agents und eine Datei mit den Pipeline-Einstellungen an. devline braucht `jq`, `git` und die GitHub-CLI `gh`.
+
+</Section>
