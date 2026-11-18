@@ -1,3 +1,5 @@
+import type { Design } from "./design";
+
 export const siteConfig = {
   name: "Marlon Kranz",
   /** Production URL of the site — used by sitemap, robots, and JSON-LD. */
@@ -6,6 +8,9 @@ export const siteConfig = {
   jobTitle: "Software Engineer",
   github: "https://github.com/conava",
   linkedin: "https://linkedin.com/in/marlon-kranz",
-  email: "kontakt@marlonkranz.com",
+  /** Default design; `DESIGN` env and the visitor cookie override it. */
+  design: "keynote" as Design,
+  githubLogin: "Conava",
+  duxOrg: "duxlabs-dev",
   photoPath: "/images/profile.jpg",
 } as const;
