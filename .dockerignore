@@ -4,3 +4,8 @@ node_modules
 docs
 **/*.md
 .env*
+.cache
+public/playground/bpmnscript
+public/playground/presets
+public/playground/editor.worker.js
+src/generated

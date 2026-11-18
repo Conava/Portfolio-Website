@@ -2,28 +2,49 @@
   "name": "portfolio",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "bun@1.4.4",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "bun run playground:assets && next dev",
+    "build": "bun run playground:assets && next build",
+    "start": "next start",
+    "typecheck": "bun run playground:assets && next typegen && tsc --noEmit",
+    "test": "bun run playground:assets && bun test src scripts",
+    "test:e2e": "bun test ./e2e",
+    "shots": "bun scripts/shots.ts",
+    "resume:figures": "bun scripts/resume-figures.ts",
+    "playground:assets": "bun scripts/playground-assets.ts"
+  },
+  "bpmnscript": {
+    "repo": "https://github.com/BPMNscript/bpmnscript.git",
+    "ref": "v0.2.0"
   },
   "dependencies": {
-    "framer-motion": "^12.35.0",
+    "@codingame/monaco-vscode-api": "37.6.1",
+    "@codingame/monaco-vscode-editor-api": "37.6.1",
+    "bpmn-js": "18.31.1",
     "gray-matter": "^4.0.3",
-    "next": "16.1.6",
-    "next-intl": "^4.8.3",
+    "monaco-languageclient": "11.0.3",
+    "next": "16.4.6",
+    "next-intl": "^4.9.1",
     "next-mdx-remote": "^6.0.0",
     "next-themes": "^0.4.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "three": "0.160.0",
+    "vscode": "npm:@codingame/monaco-vscode-extension-api@37.6.1",
+    "vscode-languageclient": "10.1.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bun": "1.4.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^20.19.37",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "0.160.0",
+    "playwright-core": "1.61.1",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
