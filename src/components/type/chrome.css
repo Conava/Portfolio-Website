@@ -1,0 +1,60 @@
+/* Type chrome: skip link, header, footer. */
+
+:root[data-design="type"] .skip:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: var(--z-tip);
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 16px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 600 15px/1 var(--sans);
+  text-decoration: none;
+}
+
+/* In the page, over the first facade; it scrolls away with it. */
+:root[data-design="type"] .ty-hdr {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: var(--z-header);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--hdr);
+  padding: 0 calc(var(--pad) - 12px) 0 var(--pad);
+}
+:root[data-design="type"] .ty-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: 700 16px/1 var(--sans);
+  font-stretch: 125%;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+:root[data-design="type"] .ty-utils {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+:root[data-design="type"] .ty-hdr .icon-btn {
+  color: var(--ink);
+}
+
+:root[data-design="type"] .ty-ftr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 28px var(--pad) 36px;
+  border-top: 1.5px solid var(--ink);
+  font-size: 14px;
+}
+:root[data-design="type"] .ty-ftr p {
+  margin: 0;
+}
