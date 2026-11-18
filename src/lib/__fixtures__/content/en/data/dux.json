@@ -1,0 +1,26 @@
+{
+  "intro": "i",
+  "shellRepo": "o/shell",
+  "featuredPrs": [
+    {
+      "ref": "o/shell#1",
+      "title": "t",
+      "blurb": "b"
+    },
+    {
+      "ref": "o/shell#2",
+      "title": "t",
+      "blurb": "b"
+    }
+  ],
+  "projects": [
+    {
+      "id": "p",
+      "name": "P",
+      "repo": "o/bpmn",
+      "url": "https://x.test",
+      "blurb": "b"
+    }
+  ],
+  "links": []
+}

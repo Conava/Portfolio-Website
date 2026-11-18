@@ -1,0 +1,15 @@
+{
+  "intro": "i",
+  "repo": "o/bpmn",
+  "sample": "s",
+  "proof": {
+    "sentence": "p",
+    "steps": [
+      {
+        "label": "a",
+        "value": 3
+      }
+    ]
+  },
+  "links": []
+}

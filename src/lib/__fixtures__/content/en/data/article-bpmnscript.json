@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "title": "T", "description": "D", "lede": "L", "published": "2026-01-01", "updated": "2026-01-02",
+    "ogImage": { "src": "/og.jpg", "alt": "x", "width": 1200, "height": 630 },
+    "sections": [{ "id": "intro", "title": "Intro" }, { "id": "result", "title": "Result" }],
+    "links": [{ "label": "Repo", "href": "https://example.test" }]
+  },
+  "figures": [{ "id": "fig-a", "src": "/a.svg", "alt": "a", "width": 10, "height": 10, "plate": true }],
+  "numbers": [{ "id": "n-a", "value": 3 }, { "id": "n-b", "value": 4 }],
+  "repo": "o/bpmn",
+  "funnel": [{ "label": "All", "value": 4 }]
+}

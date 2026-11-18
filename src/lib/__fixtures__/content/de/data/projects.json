@@ -1,0 +1,15 @@
+{
+  "projects": [
+    {
+      "id": "a",
+      "name": "A",
+      "blurb": "b",
+      "repo": "o/shell"
+    },
+    {
+      "id": "b",
+      "name": "B",
+      "blurb": "b"
+    }
+  ]
+}
