@@ -1,0 +1,250 @@
+/*
+ * Flow (config key `flow`): tokens and chrome. Layout, type roles, buttons and the article
+ * skin come from Trace (src/styles/trace.css and the shared stylesheets select both designs);
+ * this file loads after them and overrides colors, fonts and the gutter.
+ * Dark only: the subject's glow and halos need a dark ground (SiteShell forces next-themes to dark).
+ */
+
+:root[data-design="flow"] {
+  color-scheme: dark;
+  --bg: #0b0b0d;
+  --bg-2: #151416;
+  --bg-3: #1c1b1e;
+  --line: #2b2926;
+  --line-2: #45413b;
+  --line-3: #78726a;
+  --fg: #f1ece2;
+  --fg-2: #cfc8bc;
+  --fg-3: #a29b90;
+  --acc: #ffae57;
+  --acc-2: #ffd7a6;
+  --acc-ink: #1a0e02;
+  --open: #3fb950;
+  --merged: #a371f7;
+  --closed: #f85149;
+  --plate: #f4f1ea;
+  --shadow-window: 0 24px 48px -24px rgb(0 0 0 / 0.7);
+
+  --sans: var(--font-geist), system-ui, sans-serif;
+  --mono: var(--font-geist-mono), ui-monospace, monospace;
+  --display: var(--font-instrument-serif), Georgia, serif;
+
+  /* No trace gutter, no rail column. */
+  --g: 0px;
+  --pr: var(--pad);
+  --hdr: 64px;
+  /* Page margin of the homepage and the header; wide enough for the rail from 1100px. */
+  --fl-x: max(var(--pad), 5vw);
+
+  --s-font-display: var(--display);
+  --s-focus: var(--acc-2);
+  --flow-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+@media (max-width: 759.98px) {
+  :root[data-design="flow"] {
+    --hdr: 56px;
+  }
+}
+@media (min-width: 1100px) {
+  :root[data-design="flow"] {
+    --fl-x: max(5vw, 92px);
+  }
+}
+
+:root[data-design="flow"] .pj-article::before,
+:root[data-design="flow"] .pj-article::after,
+:root[data-design="flow"] .pj-article .pj-title::before,
+:root[data-design="flow"] .pj-body > h2::before,
+:root[data-design="flow"] .pj-body > h2::after {
+  /* No gutter in Flow, so no article trace line or station dots. */
+  display: none;
+}
+
+/* Headings in the display serif: roman, weight 400 (the face has one weight). */
+:root[data-design="flow"] :is(h1.pj-title, .pj-body h2, .ar-sec h2, .fl-nf h1) {
+  font-family: var(--display);
+  font-weight: 400;
+  font-stretch: normal;
+  letter-spacing: -0.01em;
+}
+:root[data-design="flow"] .pj-title {
+  font-size: clamp(44px, 6.4vw, 96px);
+  line-height: 0.95;
+}
+:root[data-design="flow"] :is(.pj-body h2, .ar-sec h2) {
+  font-size: clamp(30px, 3.2vw, 44px);
+  line-height: 1.05;
+}
+:root[data-design="flow"] .btn-primary {
+  background: var(--acc);
+  border-color: var(--acc);
+  color: var(--acc-ink);
+}
+@media (hover: hover) {
+  :root[data-design="flow"] .btn-primary:not(:disabled):hover {
+    background: var(--acc-2);
+    border-color: var(--acc-2);
+    color: var(--acc-ink);
+  }
+}
+:root[data-design="flow"] ::selection {
+  background: var(--acc);
+  color: var(--acc-ink);
+}
+
+/* ---- Skip link ---- */
+:root[data-design="flow"] .skip:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: var(--z-tip);
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-2);
+  background: var(--fg);
+  color: var(--bg);
+  font: 500 14px/1 var(--sans);
+  text-decoration: none;
+}
+
+/* ---- Header: fixed over the scene, fading into it ---- */
+:root[data-design="flow"] .fl-hdr {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: var(--z-header);
+  height: calc(var(--hdr) + 24px);
+  padding-bottom: 24px;
+  background: linear-gradient(to bottom, rgb(11 11 13 / 0.94) 0%, rgb(11 11 13 / 0.78) 55%, rgb(11 11 13 / 0) 100%);
+  pointer-events: none;
+}
+:root[data-design="flow"] .fl-hdr-in {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--hdr);
+  padding: 0 calc(var(--fl-x) - 10px) 0 var(--fl-x);
+}
+:root[data-design="flow"] .fl-hdr-in > * {
+  pointer-events: auto;
+}
+:root[data-design="flow"] .fl-brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  min-height: 40px;
+  align-self: center;
+  padding-top: 11px;
+  color: var(--fg);
+  font: 500 15px/1 var(--sans);
+  text-decoration: none;
+  white-space: nowrap;
+}
+:root[data-design="flow"] .fl-brand span {
+  overflow: hidden;
+  color: var(--fg-3);
+  font-weight: 400;
+  text-overflow: ellipsis;
+}
+:root[data-design="flow"] .fl-utils {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+:root[data-design="flow"] .fl-resume {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 10px;
+  color: var(--fg-2);
+  font: 400 14px/1 var(--sans);
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: 0.3em;
+}
+@media (hover: hover) {
+  :root[data-design="flow"] .fl-resume:hover {
+    color: var(--fg);
+    text-decoration-color: var(--acc);
+  }
+}
+@media (pointer: coarse) {
+  :root[data-design="flow"] :is(.fl-brand, .fl-resume) {
+    min-height: 44px;
+  }
+}
+@media (max-width: 519.98px) {
+  :root[data-design="flow"] .fl-brand span {
+    display: none;
+  }
+}
+/* Narrow phones with the longer German resume label: tighten the row so nothing collides or clips. */
+@media (max-width: 400px) {
+  :root[data-design="flow"] .fl-hdr-in {
+    gap: 0;
+    padding-inline: var(--pad) 0;
+  }
+  :root[data-design="flow"] .fl-brand {
+    flex: none;
+    margin-right: 8px;
+    font-size: 14px;
+  }
+  :root[data-design="flow"] .fl-utils {
+    gap: 0;
+    min-width: 0;
+  }
+  :root[data-design="flow"] .fl-resume {
+    padding: 0 6px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+}
+
+/* ---- Footer ---- */
+:root[data-design="flow"] .fl-ftr {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-top: var(--sp-7);
+  padding-bottom: var(--sp-7);
+  border-top: 1px solid var(--line);
+}
+
+/* ---- 404 ---- */
+:root[data-design="flow"] .fl-nf {
+  min-height: 70vh;
+  padding-top: calc(var(--hdr) + 18vh);
+  padding-bottom: var(--sp-9);
+}
+:root[data-design="flow"] .fl-nf h1 {
+  max-width: 14ch;
+  font-size: clamp(48px, 8vw, 120px);
+  line-height: 0.95;
+  text-wrap: balance;
+}
+:root[data-design="flow"] .fl-nf h1 em {
+  color: var(--acc-2);
+}
+:root[data-design="flow"] .fl-nf-path {
+  margin-bottom: var(--sp-5);
+  color: var(--fg-3);
+  font: 400 14px/1.4 var(--mono);
+}
+:root[data-design="flow"] .fl-nf p:last-child {
+  margin-top: var(--sp-6);
+}
+
+/* Flow has no rail column (--pr is only the page padding); the fixed contents list needs its own width. */
+@media (min-width: 1180px) {
+  :root[data-design="flow"] .ar-toc {
+    --pr: 240px;
+  }
+}
