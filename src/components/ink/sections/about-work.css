@@ -1,0 +1,186 @@
+/* Ink about (statement as lyrics) and work (ledger rows with in-place panels). */
+
+/* ---- About ---- */
+:root[data-design="keynote"] .ink-about {
+  padding-block: var(--section-lg) var(--section-md);
+  row-gap: 48px;
+}
+:root[data-design="keynote"] .ink-about > h2 {
+  grid-column: 1 / -1;
+}
+/*
+ * The statement read like synced lyrics: large lines, the one at the reading line in full ink,
+ * the others in --mute (still 4.5:1 over the ambient ink). A pen line down the left fills with
+ * the section's progress. Scroll timelines only; elsewhere every line is full ink.
+ */
+:root[data-design="keynote"] .ink-statement {
+  position: relative;
+  padding-left: clamp(20px, 3vw, 40px);
+}
+:root[data-design="keynote"] .ink-statement .lede {
+  max-width: 34ch;
+  font-size: clamp(22px, 2.3vw, 32px);
+  line-height: 1.38;
+  color: var(--ink);
+}
+:root[data-design="keynote"] .ink-statement .lede + .lede {
+  margin-top: 1em;
+}
+:root[data-design="keynote"] .ink-statement::before,
+:root[data-design="keynote"] .ink-statement::after {
+  content: "";
+  position: absolute;
+  top: 0.4em;
+  bottom: 0.4em;
+  left: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--line);
+}
+:root[data-design="keynote"] .ink-statement::after {
+  background: var(--accent);
+  transform-origin: top;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :root[data-design="keynote"] .ink-statement .lede {
+      animation: ink-lyric linear both;
+      animation-timeline: view();
+      animation-range: cover 15% cover 85%;
+    }
+    :root[data-design="keynote"] .ink-statement::after {
+      animation: ink-fill linear both;
+      animation-timeline: view();
+      animation-range: cover 30% cover 75%;
+    }
+  }
+}
+@keyframes ink-lyric {
+  0%,
+  100% {
+    color: var(--mute);
+  }
+  38%,
+  62% {
+    color: var(--ink);
+  }
+}
+@keyframes ink-fill {
+  from {
+    transform: scaleY(0);
+  }
+}
+:root[data-design="keynote"] .ink-links {
+  align-self: start;
+}
+@media (min-width: 900px) {
+  :root[data-design="keynote"] .ink-statement {
+    grid-column: 1 / 9;
+  }
+  :root[data-design="keynote"] .ink-links {
+    grid-column: 9 / 13;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---- The work and education timeline, under the work entries ---- */
+:root[data-design="keynote"] .ink-timeline {
+  max-width: 880px;
+  margin-top: clamp(40px, 7vh, 72px);
+}
+
+/* ---- Work ---- */
+:root[data-design="keynote"] .ink-work {
+  padding-block: var(--section-md) var(--section-lg);
+}
+:root[data-design="keynote"] .ink-work-intro {
+  margin-top: 24px;
+}
+:root[data-design="keynote"] .ink-rows {
+  margin-top: clamp(40px, 7vh, 72px);
+  border-bottom: 1px solid var(--line);
+}
+:root[data-design="keynote"] .ink-row {
+  position: relative;
+  isolation: isolate;
+  row-gap: 8px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+/* Rows without a panel still close with the same space a panel's trigger row leaves. */
+:root[data-design="keynote"] .ink-row:not(:has(.dp-region)) {
+  padding-bottom: 24px;
+}
+:root[data-design="keynote"] .ink-row h3 {
+  margin: 0;
+  color: var(--ink);
+}
+:root[data-design="keynote"] .ink-row h3 a {
+  text-decoration-color: transparent;
+}
+:root[data-design="keynote"] .ink-row-logo {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 12px;
+}
+:root[data-design="keynote"] .ink-row-who .meta {
+  margin-top: 8px;
+}
+:root[data-design="keynote"] .ink-row-sum {
+  margin: 0;
+}
+:root[data-design="keynote"] .ink-row .dp-trigger {
+  margin-bottom: 16px;
+}
+
+/* Hover: a 60 % paper-2 tint behind the row and the name's underline. Nothing moves. */
+:root[data-design="keynote"] .ink-row::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(-1 * min(16px, var(--margin)));
+  z-index: -1;
+  background: color-mix(in oklab, var(--paper-2) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-hover) var(--ease-std);
+}
+@media (hover: hover) {
+  :root[data-design="keynote"] .ink-row:hover::before {
+    opacity: 1;
+  }
+  :root[data-design="keynote"] .ink-row:hover h3 a {
+    text-decoration-color: currentColor;
+  }
+}
+
+@media (min-width: 900px) {
+  /* Name, summary and dates share the first baseline. */
+  :root[data-design="keynote"] .ink-row {
+    align-items: baseline;
+  }
+  :root[data-design="keynote"] .ink-row-who {
+    grid-column: 1 / 4;
+    grid-row: 1 / span 2;
+    padding-bottom: 24px;
+  }
+  :root[data-design="keynote"] .ink-row-sum,
+  :root[data-design="keynote"] .ink-row .dp-trigger {
+    grid-column: 4 / 10;
+  }
+  :root[data-design="keynote"] .ink-row-sum {
+    grid-row: 1;
+  }
+  :root[data-design="keynote"] .ink-row .dp-trigger {
+    grid-row: 2;
+  }
+  :root[data-design="keynote"] .ink-row-when {
+    grid-column: 10 / 13;
+    grid-row: 1;
+    text-align: right;
+  }
+  :root[data-design="keynote"] .ink-row .dp-region {
+    grid-row: 3;
+  }
+}

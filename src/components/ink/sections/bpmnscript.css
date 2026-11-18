@@ -1,0 +1,223 @@
+/*
+ * Ink BPMNscript. Default (no JS, reduced motion): the scene's final state.
+ * JS sets [data-mode="pin|play"] on the band; only then are unwritten lines and
+ * unrevealed diagram marks hidden. Frame writes: attributes, opacity, clip-path.
+ */
+
+/* ---- Intro and proof (paper) ---- */
+.ink-bs-intro {
+  padding-block: var(--section-lg) var(--sp-8);
+}
+.ink-bs-intro .lede {
+  margin-top: var(--sp-5);
+  /* At 44ch, text-wrap: pretty broke "back / into code" early (EN, 1000-1440); at 46ch every
+     inner line runs >= 83 % of the measure in EN and DE. */
+  max-width: 46ch;
+}
+.ink-bs-proof {
+  display: grid;
+  gap: var(--sp-6);
+  padding-block: var(--sp-8) var(--section-md);
+}
+.ink-bs-panel {
+  display: grid;
+  justify-items: start;
+  max-width: 1180px; /* the 12-column panel body needs the full page width */
+}
+.ink-bs-panel > .dp-region {
+  justify-self: stretch;
+}
+
+/* ---- Scene band ---- */
+.ink-bs-band {
+  padding-block: var(--section-md);
+}
+.ink-bs-stage {
+  display: grid;
+  gap: var(--sp-5);
+}
+
+/* The window: the one surface with border + shadow (shadow is none on the scene ground). */
+.ink-bs-win {
+  max-width: 1040px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--raised);
+  box-shadow: var(--shadow-window);
+}
+.ink-bs-bar,
+.ink-bs-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--mute);
+  cursor: default;
+}
+.ink-bs-bar {
+  border-bottom: 1px solid var(--line);
+}
+.ink-bs-file {
+  white-space: nowrap;
+  font-family: var(--mono);
+  color: var(--ink);
+}
+.ink-bs-tools {
+  display: flex;
+  gap: var(--sp-4);
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.ink-bs-foot {
+  border-top: 1px solid var(--line);
+}
+.ink-bs-status {
+  color: var(--open);
+  font-weight: 500;
+}
+
+.ink-bs-src {
+  padding-block: var(--sp-4);
+  border-bottom: 1px solid var(--line);
+  cursor: text;
+}
+.ink-bs-src .bpmn-src {
+  font-size: 13px;
+  scrollbar-width: thin;
+}
+.ink-bs-src .ln {
+  padding-inline: var(--sp-4);
+}
+/* Diagrams scroll in their own box below the width where labels stay >= 12px. */
+.ink-bs-diagram {
+  padding: var(--sp-5) var(--sp-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  /* Overflow cue: a darker hairline on each edge that still has content past it.
+     The two `local` covers ride on the content's ends and hide the line once an
+     end is reached (backgrounds paint under the diagram, so marks cross it). */
+  --cue: color-mix(in oklab, var(--ink) 38%, transparent);
+  background:
+    linear-gradient(var(--raised), var(--raised)) left / 2px 100% no-repeat local,
+    linear-gradient(var(--raised), var(--raised)) right / 2px 100% no-repeat local,
+    linear-gradient(var(--cue), var(--cue)) left / 1px 100% no-repeat scroll,
+    linear-gradient(var(--cue), var(--cue)) right / 1px 100% no-repeat scroll;
+}
+.ink-bs-diagram .bpmn-diagram {
+  min-width: 720px;
+  max-width: 960px;
+}
+
+.ink-bs-after {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 44px;
+}
+.ink-bs-replay {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 500 15px/1 var(--sans);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+  cursor: pointer;
+  transition-property: color, transform;
+  transition-duration: var(--dur-hover), var(--dur-press);
+  transition-timing-function: var(--ease-std);
+}
+.ink-bs-replay:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) {
+  .ink-bs-replay:hover {
+    color: var(--accent);
+  }
+}
+
+/* ---- Choreography (JS only) ---- */
+.ink-bs-band[data-mode] {
+  & .bpmn-src .ln {
+    transition: clip-path 240ms var(--ease-drawer);
+  }
+  & .bpmn-src .ln:not([data-on]) {
+    clip-path: inset(0 100% 0 0);
+  }
+  & .bpmn-src .ln[data-cur] {
+    background: color-mix(in oklab, var(--ink) 10%, transparent);
+  }
+  & .bpmn-diagram [data-s] {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    transition-property: opacity, transform, stroke-dashoffset;
+    transition-duration: 280ms;
+    transition-timing-function: var(--ease-drawer);
+  }
+  & .bpmn-diagram [data-s]:not([data-on]) {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  /* --len is the edge's length in user units (from InvoiceDiagram). Dashed only while hidden or drawing:
+     on arrival the offset runs to 0, then the dash drops to none at the end of the draw. */
+  & .bpmn-diagram .ed:not([data-on]) {
+    stroke-dasharray: var(--len) var(--len);
+    stroke-dashoffset: var(--len);
+    transform: none;
+    transition:
+      opacity 280ms var(--ease-drawer),
+      stroke-dashoffset 280ms var(--ease-drawer),
+      stroke-dasharray 0s;
+  }
+  & .bpmn-diagram .ed[data-on] {
+    stroke-dasharray: none;
+    transition:
+      opacity 280ms var(--ease-drawer),
+      stroke-dashoffset 280ms var(--ease-drawer),
+      stroke-dasharray 0s 280ms allow-discrete;
+  }
+}
+/* Played once on narrow screens: status, toolbar and links arrive together at the end. */
+.ink-bs-band[data-mode="play"] :is(.ink-bs-status, .ink-bs-tools, .ink-bs-links) {
+  transition-property: opacity, clip-path;
+  transition-duration: 300ms;
+  transition-timing-function: var(--ease-drawer);
+}
+
+/* ---- Pinned (wide screens with motion) ---- */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) and (min-width: 900px) {
+  .ink-bs-band[data-scene="bpmnscript"]:not([data-scene-disabled]) {
+    height: 420vh;
+    padding-block: 0;
+
+    & .ink-bs-stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      align-content: center;
+      padding-top: var(--hdr);
+      isolation: isolate;
+    }
+  }
+}
+
+/* ---- What it is, round trip (paper) ---- */
+.ink-bs-intro .bs-what {
+  margin-top: var(--sp-6);
+  max-width: 1080px;
+}
+.ink-bs-intro .bs-what-terms dd {
+  font-family: var(--s-font-prose);
+}
