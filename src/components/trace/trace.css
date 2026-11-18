@@ -1,0 +1,210 @@
+/* Trace layer: the line, its lanes, the head and the station pads. */
+:root[data-design="thread"] {
+  /* ---- Pads: 11px stations on the trace in the left gutter ---- */
+  /* A pad's parent starts at the content edge; the pad hangs half a gutter to its left. */
+  :where(:has(> .pad)) {
+    position: relative;
+  }
+  .pad {
+    --la-on: 0px; /* no lanes under 760: every pad sits on the gutter line */
+    position: absolute;
+    /* Centred through left/top (not translate) so a section's own left/top fully replaces it. */
+    left: calc(var(--g) / -2 + var(--lane, 0) * var(--la-on) - var(--pad-size, 11px) / 2);
+    top: calc(var(--pad-y, 0.5lh) - var(--pad-size, 11px) / 2);
+    z-index: calc(var(--z-trace) + 1);
+    width: var(--pad-size, 11px);
+    height: var(--pad-size, 11px);
+    box-sizing: border-box;
+    border: 1.5px solid var(--line-3);
+    border-radius: 50%;
+    background: var(--bg);
+    transition-property: background-color, border-color;
+    transition-duration: var(--dur-hover);
+    transition-timing-function: var(--ease-std);
+  }
+  @media (min-width: 760px) {
+    .pad {
+      --la-on: var(--la);
+    }
+  }
+  .pad[data-passed] {
+    background: var(--acc);
+    border-color: var(--acc);
+  }
+  /* 40px hit area (44 on touch), centred; stations are far enough apart that these never overlap. */
+  .pad::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    translate: -50% -50%;
+  }
+  @media (pointer: coarse) {
+    .pad::before {
+      width: 44px;
+      height: 44px;
+    }
+  }
+  .pad:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+  /* The overlap sentences are long: wrap instead of running off a phone screen. */
+  .pad::after {
+    width: max-content;
+    max-width: min(62ch, calc(100vw - var(--pad) - 24px));
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  /* ---- The line ---- */
+  .trace {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: var(--z-trace);
+    pointer-events: none;
+    user-select: none;
+  }
+  .trace > *,
+  .trace-reveal > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .trace svg {
+    overflow: visible;
+  }
+  /* Only the reveal pair and the head are promoted up front (below). The page-tall base is static
+     and the lit lane/lead/tail SVGs are small: promoting them all cost more than it saved. */
+  .trace-lanes > svg {
+    position: absolute;
+  }
+  .trace path {
+    fill: none;
+  }
+  /* Unlit spine and lanes share the hollow pads' value (>= 3:1 once pixel-snapped, see the layer);
+     the lit accent sits above both. */
+  .trace-base path {
+    stroke: var(--line-3);
+    stroke-width: 1.25;
+  }
+  .trace-lit path {
+    stroke: var(--acc);
+    stroke-width: 1.5;
+  }
+  .trace-lead path,
+  .trace-tail path,
+  .trace-lane path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  /* A scene showing this lane's entry (data-scene-lit on its pad) lights the whole lane. */
+  .trace-lane[data-scene-lit] path {
+    stroke-dashoffset: 0 !important;
+  }
+  /* The lit spine: a clip box and its content moved in opposite directions (compositor only). */
+  .trace-reveal {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    transform: translate3d(0, -100%, 0);
+    will-change: transform;
+  }
+  .trace-reveal > div {
+    width: 100%;
+    height: 100%;
+    transform: translate3d(0, 100%, 0);
+    will-change: transform;
+  }
+  /* Stepping aside for a full-bleed scene (the Player's cover state); the rail does the same. */
+  .trace,
+  .t-rail {
+    transition-property: opacity, visibility;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-std);
+  }
+  .trace[data-covered],
+  .t-rail[data-covered] {
+    opacity: 0;
+    visibility: hidden;
+  }
+  /* Approaching that scene: nothing of the trace below its top, so the line runs into the screenshot. */
+  .trace[data-clip] {
+    /* Sideways unclipped: task boxes reach past the layer box. */
+    clip-path: inset(0 -100vw calc(100% - var(--clip-y, 100%)) 0);
+  }
+  .trace-head {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--acc);
+    /* ponytail: always promoted (a 9px layer); toggling will-change per scroll burst cost more than it saved. */
+    will-change: transform;
+    transition: opacity var(--dur-fade) var(--ease-std);
+  }
+  .trace-head[data-hidden],
+  .trace-head[data-end],
+  .trace-head[data-away] {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .trace-lit,
+    .trace-reveal,
+    .trace-head,
+    .trace-tokens {
+      display: none;
+    }
+  }
+
+  /* Parallel gateways where a lane forks and joins: unlit like the line, lit by the same reveal. */
+  .trace-base .trace-gw {
+    fill: var(--bg);
+    stroke: var(--line-3);
+    stroke-width: 1.25;
+  }
+  .trace-base .trace-gw-plus {
+    stroke: var(--line-3);
+    stroke-width: 1.25;
+  }
+  .trace-lit .trace-gw {
+    fill: var(--acc);
+    stroke: var(--acc);
+    stroke-width: 1.25;
+  }
+  .trace-lit .trace-gw-plus {
+    stroke: var(--acc-ink);
+    stroke-width: 1.5;
+  }
+  /* Tokens: one per lane (split off at the fork), one per task half. */
+  .trace-token {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--acc);
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+}
+
+/* No JS: no drawn trace, so a plain unlit gutter line keeps the pads on something. */
+@media (scripting: none) {
+  :root[data-design="thread"] main {
+    position: relative;
+  }
+  :root[data-design="thread"] main::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(max(0px, (100% - var(--max)) / 2) + var(--pad) + var(--g) / 2 - 0.625px);
+    width: 1.25px;
+    background: var(--line-3);
+    pointer-events: none;
+  }
+}

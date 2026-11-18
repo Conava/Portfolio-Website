@@ -1,0 +1,97 @@
+/* Trace hero: name, lede, status line. The header is sticky (in flow), so no --hdr offset here. */
+:root[data-design="thread"] {
+  .t-hero {
+    --name: clamp(58px, 14.4vw, 200px);
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "name" "lede" "aside" "career";
+    gap: var(--sp-7) 56px;
+    padding-top: clamp(40px, 10vh, 120px);
+    padding-bottom: 0; /* the next section brings its own top padding */
+  }
+  .t-hero .t-name {
+    grid-area: name;
+    font-size: var(--name);
+    /* Optical: pull the M's side bearing onto the content edge. */
+    margin-left: -0.04em;
+  }
+  .t-ln {
+    display: block;
+  }
+  /* The period: a square on the baseline, the first station of the trace. */
+  .t-period {
+    display: inline-block;
+    /* Never smaller than a pad (11px); at display sizes it is the type's own period. */
+    width: max(11px, 0.15em);
+    height: max(11px, 0.15em);
+    margin-left: 0.04em;
+    background: var(--acc);
+    border-radius: 1px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform var(--dur-press) var(--ease-std);
+  }
+  .t-period:active {
+    transform: scale(0.97);
+  }
+  .t-hero-lede {
+    grid-area: lede;
+    margin-top: var(--sp-6);
+  }
+  .t-hero-aside {
+    grid-area: aside;
+    min-width: 0;
+  }
+
+  /* The status line: the one place in the hero that keeps rules. */
+  .t-status {
+    margin: 0;
+    padding: 11px 0;
+    border-block: 1px solid var(--line);
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+
+  .t-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+  }
+
+  /* 960-1199: name across, then lede | status on one last baseline. */
+  @media (min-width: 960px) {
+    .t-hero {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      grid-template-areas: "name name" "lede aside" "career career";
+      align-items: last baseline;
+    }
+    .t-hero-lede {
+      margin-top: 0;
+    }
+  }
+
+  /* >= 1200: status and CTAs move up beside the name (no dead right half), lede under the name. */
+  @media (min-width: 1200px) {
+    .t-hero {
+      /* The aside column keeps a readable measure (>= 340px); the name gives way first. */
+      --name: clamp(58px, 11.6vw, 168px);
+      grid-template-columns: max-content minmax(340px, 1fr);
+      grid-template-areas: "name aside" "lede aside" "career career";
+      grid-template-rows: auto 1fr auto;
+      align-items: start;
+      column-gap: clamp(40px, 4vw, 72px);
+    }
+    .t-hero-lede {
+      margin-top: var(--sp-7);
+    }
+    /* Level the first rule with the cap line of "Marlon" (Mona Sans at lh .86: about .08em down). */
+    .t-hero-aside {
+      margin-top: calc(var(--name) * 0.08);
+    }
+  }
+}

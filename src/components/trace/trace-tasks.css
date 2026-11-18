@@ -1,0 +1,114 @@
+/* Task boxes round each entry: pending dashed, running lit, done solid with a check. */
+:root[data-design="thread"] {
+  .trace-tasks > * {
+    position: absolute;
+  }
+  .trace-task path {
+    fill: none;
+  }
+  .trace-task .trace-task-base {
+    stroke: var(--line-2);
+    stroke-width: 1;
+    stroke-dasharray: 2 5;
+  }
+  .trace-task[data-done] .trace-task-base {
+    stroke: var(--line-3);
+    stroke-dasharray: none;
+  }
+  /* The lit outline of a running box, revealed by its pair's clip (composited, never repainted). */
+  .trace-task-rigs > .trace-rig {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    will-change: transform;
+    /* Closed until linked: above and left of the layer, where nothing is drawn. */
+    transform: translate3d(-100%, -100%, 0);
+  }
+  .trace-rig > div {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    transform: translate3d(100%, 100%, 0);
+  }
+  .trace-task-rigs {
+    position: absolute;
+    inset: 0;
+    /* width set in measure: a reveal near the left edge reaches past the right edge and must not widen the page */
+    overflow-x: clip;
+  }
+  .trace-task-lit {
+    position: absolute;
+    overflow: visible;
+    visibility: hidden;
+  }
+  .trace-task-lit[data-run] {
+    visibility: visible;
+  }
+  .trace-task-lit path {
+    fill: none;
+    stroke: var(--acc);
+    stroke-width: 1.5;
+  }
+  .trace-task .trace-sub rect {
+    fill: var(--bg);
+    stroke: var(--line-2);
+    stroke-width: 1;
+  }
+  .trace-task .trace-sub path {
+    stroke: var(--fg-3);
+    stroke-width: 1.25;
+  }
+  .trace-task[data-done] .trace-sub rect {
+    stroke: var(--line-3);
+  }
+  /* The token running the BPMNscript diagram (in the diagram's user units). */
+  .trace-diagram-tok {
+    fill: var(--acc);
+    opacity: 0;
+  }
+  .trace-tick {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 16px;
+    padding-left: 6px;
+    background: var(--bg);
+    color: var(--fg-3);
+    font: 400 12px/1 var(--mono);
+    white-space: nowrap;
+    opacity: 0;
+    transform: scale(0.4);
+    transform-origin: 100% 50%;
+    /* A transition, not a scroll-linked animation: a layer only while it runs. */
+    transition:
+      opacity 240ms var(--ease-std),
+      transform 240ms var(--ease-out-quart);
+  }
+  .trace-tick[data-done] {
+    opacity: 1;
+    transform: none;
+  }
+  .trace-tick svg {
+    display: block;
+  }
+  .trace-tick circle {
+    fill: var(--acc);
+  }
+  .trace-tick path {
+    fill: none;
+    stroke: var(--acc-ink);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .trace-task-toks > .trace-token,
+    .trace-task-rigs {
+      display: none;
+    }
+    .trace-tick {
+      transition: none;
+    }
+  }
+}

@@ -1,0 +1,348 @@
+/* The hero's career diagram: a BPMN pool, Work and Education lanes, on one month axis. */
+:root[data-design="thread"] {
+  .t-career {
+    grid-area: career;
+    margin: 0;
+    min-width: 0;
+  }
+  .t-career-cap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 18px;
+    margin-bottom: var(--sp-3);
+  }
+  /* Legend: the same swatch as a running and a planned task. */
+  .cg-key::before {
+    content: "";
+    display: inline-block;
+    width: 22px;
+    height: 10px;
+    margin-right: 7px;
+    vertical-align: -1px;
+    box-sizing: border-box;
+    border-radius: 3px;
+  }
+  .cg-key[data-kind="now"]::before {
+    border: 1.5px solid var(--acc);
+    background: color-mix(in srgb, var(--acc) 14%, var(--bg));
+  }
+  .cg-key[data-kind="next"]::before {
+    border: 1.25px dashed var(--line-3);
+  }
+  /* Phones scroll the diagram sideways; it keeps a readable minimum width. */
+  .t-career-scroll {
+    overflow-x: auto;
+    padding: 4px 4px 8px 0;
+    /* rtl puts the scroll start on the right (today); the diagram itself stays ltr. */
+    direction: rtl;
+  }
+  .t-career-scroll > .cg {
+    direction: ltr;
+  }
+  /* A left edge fade tells phones there is more history to scroll to; it clears at the left end. */
+  @media (max-width: 759px) {
+    @supports (animation-timeline: scroll()) {
+      .t-career-scroll {
+        mask-image: linear-gradient(90deg, transparent, #000 var(--fade, 36px));
+        animation: cg-fade linear both;
+        animation-timeline: scroll(self inline);
+      }
+    }
+  }
+  @property --fade {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 36px;
+  }
+  @keyframes cg-fade {
+    to {
+      --fade: 0px;
+    }
+  }
+  .cg {
+    --lab: 132px;
+    --l0: calc(var(--lab) + var(--ev));
+    --r0: 20px;
+    --ln: var(--line-3);
+    position: relative;
+    min-width: 860px;
+  }
+  .cg-at {
+    position: absolute;
+    left: calc(var(--l0) + (100% - var(--l0) - var(--r0)) * var(--x));
+  }
+  .cg-draw {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Lanes: one pool, two labelled bands. */
+  .cg-lane {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border: 1px solid var(--line-2);
+  }
+  .cg-lane + .cg-lane {
+    margin-top: -1px;
+  }
+  .cg-lane[data-band="edu"] {
+    background: color-mix(in srgb, var(--bg-3) 55%, transparent);
+  }
+  .cg-lab {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--lab);
+    display: flex;
+    align-items: center;
+    padding-left: 14px;
+    border-right: 1px solid var(--line-2);
+    font: 600 14px/1.2 var(--sans);
+    color: var(--fg);
+  }
+  /* Phones: BPMN's own vertical lane labels, so the axis gets the width. */
+  @media (max-width: 759px) {
+    .cg {
+      --lab: 34px;
+    }
+    .cg-lab {
+      justify-content: center;
+      padding: 0;
+      writing-mode: vertical-rl;
+      rotate: 180deg;
+      border-right: 0;
+      border-left: 1px solid var(--line-2);
+      font-size: 13px;
+    }
+  }
+
+  .cg-tick {
+    top: 0;
+    bottom: 26px; /* clear of the today label */
+    padding: 4px 0 0 6px;
+    border-left: 1px solid var(--line);
+    font: 400 12px/1 var(--mono);
+    color: var(--fg-3);
+  }
+  .cg-start {
+    position: absolute;
+    top: 0;
+    left: var(--lab);
+    overflow: visible;
+  }
+  .cg-line {
+    fill: none;
+    stroke: var(--ln);
+    stroke-width: 1.25;
+  }
+  /* The start event: a thin ring; the page ends on the thick one beside the email. */
+  .cg-se {
+    fill: var(--bg);
+    stroke: var(--acc);
+    stroke-width: 1.5;
+  }
+  .cg-gwd {
+    fill: var(--bg);
+    stroke: var(--ln);
+    stroke-width: 1.25;
+  }
+
+  /* Sequence flow along each lane's first row; boxes sit on top of it. */
+  .cg-flow {
+    width: calc((100% - var(--l0) - var(--r0)) * var(--w));
+    border-top: 1.25px solid var(--ln);
+    margin-top: -0.6px;
+  }
+  /* After a running task: the flow continues past today. */
+  .cg-flow.cg-on {
+    border-top-style: dashed;
+    border-top-color: var(--acc);
+  }
+  .cg-flow.cg-on::after {
+    content: "";
+    position: absolute;
+    right: -2px;
+    top: -4.6px;
+    border: 4px solid transparent;
+    border-right: 0;
+    border-left: 7px solid var(--acc);
+  }
+
+  /* Tasks. */
+  .cg-task {
+    display: flex;
+    align-items: center;
+    width: calc((100% - var(--l0) - var(--r0)) * var(--w) - 6px);
+    height: 30px;
+    margin: -15px 0 0 3px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    border: 1.25px solid var(--ln);
+    border-radius: var(--r-2);
+    background: var(--bg);
+    color: var(--fg-2);
+    font: 500 13px/1 var(--sans);
+    white-space: nowrap;
+    text-decoration: none;
+    transition: border-color var(--dur-hover) var(--ease-std);
+  }
+  /* Arrowhead of the incoming flow. */
+  .cg-task::before {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 50%;
+    margin-top: -4px;
+    border: 4px solid transparent;
+    border-right: 0;
+    border-left: 7px solid var(--ln);
+  }
+  .cg-task:hover {
+    border-color: var(--fg);
+    color: var(--fg);
+  }
+  .cg-task:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+  /* Running: lit, ending on the today line. */
+  .cg-task[data-kind="now"] {
+    width: calc((100% - var(--l0) - var(--r0)) * var(--w) - 3px);
+    border: 1.5px solid var(--acc);
+    background: color-mix(in srgb, var(--acc) 14%, var(--bg));
+    color: var(--fg);
+    font-weight: 600;
+  }
+  /* Upcoming: dashed, open to the right. */
+  .cg-task[data-kind="next"] {
+    border-style: dashed;
+    border-right: 0;
+    border-radius: var(--r-2) 0 0 var(--r-2);
+    width: calc((100% - var(--l0) - var(--r0)) * var(--w) - 3px);
+    color: var(--fg-2);
+  }
+  .cg-task[data-out] {
+    padding: 0;
+  }
+  .cg-task[data-out] .cg-l {
+    position: absolute;
+    left: calc(100% + 28px);
+  }
+  /* A short branch box: its label sits left of the fork gateway, where the row is empty. */
+  .cg-task[data-out][data-branch] .cg-l {
+    left: auto;
+    right: calc(100% + 26px);
+  }
+  /* A box never clips its label: if the date span is shorter it grows right, past the end of the span
+     (the today line and token still mark the true end). */
+  .cg-task:not([data-out]) {
+    min-width: max-content;
+  }
+  /* Short running box: tight padding so the label clears the token on the today line. */
+  .cg-task[data-kind="now"] {
+    padding: 0 18px 0 5px;
+    font-size: 12.5px;
+  }
+  /* A running task's planned end after today. */
+  .cg-rest {
+    width: calc((100% - var(--l0) - var(--r0)) * var(--w));
+    height: 30px;
+    margin-top: -15px;
+    box-sizing: border-box;
+    border: 1.25px dashed var(--acc);
+    border-left: 0;
+    border-radius: 0 var(--r-2) var(--r-2) 0;
+    background: var(--bg);
+  }
+
+  /* An overlapping entry on its own row: forked off the row above, joined back when done. */
+  .cg-br {
+    width: calc((100% - var(--l0) - var(--r0)) * var(--w));
+  }
+  .cg-br::before,
+  .cg-br[data-join]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 16px;
+    height: 100%;
+    border-bottom: 1.25px solid var(--ln);
+    margin-top: 0.6px;
+  }
+  .cg-br::before {
+    left: -14px;
+    border-left: 1.25px solid var(--ln);
+  }
+  .cg-br[data-join]::after {
+    right: -14px;
+    border-right: 1.25px solid var(--ln);
+  }
+
+  /* Parallel gateways on the fork and join corners. */
+  .cg-gw {
+    position: absolute;
+    top: 100%;
+    left: -14px;
+    width: 10px;
+    height: 10px;
+    margin: -4.4px 0 0 -5px;
+    box-sizing: border-box;
+    border: 1.25px solid var(--ln);
+    background:
+      linear-gradient(var(--ln), var(--ln)) center / 1.25px 5px no-repeat,
+      linear-gradient(var(--ln), var(--ln)) center / 5px 1.25px no-repeat,
+      var(--bg);
+    rotate: 45deg;
+  }
+  .cg-gw[data-join] {
+    left: calc(100% + 14px);
+  }
+  .cg-today {
+    width: 0;
+    border-left: 1.5px solid var(--acc);
+    margin-left: -0.75px;
+  }
+  .cg-now {
+    margin-top: 0;
+    translate: -50% 0;
+    padding: 2px 6px;
+    background: var(--bg);
+    font: 500 12px/1 var(--mono);
+    color: var(--acc);
+    white-space: nowrap;
+  }
+  /* The token on what runs now. */
+  .cg-tok {
+    width: 9px;
+    height: 9px;
+    margin: -4.5px 0 0 -4.5px;
+    border-radius: 50%;
+    background: var(--acc);
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+
+  /* On load the diagram inks in left to right, then the tokens land on today. */
+  @media (prefers-reduced-motion: no-preference) {
+    .cg {
+      animation: cg-ink 1.3s cubic-bezier(0.65, 0, 0.35, 1) 0.3s both;
+    }
+    .cg-tok {
+      animation: cg-tok 0.35s var(--ease-std) 1.5s both;
+    }
+  }
+  @keyframes cg-ink {
+    from {
+      clip-path: inset(-8px 100% -8px 0);
+    }
+    to {
+      clip-path: inset(-8px -8px -8px 0);
+    }
+  }
+  @keyframes cg-tok {
+    from {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+  }
+}

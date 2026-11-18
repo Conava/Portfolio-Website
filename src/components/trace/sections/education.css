@@ -1,0 +1,237 @@
+/* Trace education: three ruled columns; pinned scene from 960 px with motion allowed. */
+:root[data-design="thread"] {
+  /* The pin starts at the scene's top, so the section's top padding is only the pin's own
+     (sp-7): Work's bottom padding already is the gap, no ~300px band between the two. */
+  .t-edu {
+    padding-block: 0 var(--section);
+  }
+  .t-edu-pin {
+    padding-top: var(--sp-7);
+  }
+  .t-edu-intro {
+    margin-top: var(--sp-5);
+  }
+  .t-edu-wrap {
+    position: relative;
+  }
+  .t-edu-head {
+    margin-bottom: var(--sp-7);
+  }
+  .t-edu-scene {
+    position: relative;
+    isolation: isolate;
+  }
+  .t-edu-stage {
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+  .t-edu-col {
+    position: relative;
+    min-width: 0;
+    padding: var(--sp-6) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  /* Sub-station on the column's top rule: 7 px, hollow until the trace reaches the school. Under
+     960 it is the school's station; from 960 a non-interactive dot marking the gutter pad. */
+  .t-edu-body > :is(.pad, .t-edu-dot) {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    box-sizing: border-box;
+    border: 1.25px solid var(--line-3);
+    border-radius: 50%;
+    background: var(--bg);
+    transition-property: background-color, border-color;
+    transition-duration: 450ms;
+    transition-timing-function: var(--ease-out-quart);
+  }
+  .t-edu-dot,
+  .t-edu-gpad {
+    display: none;
+  }
+  .t-edu-body > :is(.pad, .t-edu-dot):is([data-scene-lit], [data-passed]),
+  .t-edu-gpad > .pad[data-scene-lit] {
+    border-color: var(--acc);
+    background: var(--acc);
+  }
+  /* The upcoming school is the open end of the line: lit as a ring, never filled. */
+  :is(.t-edu-col, .t-edu-gpad)[data-status="upcoming"] :is(.pad, .t-edu-dot):is([data-scene-lit], [data-passed]) {
+    background: var(--bg);
+  }
+  .t-edu-logo {
+    display: flex;
+  }
+  .t-edu-col h3 {
+    margin-top: var(--sp-6);
+  }
+  .t-edu-deg {
+    margin-top: var(--sp-2);
+    color: var(--fg-2);
+  }
+  .t-edu-col .meta {
+    margin-top: var(--sp-1);
+  }
+  .t-gpa {
+    margin-top: var(--sp-4);
+  }
+  /* SDSU's circled-GPA equivalent: a 26/650 figure on a 1.5 px accent underline. */
+  .t-gpa-fig {
+    font-size: 26px;
+    font-weight: 650;
+    font-stretch: 104%;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    text-decoration: underline 1.5px var(--acc);
+    text-underline-offset: 0.18em;
+  }
+  .t-gpa .meta {
+    margin: 0;
+  }
+  .t-edu-col .t-edu-note {
+    width: fit-content;
+    margin-top: var(--sp-3);
+    max-width: 34ch;
+  }
+  .t-edu-more {
+    display: grid;
+    align-content: start;
+    margin-top: var(--sp-5);
+  }
+
+  /* Stacked schools: each pad sits on the spine, level with its logo plate (like work rows). */
+  @media (max-width: 959px) {
+    .t-edu-body > .pad {
+      top: calc(52px - 3.5px);
+      left: calc(var(--g) / -2 + var(--lane, 0) * var(--la-on) - 3.5px);
+    }
+  }
+  @media (min-width: 960px) {
+    .t-edu-body > .pad {
+      display: none;
+    }
+    .t-edu-dot {
+      display: block;
+      pointer-events: none;
+    }
+    /* Gutter stations, spread down the scene so the trace reaches each school in turn. */
+    .t-edu-gpad {
+      display: block;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .t-edu-gpad > .pad {
+      --pad-y: calc((var(--i) + 1) * 25%);
+      pointer-events: auto;
+    }
+    /* Two shared rows (subgrid): school, then the trigger, so triggers align and an open panel moves nothing beside it. */
+    .t-edu-stage {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: auto auto;
+      border-bottom: 1px solid var(--line);
+    }
+    .t-edu-col {
+      display: grid;
+      grid-row: span 2;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+      align-content: start;
+      padding: var(--sp-7) var(--sp-6) var(--sp-6);
+      border-bottom: 0;
+    }
+    .t-edu-col:first-child {
+      padding-left: 0;
+    }
+    /* The rule between columns sits inside the column (not a border, which the reveal cover's
+       clip would leave showing), so it arrives with its column. */
+    .t-edu-col + .t-edu-col::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      bottom: -1px;
+      left: 0;
+      width: 1px;
+      background: var(--line);
+    }
+    /* Centred on the column's top rule: above the body by the column's top padding plus half the rule. */
+    .t-edu-body > .t-edu-dot {
+      top: calc(-1 * var(--sp-7) - 4px);
+    }
+    .t-edu-col + .t-edu-col .t-edu-dot {
+      left: var(--sp-6);
+    }
+    .t-edu-more .dp-body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+/* The pin: only with scripting, room and motion. Server markup is the final state. */
+@media (scripting: enabled) and (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+  :root[data-design="thread"] {
+    /* A deep-linked panel (#panel-sdsu) lands unpinned from the first paint. */
+    .t-edu-scene:not([data-scene-disabled]):not(:has(.dp-region:target)) {
+      height: 240vh;
+    }
+    /* Pinned: the lit tip runs from 40 % to 85 % down the held screen (the trace layer's PIN_END);
+       each gutter pad sits where it meets the tip at the progress its school starts revealing
+       (--p, from the stage's reveal windows). */
+    .t-edu-scene:not([data-scene-disabled]):not(:has(.dp-region:target)) ~ .t-edu-gpad > .pad {
+      --pad-y: calc(40vh + var(--p) * 45vh + var(--p) * (100% - 100vh));
+    }
+    /* The pin holds the title, the intro and the columns (no empty band above a half-revealed
+       stage); the columns centre in what is left. */
+    .t-edu-scene:not([data-scene-disabled]):not(:has(.dp-region:target)) .t-edu-pin {
+      position: sticky;
+      /* The title rests at header + 24, the spot the station keys and anchors land it at. */
+      top: calc(var(--hdr) + 24px - var(--sp-7));
+      display: flex;
+      flex-direction: column;
+      height: calc(100svh - var(--hdr));
+    }
+    .t-edu-scene:not([data-scene-disabled]):not(:has(.dp-region:target)) .t-edu-stage {
+      margin-block: auto;
+      border: 0;
+    }
+    .t-edu-scene:not([data-scene-disabled]):not(:has(.dp-region:target)) .t-edu-col {
+      border-block: 1px solid var(--line);
+    }
+    /*
+     * The reveal: an opaque --bg cover slides off each column to the right
+     * (left-to-right clip reveal). A transform, so frames composite without
+     * repainting text. --reveal (0..1) is written by the scene; unset = 1 =
+     * cover parked outside the clip, i.e. the final state.
+     */
+    .t-edu-scene:not([data-scene-disabled]):not(:has(.dp-region:target)) :is(.t-edu-col, .t-edu-merge-note) {
+      position: relative;
+      overflow-x: clip;
+    }
+    .t-edu-scene:not([data-scene-disabled]):not(:has(.dp-region:target)) :is(.t-edu-col, .t-edu-merge-note)::after {
+      content: "";
+      position: absolute;
+      inset: -1px; /* 1px past the sides too, so pixel snapping never leaves a rule end showing */
+      z-index: 1;
+      background: var(--bg);
+      transform: translateX(calc(var(--reveal, 1) * 100%));
+      pointer-events: none;
+    }
+    .t-edu-scene[data-active] :is(.t-edu-col, .t-edu-merge-note)::after {
+      will-change: transform;
+    }
+    /* The dot sits above the cover (under it, the cover's layer cost ~17 ms a frame in the A/B) and
+       fades in over the first tenth of its column's reveal, as the cover's edge passes it. */
+    .t-edu-scene .t-edu-dot {
+      z-index: 2;
+      opacity: clamp(0, var(--reveal, 1) * 10, 1);
+    }
+  }
+}
+
+/*
+ * Lane hook: the trace layer lights a lane in full while one of its entry pads
+ * carries data-scene-lit (generic, in the layer's own stylesheet), so nothing
+ * per school is needed here.
+ */
