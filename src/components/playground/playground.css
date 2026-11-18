@@ -1,0 +1,51 @@
+/* Playground skin: an IDE theme of its own, the same whichever site design is active. */
+[data-playground] {
+  --pg-bg: #f5f6f6;
+  --pg-panel: #ffffff;
+  --pg-raised: #ffffff;
+  --pg-line: #dde1e4;
+  --pg-line-2: #c3cacf;
+  --pg-text: #14181b; /* 16.5:1 bg, 17.9:1 panel */
+  --pg-text-2: #3d464d; /* 8.9:1 bg, 9.6:1 panel */
+  --pg-mute: #59636b; /* 5.7:1 bg, 6.1:1 panel */
+  --pg-error: #b42318; /* 6.1:1 bg, 6.6:1 panel */
+  --pg-warn: #8a5300; /* 5.8:1 bg, 6.3:1 panel */
+  --pg-diagram-fill: #ffffff;
+  --pg-diagram-stroke: #3d464d;
+  --pg-diagram-label: #14181b;
+  --pg-shadow-menu: 0 24px 48px -24px rgb(18 21 28 / 0.28);
+  --pg-grid: radial-gradient(circle, var(--pg-line-2) 1px, transparent 1.5px) 0 0 / 20px 20px;
+
+  --pg-side: #eceef0;
+  --pg-accent: #2456d3; /* 5.9:1 panel */
+  --pg-select: rgb(36 86 211 / 0.12);
+  --pg-status-bg: #2456d3;
+  --pg-status-fg: #ffffff; /* 5.9:1 */
+  --pg-font-ui: var(--font-mona), system-ui, sans-serif;
+  --pg-font-mono: var(--font-spline-mono), ui-monospace, monospace;
+  --pg-r-0: 0;
+  --pg-r-1: 3px;
+  --pg-r-2: 8px;
+}
+
+.dark [data-playground] {
+  --pg-bg: #0d1011;
+  --pg-panel: #12161a;
+  --pg-raised: #181d22;
+  --pg-line: #232a30;
+  --pg-line-2: #343e46;
+  --pg-text: #e8ecef; /* 16.1:1 bg, 15.3:1 panel, 14.3:1 raised */
+  --pg-text-2: #c0c8ce; /* 11.3:1 bg, 10.7:1 panel */
+  --pg-mute: #8a949c; /* 6.2:1 bg, 5.9:1 panel, 5.5:1 raised */
+  --pg-error: #ff8a80; /* 8.4:1 bg, 8.0:1 panel */
+  --pg-warn: #e3a93b; /* 9.1:1 bg, 8.7:1 panel */
+  --pg-diagram-fill: #181d22;
+  --pg-diagram-stroke: #aab3ba;
+  --pg-diagram-label: #e8ecef;
+  --pg-shadow-menu: 0 24px 48px -24px rgb(0 0 0 / 0.6);
+  --pg-side: #0f1316;
+  --pg-accent: #7aa2ff; /* 7.4:1 bg */
+  --pg-select: rgb(122 162 255 / 0.16);
+  --pg-status-bg: #1d3f9e;
+  --pg-status-fg: #ffffff; /* 8.9:1 */
+}

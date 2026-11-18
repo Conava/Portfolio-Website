@@ -1,0 +1,199 @@
+/* Playground page layout: fills the viewport, no page scroll; each pane scrolls inside itself. */
+.pg-app {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--pg-bg);
+  color: var(--pg-text);
+  font-family: var(--pg-font-ui);
+}
+
+/* Desktop: Explorer | Source | Diagram/XML; the panel runs under source and diagram, like an IDE's. */
+.pg-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: "side src out" "side panel panel";
+  min-height: 0;
+}
+.pg-side {
+  grid-area: side;
+  width: 232px;
+  min-height: 0;
+  border-right: 1px solid var(--pg-line);
+  background: var(--pg-side);
+}
+.pg-app[data-explorer="closed"] .pg-side {
+  display: none;
+}
+.pg-scrim {
+  display: none;
+}
+.pg-src {
+  grid-area: src;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border-right: 1px solid var(--pg-line);
+}
+.pg-editor-box {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.pg-out {
+  grid-area: out;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.pg-out-diagram {
+  flex: 1;
+  min-height: 0;
+}
+.pg-bottom {
+  grid-area: panel;
+  min-width: 0;
+}
+.pg-main > noscript {
+  grid-column: 1 / -1;
+}
+
+/* Diagram or XML: one at a time; the hidden one stays mounted. */
+.pg-app[data-tab="xml"] .pg-out-diagram,
+.pg-app:not([data-tab="xml"]) .pg-xml {
+  display: none;
+}
+
+.pg-xml {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 12px 16px;
+  overflow: auto;
+  background: var(--pg-panel);
+  color: var(--pg-text-2);
+  font: 400 12.5px/1.6 var(--pg-font-mono);
+  tab-size: 2;
+}
+.pg-xml code {
+  font: inherit;
+}
+.pg-xml:focus-visible {
+  outline-offset: -2px;
+}
+
+.pg-notice {
+  margin: 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--pg-line);
+  background: var(--pg-panel);
+  color: var(--pg-text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.pg-share-url {
+  margin: 8px 16px;
+  padding: 6px 8px;
+  border: 1px solid var(--pg-line-2);
+  border-radius: var(--pg-r-1);
+  background: var(--pg-panel);
+  color: var(--pg-text);
+  font: 400 16px/1.3 var(--pg-font-mono);
+}
+
+.pg-nojs {
+  margin: 0;
+  padding: 8px 16px;
+  border-top: 1px solid var(--pg-line);
+  background: var(--pg-panel);
+  color: var(--pg-text-2);
+  font-size: 14px;
+}
+
+/* File drag over the app: one quiet layer, not a modal. */
+.pg-drop {
+  position: absolute;
+  inset: 8px;
+  z-index: var(--z-tip);
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--pg-accent);
+  border-radius: var(--pg-r-2);
+  background: color-mix(in srgb, var(--pg-bg) 88%, transparent);
+  color: var(--pg-text);
+  font-size: 16px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* Phones: Source / Diagram / XML tabs, one pane at a time; the explorer is a drawer from the left. */
+@media (max-width: 899.98px) {
+  .pg-main {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: "tabs" "pane" "panel";
+  }
+  .pg-main > .pg-tabs {
+    grid-area: tabs;
+  }
+  .pg-src,
+  .pg-out {
+    grid-area: pane;
+    border-right: 0;
+  }
+  .pg-app[data-tab="source"] .pg-out,
+  .pg-app:not([data-tab="source"]) .pg-src {
+    display: none;
+  }
+  .pg-side,
+  .pg-app[data-explorer="closed"] .pg-side {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: calc(var(--z-header) + 2);
+    display: block;
+    width: min(300px, 85vw);
+    box-shadow: var(--pg-shadow-menu);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition-property: transform, visibility;
+    transition-duration: var(--dur-tip-out);
+    transition-timing-function: var(--ease-drawer);
+  }
+  .pg-app[data-explorer="open"] .pg-side {
+    transform: none;
+    visibility: visible;
+    transition-duration: var(--dur-tip-in);
+  }
+  .pg-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-header) + 1);
+    background: rgb(0 0 0 / 0.4);
+  }
+}
+
+/* Before hydration the panel follows the viewport: closed on phones. */
+@media (max-width: 899.98px) {
+  .pg-app[data-panel-default] .pg-bottom {
+    display: none;
+  }
+}
+
+/* While the source does not compile the diagram is the last good one: dimmed, watermark untouched. */
+.pg-out-diagram[data-stale] .djs-container > svg {
+  opacity: 0.5;
+}
+.pg-out-diagram .djs-container > svg {
+  transition: opacity var(--dur-hover) var(--ease-std);
+}
+
+/* No file open: no diagram either (the last one belongs to a closed file). */
+.pg-out-diagram[data-nofile] .pg-diagram {
+  visibility: hidden;
+}

@@ -1,0 +1,58 @@
+/* Monaco host plus the server-rendered source it replaces; both share box, font size and line height. */
+.pg-editor {
+  --s-text-2: var(--pg-text-2);
+  --s-accent: var(--pg-accent);
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--pg-panel);
+  color: var(--pg-text);
+}
+
+.pg-editor-host {
+  position: absolute;
+  inset: 0;
+}
+.pg-editor:not([data-mounted]) .pg-editor-host {
+  visibility: hidden;
+}
+
+.pg-editor-fallback {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  padding: 12px 0;
+}
+.pg-editor-fallback .bpmn-src {
+  counter-reset: ln;
+  font-size: 14px;
+  line-height: 22px;
+  overflow: visible;
+}
+/* Line numbers drawn like Monaco's gutter, so the text does not move when it takes over. */
+.pg-editor-fallback .bpmn-src .ln::before {
+  counter-increment: ln;
+  content: counter(ln);
+  display: inline-block;
+  width: 3ch;
+  margin-right: 10px;
+  text-align: right;
+  color: var(--pg-mute);
+}
+@media (pointer: coarse) {
+  .pg-editor-fallback .bpmn-src {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
+
+/* Monaco renders "bold" as 700; keywords use 600. */
+.pg-editor .monaco-editor .mtkb {
+  font-weight: 600;
+}
+
+/* The site's text-link underline must not reach Monaco's widgets (suggest labels are links). */
+.pg-editor .monaco-editor a {
+  text-decoration: none;
+}
