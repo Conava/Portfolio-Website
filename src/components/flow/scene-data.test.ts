@@ -45,12 +45,13 @@ test("counts come from the copy: services, the migration, the pipeline lanes, on
   const d = sceneData(await getHomeContent("en"), "2026-11");
   expect(d.services).toBe(5);
   expect(d.migrate).toEqual([9, 10]);
-  expect(d.stages).toEqual([1, 1, 3, 1, 1]);
+  expect(d.stages).toEqual([1, 1, 1, 3, 1, 1, 1]);
   expect(d.jobs.map((j) => j.id)).toEqual(["otto", "uhh-ta", "msg-life"]);
   expect(d.jobs[0].months).toBe(11);
   expect(d.prs).toBe(6);
-  expect(d.duxProjects).toBe(3);
-  expect(d.projects).toBe(4);
+  // Dux Player with its plugins and dux-cast is one projects entry after devline, then the other four.
+  expect(d.shots).toBe(6);
+  expect(d.projects).toBe(5);
   expect(sceneData(await getHomeContent("de"), "2026-11")).toMatchObject({ services: 5, migrate: [9, 10] });
 });
 

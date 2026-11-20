@@ -55,11 +55,6 @@
     inherits: false;
     initial-value: 36px;
   }
-  @keyframes cg-fade {
-    to {
-      --fade: 0px;
-    }
-  }
   .cg {
     --lab: 132px;
     --l0: calc(var(--lab) + var(--ev));
@@ -236,7 +231,7 @@
   }
   /* A box never clips its label: if the date span is shorter it grows right, past the end of the span
      (the today line and token still mark the true end). */
-  .cg-task:not([data-out]) {
+  .cg-task:not([data-out]):not([data-open]) {
     min-width: max-content;
   }
   /* Short running box: tight padding so the label clears the token on the today line. */
@@ -244,16 +239,9 @@
     padding: 0 18px 0 5px;
     font-size: 12.5px;
   }
-  /* A running task's planned end after today. */
-  .cg-rest {
-    width: calc((100% - var(--l0) - var(--r0)) * var(--w));
-    height: 30px;
-    margin-top: -15px;
-    box-sizing: border-box;
-    border: 1.25px dashed var(--acc);
-    border-left: 0;
-    border-radius: 0 var(--r-2) var(--r-2) 0;
-    background: var(--bg);
+  /* An open-ended box stops exactly on the today line: it does not grow, so keep its padding tight. */
+  .cg-task[data-open] {
+    padding-right: 9px;
   }
 
   /* An overlapping entry on its own row: forked off the row above, joined back when done. */
@@ -331,18 +319,24 @@
       animation: cg-tok 0.35s var(--ease-std) 1.5s both;
     }
   }
-  @keyframes cg-ink {
-    from {
-      clip-path: inset(-8px 100% -8px 0);
-    }
-    to {
-      clip-path: inset(-8px -8px -8px 0);
-    }
+}
+
+@keyframes cg-fade {
+  to {
+    --fade: 0px;
   }
-  @keyframes cg-tok {
-    from {
-      opacity: 0;
-      transform: scale(0.3);
-    }
+}
+@keyframes cg-ink {
+  from {
+    clip-path: inset(-8px 100% -8px 0);
+  }
+  to {
+    clip-path: inset(-8px -8px -8px 0);
+  }
+}
+@keyframes cg-tok {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
   }
 }

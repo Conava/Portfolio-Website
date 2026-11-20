@@ -15,8 +15,8 @@ const EV = 64; // start event and fork gateway, between the lane labels and the 
 /**
  * The hero's career diagram: one BPMN pool with a Work lane and an Education lane on a shared
  * month axis. A start event forks into both lanes; each entry is a task linking to its row
- * below. Running entries are lit and end on the today line (with a token), a planned end after
- * today is dashed, upcoming entries are dashed. Overlapping entries take a row of their own,
+ * below. Running entries are lit: a set end is solid up to it, an open-ended one stops on the today
+ * line (with a token) and its flow continues dashed. Upcoming entries are dashed. Overlapping entries take a row of their own,
  * forked and joined through parallel gateways. Server-rendered: complete without JS.
  */
 export async function TraceCareer({ content, locale, today }: SectionProps) {
@@ -81,7 +81,7 @@ export async function TraceCareer({ content, locale, today }: SectionProps) {
               return (
                 <span key={b.id}>
                   {last && <i className="cg-flow cg-at" style={at(0, last.x0, cy(b.id, 0))} />}
-                  {last?.kind === "now" && !last.rest && <i className="cg-flow cg-on cg-at" style={at(last.x1, 1 - last.x1, cy(b.id, 0))} />}
+                  {last?.kind === "now" && last.end === null && <i className="cg-flow cg-on cg-at" style={at(last.x1, 1 - last.x1, cy(b.id, 0))} />}
                 </span>
               );
             })}
@@ -98,11 +98,6 @@ export async function TraceCareer({ content, locale, today }: SectionProps) {
                   {x.kind === "done" && <b className="cg-gw" data-join="" />}
                 </i>
               ))}
-            {layout.tasks
-              .filter((x) => x.rest !== null)
-              .map((x) => (
-                <i key={x.id} className="cg-rest cg-at" style={at(x.x1, x.rest! - x.x1, cy(x.band, x.row))} />
-              ))}
             <i className="cg-today cg-at" style={{ ...at(layout.today), top: AXIS - 4, height: H - AXIS + 12 }} />
             <span className="cg-now cg-at" style={{ ...at(layout.today), top: H + 8 }}>
               {formatMonth(today, locale)}
@@ -115,6 +110,7 @@ export async function TraceCareer({ content, locale, today }: SectionProps) {
               aria-label={meta.get(x.id)!.aria}
               className="cg-task cg-at"
               data-kind={x.kind}
+              data-open={x.kind === "now" && x.end === null ? "" : undefined}
               data-out={x.out ? "" : undefined}
               data-branch={x.row > 0 ? "" : undefined}
               style={at(x.x0, x.x1 - x.x0, cy(x.band, x.row))}

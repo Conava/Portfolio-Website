@@ -34,8 +34,8 @@
   .trace-task-rigs {
     position: absolute;
     inset: 0;
-    /* width set in measure: a reveal near the left edge reaches past the right edge and must not widen the page */
-    overflow-x: clip;
+    /* width and height set in measure: a reveal reaching past the right edge or the page end must not widen or lengthen the page */
+    overflow: clip;
   }
   .trace-task-lit {
     position: absolute;

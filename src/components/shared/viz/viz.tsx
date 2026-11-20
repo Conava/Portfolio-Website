@@ -21,7 +21,7 @@ export async function Viz({ viz, github, locale }: { viz: VizData; github: Githu
       return <PrDots prs={prs} fetchedAt={github.fetchedAt} caption={viz.caption} locale={locale} />;
     }
     case "pipeline":
-      return <Pipeline stages={viz.stages} caption={viz.caption} locale={locale} />;
+      return <Pipeline stages={viz.stages} hooks={viz.hooks} standalone={viz.standalone} caption={viz.caption} locale={locale} />;
     case "pipeline-compare":
       return <PipelineCompare before={viz.before} after={viz.after} caption={viz.caption} />;
     case "course-map":

@@ -14,7 +14,7 @@
       ],
       "panel": {
         "did": [
-          "A Claude Code plugin that takes a feature from an idea to merge-ready code: brainstorm, test-driven plan, implementation, review, documentation and a final deep review. I approve the spec and the plan and make the final merge call. The rest runs on its own.",
+          "I approve the spec and the plan and make the final merge call. The rest runs on its own.",
           "The planner gives every task its own files and orders the tasks in waves by dependency, so agents implement a wave in parallel git worktrees without merge conflicts.",
           "Every task gets its own review. Blocking findings go back to the implementer, and after three failed rounds the planner rewrites the approach.",
           "Security hooks deny destructive commands and reads of secrets and ask before risky ones, which lets a run go unattended.",
@@ -22,23 +22,167 @@
         ],
         "viz": {
           "type": "pipeline",
-          "caption": "devline pipeline stages",
+          "caption": "Only the three manual approval gates stop the run. In between, hooks block destructive commands and secret reads.",
           "stages": [
             {
-              "label": "Brainstorm"
+              "id": "brainstorm",
+              "label": "Brainstorm",
+              "skill": "brainstorm",
+              "approval": true
             },
             {
-              "label": "Plan"
+              "id": "design",
+              "label": "Design system",
+              "skill": "design",
+              "optional": true,
+              "agents": [
+                {
+                  "id": "designer",
+                  "model": "Opus"
+                }
+              ]
             },
             {
+              "id": "plan",
+              "label": "Plan",
+              "skill": "plan",
+              "approval": true,
+              "agents": [
+                {
+                  "id": "planner",
+                  "model": "Opus",
+                  "kb": [
+                    "kb-tdd-workflow",
+                    "kb-blast-radius"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "implement",
               "label": "Implement",
-              "perTask": true
+              "skill": "implement",
+              "perTask": true,
+              "agents": [
+                {
+                  "id": "implementer",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-tdd-workflow",
+                    "kb-engineering"
+                  ]
+                },
+                {
+                  "id": "reviewer",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-blast-radius",
+                    "kb-engineering"
+                  ]
+                },
+                {
+                  "id": "debugger",
+                  "model": "Opus"
+                }
+              ]
             },
             {
-              "label": "Documentation"
+              "id": "docs",
+              "label": "Documentation",
+              "agents": [
+                {
+                  "id": "docs-keeper",
+                  "model": "Sonnet"
+                }
+              ]
             },
             {
-              "label": "Deep review"
+              "id": "deep-review",
+              "label": "Deep review",
+              "skill": "deep-review",
+              "agents": [
+                {
+                  "id": "reviewer",
+                  "model": "Opus",
+                  "kb": [
+                    "kb-blast-radius",
+                    "kb-engineering"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "gate",
+              "label": "Merge or iterate",
+              "gate": true
+            }
+          ],
+          "hooks": [
+            {
+              "id": "validate-bash.sh"
+            },
+            {
+              "id": "validate-write.sh"
+            },
+            {
+              "id": "pre-compact.sh"
+            }
+          ],
+          "standalone": [
+            {
+              "id": "quick",
+              "command": "/devline:quick",
+              "agents": [
+                {
+                  "id": "implementer",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-tdd-workflow",
+                    "kb-engineering"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "debug",
+              "command": "/devline:debug",
+              "agents": [
+                {
+                  "id": "debugger",
+                  "model": "Opus"
+                }
+              ]
+            },
+            {
+              "id": "review",
+              "command": "/devline:review",
+              "agents": [
+                {
+                  "id": "reviewer",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-blast-radius",
+                    "kb-engineering"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "deps",
+              "command": "/devline:deps",
+              "agents": [
+                {
+                  "id": "dependency",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-dependency-management"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "writing",
+              "command": "/writing"
             }
           ]
         }

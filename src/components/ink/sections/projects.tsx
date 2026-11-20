@@ -10,12 +10,14 @@ import { Viz } from "@/components/shared/viz/viz";
 import { RevealOnce } from "@/components/shared/reveal-once";
 import { Link } from "@/i18n/navigation";
 import type { Project } from "@/lib/types";
+import { InkDuxProjects } from "./dux-projects";
 import "./projects-contact.css";
 import { isPageHref } from "@/lib/seo";
 
 /**
  * Ink projects: ruled rows, no cards. devline leads at full h3 size with its pipeline drawn in
  * the row itself (the pipeline is the argument; behind a "read more" it would be easy to miss).
+ * Dux Player follows in its scene band, then the plugins, then the other projects.
  */
 export async function InkProjects({ content, github, locale, today }: SectionProps) {
   const t = await getTranslations("sections");
@@ -59,6 +61,14 @@ export async function InkProjects({ content, github, locale, today }: SectionPro
               </RevealOnce>
             </li>
           )}
+        </ul>
+      </div>
+
+      {/* Dux Player, the plugins and dux-cast come second; the rest stay compact below them. */}
+      <InkDuxProjects content={content} github={github} locale={locale} today={today} />
+
+      <div className="wrap">
+        <ul className="ip-rows">
           {rest.map((p) => (
             <li key={p.id} id={p.id} className="ip-row grid-12">
               <h3>{name(p)}</h3>

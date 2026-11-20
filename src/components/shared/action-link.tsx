@@ -3,13 +3,13 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Project } from "@/lib/types";
-import { ArrowRightIcon, DownloadIcon, ExternalIcon, GithubMark } from "./icons";
+import { ArrowRightIcon, DownloadIcon, ExternalIcon, GithubMark, LinkedinMark } from "./icons";
 import { isPageHref } from "@/lib/seo";
 
 /**
  * A link styled as a button (`.btn`, `.btn-primary` for the section's one main action).
  * Site pages go through the locale-aware Link with a trailing arrow; files (`/resume.pdf`)
- * stay plain unprefixed URLs with a download icon; github.com links lead with the GitHub mark;
+ * stay plain unprefixed URLs with a download icon; github.com and linkedin.com links lead with their mark;
  * other sites keep the external mark. Always an `<a>`, so the delegated analytics listener sees it.
  */
 export function ActionLink({ href, children, primary }: { href: string; children: ReactNode; primary?: boolean }) {
@@ -27,7 +27,13 @@ export function ActionLink({ href, children, primary }: { href: string; children
   const file = /\.\w+$/.test(href.split(/[?#]/)[0]);
   return (
     <a className={className} href={href} rel={external ? "noopener" : undefined}>
-      {/^https:\/\/github\.com\//.test(href) ? <GithubMark /> : file && href.startsWith("/") && <DownloadIcon />}
+      {/^https:\/\/github\.com\//.test(href) ? (
+        <GithubMark />
+      ) : /^https:\/\/(www\.)?linkedin\.com\//.test(href) ? (
+        <LinkedinMark />
+      ) : (
+        file && href.startsWith("/") && <DownloadIcon />
+      )}
       {children}
       {external && <ExternalIcon />}
       {!external && !file && <ArrowRightIcon />}

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { CSSProperties } from "react";
+import { Fragment, type CSSProperties } from "react";
 import { getTranslations } from "next-intl/server";
 import { TrackedSection } from "@/components/analytics/tracked-section";
 import type { SectionProps } from "@/components/home-types";
@@ -16,7 +16,7 @@ import { DetailPanel } from "@/components/shared/panel/detail-panel";
 import { PanelBody } from "@/components/shared/panel/panel-body";
 import { jobEntries, monthIndex, schoolEntries, Timeline, timelineRange } from "@/components/shared/viz/timeline";
 import { Viz } from "@/components/shared/viz/viz";
-import { DuxRelations } from "@/components/shared/dux-relations";
+import { DuxBuiltOn, DuxRelations } from "@/components/shared/dux-relations";
 import { Link } from "@/i18n/navigation";
 import { formatMonth, formatRange } from "@/lib/format";
 import type { Project, YearMonth } from "@/lib/types";
@@ -330,7 +330,7 @@ export async function TypeHome(props: SectionProps) {
         4,
         "dux",
         sec("dux"),
-        ["Dux Shell", ...dux.projects.map((p) => p.name)],
+        dux.featuredPrs.flatMap((f) => f.label ?? []),
         <div className="ty-in" data-ground={g[4]} data-ty-in>
           {tag(4)}
           <div className="ty-wrap">
@@ -347,21 +347,10 @@ export async function TypeHome(props: SectionProps) {
                 </li>
               ))}
             </ul>
-            {/* The shell's bar: one tab per project below, each of which hangs from its own tab
-                as a connected popout. */}
+            {/* The contributions as a popout of the shell, hanging from its tab. */}
             <div className="ty-pops" data-ground="ink">
-              <nav className="ty-bar" aria-label="Dux">
-                <span className="ty-bar-name" aria-hidden="true">Dux</span>
-                <ul>
-                  {[{ id: "dux-shell", name: "Dux Shell" }, ...dux.projects].map((p) => (
-                    <li key={p.id}>
-                      <a href={`#${p.id}`}>{p.name}</a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
               <article id="dux-shell" className="ty-pop">
-                <h3 className="ty-pop-tab">Dux Shell</h3>
+                <h3 className="ty-pop-tab">{t("dux.contributions")}</h3>
                 <div className="ty-pop-body">
                 <div className="ty-row-id">
                   <p className="ty-meta">
@@ -397,45 +386,6 @@ export async function TypeHome(props: SectionProps) {
                 </div>
                 </div>
               </article>
-              {dux.projects.map((p) => (
-                <article
-                  key={p.id}
-                  id={p.id}
-                  className="ty-pop"
-                  data-dux-shared={p.usedBy ? "" : undefined}
-                >
-                  <h3 className="ty-pop-tab">
-                    <a href={p.url}>{p.name}</a>
-                  </h3>
-                  <div className="ty-pop-body">
-                    <div className="ty-row-id">
-                      <p className="ty-meta">
-                        <RepoFacts
-                          repo={p.repo}
-                          github={github}
-                          locale={locale}
-                        />
-                      </p>
-                      <p className="ty-prose">{p.blurb}</p>
-                      <DuxRelations project={p} projects={dux.projects} locale={locale} />
-                      <p className="btn-row">
-                        <ActionLink href={p.url}>
-                          {t("projects.github")}
-                        </ActionLink>
-                      </p>
-                    </div>
-                    {p.images?.length ? (
-                      <div className="ty-row-body">
-                        <Gallery
-                          images={p.images}
-                          label={p.name}
-                          locale={locale}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                </article>
-              ))}
             </div>
             {dux.panel && (
               <DetailPanel id="dux" name={sec("dux")} section="dux">
@@ -455,15 +405,15 @@ export async function TypeHome(props: SectionProps) {
         5,
         "projects",
         sec("projects"),
-        projects.projects.map((p) => p.name),
+        [...(feature ? [feature] : []), ...dux.projects, ...rest].map((p) => p.name),
         <div className="ty-in" data-ground={g[5]} data-ty-in>
           {tag(5)}
           <div className="ty-wrap">
             {projects.intro && <p className="ty-lede">{projects.intro}</p>}
             <ul className="ty-rows">
               {[...(feature ? [feature] : []), ...rest].map((p, i) => (
+                <Fragment key={p.id}>
                 <li
-                  key={p.id}
                   id={p.id}
                   className="ty-row"
                   data-ty-focus={i === 0 ? "" : undefined}
@@ -510,6 +460,71 @@ export async function TypeHome(props: SectionProps) {
                     )}
                   </div>
                 </li>
+                {p === feature && dux.projects.length > 0 && (
+                  <li className="ty-row ty-row-dux">
+                    {/* Dux Player, the plugins and dux-cast: a Dux bar, each project a popout
+                        hanging from its own tab. */}
+                    <div className="ty-pops" data-ground="ink">
+                      <nav className="ty-bar" aria-label="Dux">
+                        <span className="ty-bar-name" aria-hidden="true">Dux</span>
+                        <ul>
+                          {dux.projects.map((d) => (
+                            <li key={d.id}>
+                              <a href={`#${d.id}`}>{d.name}</a>
+                            </li>
+                          ))}
+                        </ul>
+                      </nav>
+                      {dux.projects.map((d, k) => (
+                        <article
+                          key={d.id}
+                          id={d.id}
+                          className="ty-pop"
+                          data-dux-shared={d.usedBy ? "" : undefined}
+                        >
+                          <h3 className="ty-pop-tab">
+                            <a href={d.url}>{d.name}</a>
+                          </h3>
+                          <div className="ty-pop-body">
+                            <div className="ty-row-id">
+                              <p className="ty-meta">
+                                <RepoFacts
+                                  repo={d.repo}
+                                  github={github}
+                                  locale={locale}
+                                />
+                              </p>
+                              <p className="ty-prose">{d.blurb}</p>
+                              {k === 0 && <DuxBuiltOn locale={locale} />}
+                              <DuxRelations project={d} projects={dux.projects} locale={locale} />
+                              {d.panel ? (
+                                <DetailPanel id={d.id} name={d.name} section="projects" actions={<ActionLink href={d.url}>{t("projects.github")}</ActionLink>}>
+                                  <PanelBody panel={d.panel} />
+                                </DetailPanel>
+                              ) : (
+                                <p className="btn-row">
+                                  <ActionLink href={d.url}>
+                                    {t("projects.github")}
+                                  </ActionLink>
+                                </p>
+                              )}
+                            </div>
+                            {d.images?.length ? (
+                              <div className="ty-row-body">
+                                <Gallery
+                                  images={d.images}
+                                  label={d.name}
+                                  locale={locale}
+                                />
+                              </div>
+                            ) : null}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </li>
+                )}
+                </Fragment>
               ))}
             </ul>
           </div>

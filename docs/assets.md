@@ -43,6 +43,10 @@ Universität Hamburg (the teaching assistant job) keeps its plain name in type: 
 
 `GithubMark` in `src/components/shared/icons.tsx` is GitHub's Invertocat, the path copied unaltered from `primer/octicons` `icons/mark-github-16.svg` (MIT, fetched 2026-11-11). It follows the logo guidelines at https://github.com/logos: the Invertocat is used as a button to link to a GitHub profile or project, it is not modified, stretched or combined with other artwork, and it is monochrome. It takes the button's text color (near-black on light grounds, near-white on dark ones). It always sits next to a visible text label and is never used as this site's own logo. GITHUB and the Invertocat are trademarks of GitHub, Inc.
 
+## LinkedIn mark
+
+`LinkedinMark` in `src/components/shared/icons.tsx` is LinkedIn's "in" logo (path from Simple Icons, CC0). It is used only as the icon of a link to a LinkedIn profile, next to a visible "LinkedIn" label, unmodified and monochrome in the button's text color. LinkedIn and the "in" logo are trademarks of LinkedIn Corporation.
+
 # Screenshots
 
 All fetched 2026-11-09, converted to WebP (max 1600 px wide, quality 82, metadata stripped). Every image is a screenshot made by the site owner, so no third-party credit applies (`credit` is unset). Images from the duxlabs.dev website and docs were not used: their reuse terms are not stated, so they stay out.

@@ -1,4 +1,4 @@
-/* Trace Dux: huge heading, intro beside the links, three lanes (Shell, Player, Plugins). */
+/* Trace Dux Shell: huge heading, intro beside the links, the Shell lane. The Player and Plugins lanes sit under projects. */
 :root[data-design="thread"] {
   .t-dux-sec {
     padding-block: var(--section);
@@ -79,14 +79,14 @@
   }
 
   /* Static row (no pin): line its first screenshot up with the .wrap content edge, also past --max. */
-  .t-dux-sec .pscene {
+  .t-projects .pscene {
     --pscene-inset: max(calc(var(--pad) + var(--g)), calc((100% - var(--max)) / 2 + var(--pad) + var(--g)));
     margin-top: var(--sp-6);
   }
 
   /* Pinned cover title: a lower third on the content edge, over the screenshot's quiet list
      rows instead of centred on the album art. (Only displayed while pinned; shared CSS.) */
-  .t-dux-sec .pscene .pscene-title {
+  .t-projects .pscene .pscene-title {
     justify-self: start;
     align-self: end;
     margin: 0 0 var(--sp-6)

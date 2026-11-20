@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { isPageHref } from "@/lib/seo";
 import type { CSSProperties, ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
@@ -13,7 +14,8 @@ import { StatusLine } from "@/components/shared/status-line";
 import { DetailPanel } from "@/components/shared/panel/detail-panel";
 import { PanelBody } from "@/components/shared/panel/panel-body";
 import { Viz } from "@/components/shared/viz/viz";
-import { DuxRelations } from "@/components/shared/dux-relations";
+import { DuxBuiltOn, DuxRelations } from "@/components/shared/dux-relations";
+import { Gallery } from "@/components/shared/gallery";
 import { Link } from "@/i18n/navigation";
 import { formatMonth, formatRange } from "@/lib/format";
 import type { Image as Img, Job, Panel, Project, YearMonth } from "@/lib/types";
@@ -150,7 +152,8 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
 
   const feature = projects.projects.find((p) => p.emphasis) ?? projects.projects[0];
   const restProjects = projects.projects.filter((p) => p !== feature);
-  const stages = feature?.panel?.viz?.type === "pipeline" ? feature.panel.viz.stages : [];
+  const duxLead = dux.projects.find((p) => p.id === "dux-player");
+  const duxShot = dux.shellImages?.[0];
   const projName = (p: Project) =>
     p.slug ? <Link href={`/projects/${p.slug}?from=home`}>{p.name}</Link> : p.url && isPageHref(p.url) ? <Link href={p.url}>{p.name}</Link> : p.name;
   const counts = await DuxCounts({ github, locale });
@@ -321,26 +324,15 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
               </>
             )}
           </p>
+          {duxShot && (
+            <figure className="fl-shot rv">
+              <Image src={duxShot.src} alt={duxShot.alt} width={duxShot.width} height={duxShot.height} sizes="(min-width: 1200px) 40rem, 92vw" />
+              {duxShot.caption && <figcaption className="fl-meta">{duxShot.caption}</figcaption>}
+            </figure>
+          )}
           <div className="rv" data-item-list>
             <PrList featured={dux.featuredPrs} github={github} locale={locale} />
           </div>
-          {dux.projects.map((p, i) => (
-            <div key={p.id} id={p.id} className="fl-entry rv" data-item={dux.featuredPrs.length + i} data-dux-shared={p.usedBy ? "" : undefined}>
-              <h3>
-                <a href={p.url}>{p.name}</a>
-              </h3>
-              <p className="fl-p">{p.blurb}</p>
-              <DuxRelations project={p} projects={dux.projects} locale={locale} />
-              <p className="fl-meta">
-                <RepoFacts repo={p.repo} github={github} locale={locale} />
-              </p>
-              {p.panel && (
-                <DetailPanel id={p.id} name={p.name} section="dux">
-                  <PanelBody panel={p.panel} viz={viz(p.panel)} />
-                </DetailPanel>
-              )}
-            </div>
-          ))}
           <ul className="btn-row rv">
             {dux.links.map((l) => (
               <li key={l.href}>
@@ -368,16 +360,7 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
             <div id={feature.id} className="fl-feature rv" data-item={0}>
               <h3>{projName(feature)}</h3>
               <p className="fl-p">{feature.blurb}</p>
-              {stages.length > 0 && (
-                <ol className="fl-facts">
-                  {stages.map((s) => (
-                    <li key={s.label}>
-                      {s.label}
-                      {s.perTask && <b> {t("viz.perTask")}</b>}
-                    </li>
-                  ))}
-                </ol>
-              )}
+              {viz(feature.panel)}
               <p className="fl-meta">
                 {feature.tech?.join(", ")}
                 {feature.repo && <RepoFacts repo={feature.repo} github={github} locale={locale} />}
@@ -393,8 +376,32 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
               )}
             </div>
           )}
+          {/* Dux Player with its plugins and dux-cast: one entry of the form (item 1). */}
+          {dux.projects.map((p) => (
+            <div key={p.id} id={p.id} className={p === duxLead ? "fl-feature rv" : "fl-entry rv"} data-item={1} data-dux-shared={p.usedBy ? "" : undefined}>
+              <h3>
+                <a href={p.url}>{p.name}</a>
+              </h3>
+              <p className="fl-p">{p.blurb}</p>
+              {p === duxLead && <DuxBuiltOn locale={locale} />}
+              <DuxRelations project={p} projects={dux.projects} locale={locale} />
+              <p className="fl-meta">
+                <RepoFacts repo={p.repo} github={github} locale={locale} />
+              </p>
+              {p.images?.length ? <Gallery images={p.images} label={p.name} locale={locale} /> : null}
+              {p.panel ? (
+                <DetailPanel id={p.id} name={p.name} section="projects" actions={<ActionLink href={p.url}>{t("projects.github")}</ActionLink>}>
+                  <PanelBody panel={p.panel} viz={viz(p.panel)} />
+                </DetailPanel>
+              ) : (
+                <p className="btn-row dp-actions">
+                  <ActionLink href={p.url}>{t("projects.github")}</ActionLink>
+                </p>
+              )}
+            </div>
+          ))}
           {restProjects.map((p, i) => (
-            <div key={p.id} id={p.id} className="fl-entry rv" data-item={i + 1}>
+            <div key={p.id} id={p.id} className="fl-entry rv" data-item={i + 2}>
               <h3>{projName(p)}</h3>
               <p className="fl-p">{p.blurb}</p>
               <p className="fl-meta">

@@ -142,11 +142,6 @@
 }
 
 /* Motion arms only after mount (data-armed), so no-JS and reduced motion show the final state. */
-@keyframes ink-lane {
-  from {
-    transform: scaleX(0);
-  }
-}
 @keyframes ink-strike {
   from {
     clip-path: inset(0 100% 0 0);
@@ -157,13 +152,6 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   :root[data-design="keynote"] {
-    .ip-viz[data-armed]:not([data-in]) .viz-lane {
-      transform: scaleX(0);
-    }
-    .ip-viz[data-in] .viz-lane {
-      animation: ink-lane 900ms var(--ease-out-quart) both;
-      animation-delay: min(calc(var(--i, 0) * 120ms), 480ms);
-    }
     .ink-nf-path path {
       animation: ink-strike 700ms var(--ease-in-out-quart) 250ms both;
     }

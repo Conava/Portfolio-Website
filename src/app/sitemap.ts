@@ -2,8 +2,11 @@ import matter from "gray-matter";
 import type { MetadataRoute } from "next";
 import { ARTICLE_SLUGS, getArticle, getProjectSlugs, getProjectSource } from "@/lib/content";
 import { localizedPath } from "@/lib/seo";
-import { siteConfig } from "@/lib/site-config";
+import { articlesLive, siteConfig } from "@/lib/site-config";
 import type { Locale, ProjectFrontmatter } from "@/lib/types";
+
+// Read per request: the ARTICLES switch is a runtime env, so a build-time sitemap would miss it.
+export const dynamic = "force-dynamic";
 
 const LOCALES: Locale[] = ["en", "de"];
 
@@ -39,7 +42,7 @@ export function sitemapEntries(input: {
 /** Reads the real content: article dates and every non-hidden project. */
 export async function loadSitemapInput() {
   const articles = await Promise.all(
-    ARTICLE_SLUGS.map(async (slug) => ({ slug, updated: (await getArticle("en", slug)).data.meta.updated })),
+    (articlesLive() ? ARTICLE_SLUGS : []).map(async (slug) => ({ slug, updated: (await getArticle("en", slug)).data.meta.updated })),
   );
   const projectSlugs = (
     await Promise.all(

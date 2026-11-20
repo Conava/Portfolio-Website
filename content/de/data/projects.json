@@ -14,7 +14,7 @@
       ],
       "panel": {
         "did": [
-          "Ein Claude-Code-Plugin, das ein Feature von der Idee bis zu mergefähigem Code bringt: Brainstorm, testgetriebener Plan, Umsetzung, Review, Dokumentation und zum Schluss ein Deep Review. Ich gebe Spezifikation und Plan frei und entscheide am Ende über den Merge, den Rest erledigt es allein.",
+          "Ich gebe Spezifikation und Plan frei und entscheide am Ende über den Merge. Den Rest erledigt devline allein.",
           "Der Planer teilt jeder Aufgabe eigene Dateien zu und ordnet die Aufgaben nach Abhängigkeiten in Wellen. Agenten setzen eine Welle parallel in Git-Worktrees um, ohne Merge-Konflikte.",
           "Jede Aufgabe bekommt ein eigenes Review. Blockierende Befunde gehen zurück an die Umsetzung, und nach drei gescheiterten Runden schreibt der Planer den Ansatz neu.",
           "Security-Hooks verweigern zerstörerische Befehle und das Lesen von Secrets und fragen bei riskanten nach. Deshalb kann ein Lauf unbeaufsichtigt durchgehen.",
@@ -22,23 +22,167 @@
         ],
         "viz": {
           "type": "pipeline",
-          "caption": "Stufen der devline-Pipeline",
+          "caption": "Nur die drei manuellen Freigaben halten den Lauf an. Dazwischen blockieren Hooks zerstörerische Befehle und das Lesen von Secrets.",
           "stages": [
             {
-              "label": "Brainstorm"
+              "id": "brainstorm",
+              "label": "Brainstorm",
+              "skill": "brainstorm",
+              "approval": true
             },
             {
-              "label": "Plan"
+              "id": "design",
+              "label": "Designsystem",
+              "skill": "design",
+              "optional": true,
+              "agents": [
+                {
+                  "id": "designer",
+                  "model": "Opus"
+                }
+              ]
             },
             {
+              "id": "plan",
+              "label": "Plan",
+              "skill": "plan",
+              "approval": true,
+              "agents": [
+                {
+                  "id": "planner",
+                  "model": "Opus",
+                  "kb": [
+                    "kb-tdd-workflow",
+                    "kb-blast-radius"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "implement",
               "label": "Implementierung",
-              "perTask": true
+              "skill": "implement",
+              "perTask": true,
+              "agents": [
+                {
+                  "id": "implementer",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-tdd-workflow",
+                    "kb-engineering"
+                  ]
+                },
+                {
+                  "id": "reviewer",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-blast-radius",
+                    "kb-engineering"
+                  ]
+                },
+                {
+                  "id": "debugger",
+                  "model": "Opus"
+                }
+              ]
             },
             {
-              "label": "Dokumentation"
+              "id": "docs",
+              "label": "Dokumentation",
+              "agents": [
+                {
+                  "id": "docs-keeper",
+                  "model": "Sonnet"
+                }
+              ]
             },
             {
-              "label": "Deep Review"
+              "id": "deep-review",
+              "label": "Deep Review",
+              "skill": "deep-review",
+              "agents": [
+                {
+                  "id": "reviewer",
+                  "model": "Opus",
+                  "kb": [
+                    "kb-blast-radius",
+                    "kb-engineering"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "gate",
+              "label": "Merge oder neue Runde",
+              "gate": true
+            }
+          ],
+          "hooks": [
+            {
+              "id": "validate-bash.sh"
+            },
+            {
+              "id": "validate-write.sh"
+            },
+            {
+              "id": "pre-compact.sh"
+            }
+          ],
+          "standalone": [
+            {
+              "id": "quick",
+              "command": "/devline:quick",
+              "agents": [
+                {
+                  "id": "implementer",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-tdd-workflow",
+                    "kb-engineering"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "debug",
+              "command": "/devline:debug",
+              "agents": [
+                {
+                  "id": "debugger",
+                  "model": "Opus"
+                }
+              ]
+            },
+            {
+              "id": "review",
+              "command": "/devline:review",
+              "agents": [
+                {
+                  "id": "reviewer",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-blast-radius",
+                    "kb-engineering"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "deps",
+              "command": "/devline:deps",
+              "agents": [
+                {
+                  "id": "dependency",
+                  "model": "Sonnet",
+                  "kb": [
+                    "kb-dependency-management"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "writing",
+              "command": "/writing"
             }
           ]
         }

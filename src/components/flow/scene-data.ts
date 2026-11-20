@@ -12,12 +12,12 @@ export interface FlowSceneData {
   services: number;
   /** [moved, total] apps of the current job's migration (first two numbers of its significant line). */
   migrate: [number, number];
-  /** Featured Dux PRs and Dux projects, as listed. */
+  /** Featured Dux PRs as listed, and how many of them have a screenshot. */
   prs: number;
-  duxProjects: number;
+  shots: number;
   /** The featured project's pipeline: lanes per stage; a per-task stage fans out into 3, a picture of "one per task", not a count. */
   stages: number[];
-  /** The other projects below the featured one. */
+  /** The entries below the featured project: the Dux projects as one, then the others. */
   projects: number;
 }
 
@@ -63,9 +63,9 @@ export function sceneData(content: HomeContent, today: YearMonth): FlowSceneData
     services,
     migrate,
     prs: content.dux?.featuredPrs.length ?? 0,
-    duxProjects: content.dux?.projects.length ?? 0,
+    shots: content.dux?.featuredPrs.filter((p) => p.image).length ?? 0,
     stages,
-    projects: Math.max(0, projects.length - 1),
+    projects: Math.max(0, projects.length - 1) + (content.dux?.projects.length ? 1 : 0),
   };
   if (!spans.length) return { ...rest, schools: [] };
   const t0 = Math.min(...spans.map((s) => s.a)), t1 = Math.max(...spans.map((s) => s.b));

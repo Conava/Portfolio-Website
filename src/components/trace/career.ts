@@ -21,10 +21,9 @@ export interface CareerInput {
 export interface CareerTask extends CareerInput {
   kind: Kind;
   row: number;
-  /** Left and right edge. A running task ends on the today line; a planned end after it is `rest`. */
+  /** Left and right edge. A set end is drawn solid up to it; an open-ended running task ends on the today line. */
   x0: number;
   x1: number;
-  rest: number | null;
   /** Too narrow for its label at the diagram's minimum width: the label sits to its right. */
   out: boolean;
 }
@@ -64,10 +63,9 @@ export function careerLayout(input: CareerInput[], today: YearMonth): CareerLayo
       const kind = kindOf(e);
       const s = month(e.start);
       const end = e.end ? month(e.end) + 1 : null;
-      const x1 = kind === "now" ? x(now + 0.5) : kind === "next" && end === null ? 1 : x(end!);
-      const rest = kind === "now" && end !== null && end > now + 1 ? x(end) : null;
-      const span = (rest ?? x1) * (d1 - d0) - (s - d0);
-      return { ...e, kind, row: lane[e.id], x0: x(s), x1, rest, out: span < e.label.length * MONTHS_PER_CHAR + 1.5 };
+      const x1 = end !== null ? x(end) : kind === "now" ? x(now + 0.5) : 1;
+      const span = x1 * (d1 - d0) - (s - d0);
+      return { ...e, kind, row: lane[e.id], x0: x(s), x1, out: span < e.label.length * MONTHS_PER_CHAR + 1.5 };
     })
     .sort((a, b) => a.x0 - b.x0);
 

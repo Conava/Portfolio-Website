@@ -157,6 +157,25 @@ describe("designs", () => {
     }
   }, 60_000);
 
+  test("3b. Dux Player sits under projects, each featured Dux PR shows its screenshot", async () => {
+    for (const l of LOCALES) {
+      const shots = (json(`content/${l}/data/dux.json`).featuredPrs as { image: { src: string; alt: string } }[]).map((p) => p.image);
+      for (const name of DESIGNS) {
+        const html = markup(await (await get(main, home(l), { Cookie: `design=${name}` })).text());
+        const at = (id: string) => html.search(new RegExp(`<section[^>]*\\sid="${id}"`));
+        const [dux, projects, contact] = [at("dux"), at("projects"), at("contact")];
+        expect(dux, `${l} ${name}`).toBeGreaterThan(-1);
+        const player = html.indexOf('id="dux-player"');
+        expect(player > projects && player < contact, `${l} ${name}: player under #projects`).toBe(true);
+        const shell = html.slice(dux, projects);
+        for (const s of shots) {
+          expect(shell, `${l} ${name} ${s.src}`).toContain(`class="gh-shot" href="${s.src}"`);
+          expect(shell, `${l} ${name} ${s.src} alt`).toContain(`alt="${escapeHtml(s.alt)}"`);
+        }
+      }
+    }
+  }, 60_000);
+
   test("4. detail panel deep link, keyboard, events", async () => {
     const id = content("en").job.id;
     for (const name of DESIGNS) {

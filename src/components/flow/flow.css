@@ -278,25 +278,8 @@
   font-size: 14px;
   line-height: 1.5;
 }
-.fl-facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 18px 0;
-  padding: 0;
-  list-style: none;
-}
-.fl-facts li {
-  padding: 7px 11px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-1);
-  background: rgb(12 12 14 / 0.6);
-  color: var(--fg-2);
-  font: 400 13px/1.3 var(--mono);
-}
-.fl-facts b {
-  color: var(--acc);
-  font-weight: 500;
+.fl-feature .viz {
+  margin: 22px 0;
 }
 .fl-code {
   margin: 18px 0;
@@ -319,6 +302,16 @@
   border-left-color: var(--acc);
   background: rgb(255 174 87 / 0.12);
   color: #fff4e4;
+}
+.fl-shot {
+  margin: 24px 0;
+}
+.fl-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
 }
 .fl-entry,
 .fl-feature {

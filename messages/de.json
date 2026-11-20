@@ -4,7 +4,7 @@
     "work": "Berufserfahrung",
     "education": "Ausbildung",
     "bpmnscript": "BPMNscript",
-    "dux": "Dux",
+    "dux": "Dux Shell",
     "projects": "Projekte",
     "contact": "Kontakt"
   },
@@ -46,7 +46,6 @@
     "duxCounts": "{merged} gemergte Pull Requests in {repos, plural, one {# Repository} other {# Repositories}}, {open} offen"
   },
   "viz": {
-    "perTask": "Ein Agent je Aufgabe, jede mit eigenem Review",
     "entry": "Eintrag",
     "period": "Zeitraum",
     "count": "Anzahl",
@@ -83,7 +82,7 @@
     "work": "Berufserfahrung",
     "education": "Ausbildung",
     "bpmnscript": "BPMNscript",
-    "dux": "Dux",
+    "dux": "Dux Shell",
     "projects": "Projekte",
     "contact": "Kontakt",
     "menu": "Menü",
@@ -92,8 +91,7 @@
   },
   "hero": {
     "resume": "Lebenslauf (PDF)",
-    "resumeShort": "Lebenslauf",
-    "statusFrom": "{what} ab {date}"
+    "resumeShort": "Lebenslauf"
   },
   "scene": {
     "diagramLabel": "Kompiliertes BPMN-Diagramm der Rechnungsfreigabe",
@@ -113,7 +111,8 @@
     "xml": "XML",
     "playground": "Playground",
     "github": "GitHub",
-    "thesis": "Bachelorarbeit"
+    "thesis": "Bachelorarbeit",
+    "openPlayground": "Diesen Code im Playground öffnen"
   },
   "trace": {
     "overlap": "{a} und {b} überschnitten sich, {range}",
@@ -130,7 +129,7 @@
     "education": "Wirtschaftsinformatik und Informatik",
     "bpmnscript": "Eine Textsprache für BPMN",
     "dux": "Core-Contributor der Dux Shell",
-    "projects": "devline und weitere Projekte",
+    "projects": "Eigene Projekte",
     "contact": "Kontakt"
   },
   "gallery": {
@@ -144,7 +143,8 @@
     "page": "Projektseite",
     "article": "Artikel lesen",
     "usedBy": "Genutzt von <list></list>",
-    "uses": "Nutzt <h>{helper}</h>, wie auch <list></list>"
+    "uses": "Nutzt <h>{helper}</h>, wie auch <list></list>",
+    "builtOn": "Baut auf <a>Dux Shell</a> auf."
   },
   "notFound": {
     "message": "Unter dieser Adresse gibt es keine Seite.",
@@ -165,6 +165,8 @@
     "links": "Links",
     "credit": "Bild: {source}",
     "pullRequests": "Pull Requests",
+    "soon": "Demnächst",
+    "soonLede": "Der Artikel zu {title} ist noch nicht veröffentlicht.",
     "figure": "Abbildung: {caption}"
   },
   "devline": {
@@ -195,7 +197,65 @@
     "flowImpl": "Implementieren",
     "flowRev": "Review",
     "flowEach": "Ein Agent je Aufgabe, alle Aufgaben einer Welle gleichzeitig",
-    "flowLoop": "Ein blockierender Befund geht zurück an den Implementierer, danach wird die Aufgabe erneut geprüft"
+    "flowLoop": "Ein blockierender Befund geht zurück an den Implementierer, danach wird die Aufgabe erneut geprüft",
+    "run": {
+      "lanes": {
+        "you": "Entwickler",
+        "skills": "Skills",
+        "agents": "Agents"
+      },
+      "start": "Idee",
+      "end": "Gemergt",
+      "gate": "Manuelle Freigabe",
+      "gateOf": {
+        "brainstorm": "Spezifikation",
+        "plan": "Plan"
+      },
+      "skip": "Keine UI-Änderungen",
+      "agent": {
+        "design/designer": "Mockups, dann das Designsystem",
+        "plan/planner": "Eigene Dateien und Tests je Aufgabe",
+        "implement/implementer": "Einer je Aufgabe, im eigenen Worktree",
+        "implement/reviewer": "Ein Review je Aufgabe",
+        "implement/debugger": "Wenn ein Build oder Testlauf scheitert",
+        "docs/docs-keeper": "README, CLAUDE.md, docs/",
+        "deep-review/reviewer": "Der ganze Branch, auf Opus"
+      },
+      "ladder": "Befunde eskalieren",
+      "fix": "Nachbessern",
+      "replan": "Nach drei blockierenden Runden schreibt der Planer den Ansatz neu",
+      "replanShort": "Nach 3 Runden neu planen",
+      "iterate": "Neue Runde: zurück zum Plan mit den Änderungswünschen",
+      "iterateShort": "Neue Runde",
+      "hooks": "Hooks bei jedem Befehl und Dateizugriff",
+      "hook": {
+        "validate-bash": "Blockiert zerstörerische Befehle",
+        "validate-write": "Verweigert das Lesen von Schlüsseln und .env-Dateien",
+        "pre-compact": "Hält den Stand des Laufs über eine Kompaktierung"
+      },
+      "alone": "Eigenständige Skills, außerhalb der Pipeline",
+      "aloneNote": {
+        "quick": "Umsetzen, prüfen, committen",
+        "debug": "Fehlerursache mit dem Debugger",
+        "review": "Letzte Änderungen prüfen",
+        "deps": "CVE-Patches und Migrationen",
+        "writing": "Einen Entwurf bereinigen"
+      },
+      "srSteps": "Der Lauf Schritt für Schritt",
+      "srSkill": "Skill {skill}",
+      "srAgents": "Agents: {agents}",
+      "srOptional": "Nur bei UI-Änderungen, sonst übersprungen.",
+      "srLoops": "Schleifen",
+      "kinds": {
+        "skill": "Skill",
+        "agent": "Agent",
+        "kb": "kb-Skill"
+      },
+      "cap": "Fähigkeit",
+      "cost": "Kosten",
+      "srKinds": "Drei Arten von Bausteinen: Skills sind die Stufen und die Befehle. Agents erledigen, was ein Skill ihnen gibt. kb-Skills sind Wissen, das die Agents laden. Ein Skill läuft auch allein.",
+      "srRuns": "Startet {agents}."
+    }
   },
   "bpmnscript": {
     "openInPlayground": "Im Playground öffnen",

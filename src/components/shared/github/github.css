@@ -13,6 +13,14 @@ a.gh-ref:hover { text-decoration-color: currentColor; }
 .gh-badge[data-pr-state="CLOSED"] .gh-badge-icon { color: var(--s-closed); }
 .gh-meta { display: flex; flex-wrap: wrap; column-gap: 12px; margin: 4px 0 0; font-size: 13px; color: var(--s-mute); font-variant-numeric: tabular-nums; }
 .gh-blurb { margin: 6px 0 0; color: var(--s-text-2); max-width: 64ch; }
+/* The feature's screenshot sits beside its blurb, small; the link opens the full image. */
+.gh-feat { display: flex; align-items: flex-start; gap: 16px; }
+.gh-feat .gh-blurb { flex: 1 1 auto; min-width: 0; }
+.gh-shot { flex: 0 0 clamp(96px, 30%, 176px); margin-top: 8px; display: block; border-radius: var(--s-r-tag); overflow: hidden; outline-offset: 3px; box-shadow: 0 0 0 1px var(--s-line); }
+.gh-shot img { display: block; width: 100%; height: auto; transition: transform 200ms ease; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .gh-shot:hover img { transform: scale(1.04); } }
+/* On a phone the blurb keeps the full width; the screenshot goes under it. */
+@media (max-width: 479.98px) { .gh-feat { flex-direction: column; gap: 0; } .gh-shot { flex: none; width: min(240px, 72%); } }
 .gh-facts { font-size: 13px; color: var(--s-mute); font-variant-numeric: tabular-nums; }
 /* Facts are spaced, not joined with a middle dot (design system 9.17); each stays whole. */
 .gh-facts > span { white-space: nowrap; }

@@ -151,10 +151,10 @@
       z-index: 2;
       height: 100lvh;
       /* The room is clickable wherever it shows through the window; the stage script stops
-         presses on the wall itself. The facade's own controls work until the flight starts. */
+         presses on the wall itself. The facade's own controls and text work until the flight starts. */
       pointer-events: none;
     }
-    .ty-stage > .ty-facade:not([data-thru]) :is(a, button) {
+    .ty-stage > .ty-facade:not([data-thru]) :is(a, button, .ty-below) {
       pointer-events: auto;
     }
     .ty-stage > .ty-facade > .ty-ann {
@@ -223,7 +223,6 @@
     font-size: 0.82em;
   }
   .ty-status {
-    max-width: 44ch;
     margin-top: 14px;
     font-size: 16px;
     line-height: 1.5;
@@ -422,6 +421,9 @@
   }
 
   /* ---- Dux: a shell bar, and popouts hanging from their tabs ---- */
+  .ty-row-dux > .ty-pops {
+    grid-column: 1 / -1;
+  }
   .ty-pops {
     display: grid;
     gap: 40px;

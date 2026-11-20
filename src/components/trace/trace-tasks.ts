@@ -119,6 +119,8 @@ export function mountTasks(root: HTMLElement, reduced: boolean, spans: Record<st
     tasks = [];
     RW = cw;
     rigBox.style.width = `${cw - m.sr.left - 2}px`; // 2 px short of the edge: nothing is drawn there
+    // Down to the page end, no further: a reveal parked below a low box must not lengthen the page and with it the scroll timeline.
+    rigBox.style.height = `${m.maxScroll + m.vh - m.docTop}px`;
     RH = 0;
     const pairEnds: number[] = [];
     m.padEls.forEach((pad, i) => {

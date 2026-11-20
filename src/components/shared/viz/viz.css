@@ -50,10 +50,6 @@
 .viz-lane.acc {
   fill: var(--s-accent);
 }
-/* A per-task stage: the third lane stands for the tasks between 2 and N. */
-.viz-fan .viz-lane:nth-child(3) {
-  opacity: 0.35;
-}
 .viz-bar.out {
   fill: none;
   stroke: var(--s-mute);

@@ -7,7 +7,7 @@ import { getDesign } from "@/lib/design";
 import { formatDate } from "@/lib/format";
 import { alternatesFor, jsonLdHtml, localizedPath, socialFor, techArticleJsonLd } from "@/lib/seo";
 import { getSiteGithub } from "@/lib/site-github";
-import { siteConfig } from "@/lib/site-config";
+import { articlesLive, siteConfig } from "@/lib/site-config";
 import type { GithubData } from "@/lib/github";
 import type { ArticleMap, ArticleSlug, HomeContent, Locale } from "@/lib/types";
 import * as bpmnscript from "./bpmnscript/components";
@@ -34,6 +34,7 @@ const shared: MDXComponents = { Section, Figure, Num, Pct };
 export async function articleMetadata(slug: ArticleSlug, locale: Locale): Promise<Metadata> {
   const { meta } = (await getArticle(locale, slug)).data;
   const path = `/${slug}`;
+  if (!articlesLive()) return { title: meta.title, robots: { index: false }, alternates: alternatesFor(path, locale) };
   return {
     title: meta.title,
     description: meta.description,
@@ -53,6 +54,7 @@ export async function articleMetadata(slug: ArticleSlug, locale: Locale): Promis
 
 /** The shared Read-mode article: header, contents list, MDX body, link list and JSON-LD. */
 export async function ArticlePage<S extends ArticleSlug>({ slug, locale }: { slug: S; locale: Locale }) {
+  if (!articlesLive()) return <ComingSoon slug={slug} locale={locale} />;
   const [{ data, mdx }, home, github, design, t] = await Promise.all([
     getArticle(locale, slug),
     getHomeContent(locale),
@@ -123,5 +125,24 @@ export async function ArticlePage<S extends ArticleSlug>({ slug, locale }: { slu
       </article>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(extra.length ? [article, ...extra] : article) }} />
     </>
+  );
+}
+
+/** Shown on an article route until articles are published. */
+async function ComingSoon({ slug, locale }: { slug: ArticleSlug; locale: Locale }) {
+  const [{ data }, t, design] = await Promise.all([getArticle(locale, slug), getTranslations({ locale }), getDesign()]);
+  return (
+    <article className="wrap pj-article ar-article ar-soon" data-article-soon>
+      <header className="pj-head grid-12 ar-head">
+        <h1 className="pj-title">
+          {t("article.soon")}
+          {design === "keynote" && <span className="pj-dot" aria-hidden="true">.</span>}
+        </h1>
+        <p className="lede">{t("article.soonLede", { title: data.meta.title })}</p>
+        <p className="btn-row">
+          <ActionLink href="/" primary>{t("notFound.home")}</ActionLink>
+        </p>
+      </header>
+    </article>
   );
 }

@@ -44,7 +44,7 @@ export async function InkBpmnscript({ content, locale }: SectionProps) {
             <ul className="btn-row ink-bs-links">
               {links.map((l) => (
                 <li key={l.href}>
-                  <ActionLink href={l.href} primary={l.href === "/playground"}>
+                  <ActionLink href={l.href} primary={l.href.startsWith("/playground")}>
                     {l.label}
                   </ActionLink>
                 </li>

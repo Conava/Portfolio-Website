@@ -10,10 +10,11 @@ import { Pad } from "@/components/trace/pad";
 import { Link } from "@/i18n/navigation";
 import type { Project } from "@/lib/types";
 import { RevealOnce } from "@/components/shared/reveal-once";
+import { TraceDuxProjects } from "./dux-projects";
 import "./projects-contact.css";
 import { isPageHref } from "@/lib/seo";
 
-/** Trace projects: devline as a dark feature block with its pipeline, the rest as ruled rows. */
+/** Trace projects: devline as a dark feature block with its pipeline, the Dux lanes, the rest as ruled rows. */
 export async function TraceProjects({ content, github, locale, today }: SectionProps) {
   const t = await getTranslations("sections");
   const { projects } = content;
@@ -34,7 +35,8 @@ export async function TraceProjects({ content, github, locale, today }: SectionP
     p.panel?.viz && <Viz viz={p.panel.viz} github={github} locale={locale} />;
 
   return (
-    <TrackedSection id="projects" className="wrap t-projects">
+    <TrackedSection id="projects" className="t-projects">
+      <div className="wrap">
       <h2>
         <Pad station="projects" label={t("projects")} kind="section" />
         {t("projects")}
@@ -58,7 +60,11 @@ export async function TraceProjects({ content, github, locale, today }: SectionP
           </article>
         </RevealOnce>
       )}
+      </div>
 
+      <TraceDuxProjects content={content} github={github} locale={locale} today={today} />
+
+      <div className="wrap">
       <ul className="t-rows">
         {rest.map((p) => (
           <li key={p.id} id={p.id} className="t-row">
@@ -78,6 +84,7 @@ export async function TraceProjects({ content, github, locale, today }: SectionP
           </li>
         ))}
       </ul>
+      </div>
     </TrackedSection>
   );
 }

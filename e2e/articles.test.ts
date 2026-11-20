@@ -179,3 +179,25 @@ describe("live PR state on /dux", () => {
     expect(html).toContain("List wallpapers reliably, even with unusual file names");
   });
 });
+
+describe("articles not published (ARTICLES unset)", () => {
+  test("each article route says coming soon, is noindex and left out of the sitemap; homepage links still lead there", async () => {
+    const s = await startSite({ ARTICLES: "" });
+    sites.push(s);
+    const m = JSON.parse(readFileSync(join(ROOT, "messages", "en.json"), "utf8"));
+    for (const slug of SLUGS) {
+      const r = await get(s, `/${slug}`);
+      expect(r.status, slug).toBe(200);
+      const html = await r.text();
+      expect(html, slug).toContain("data-article-soon");
+      expect(html, slug).toContain(m.article.soon);
+      expect(meta(html, "robots"), slug).toContain("noindex");
+      expect(html, slug).not.toContain('type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle"');
+      expect(await text(s, `/de/${slug}`), slug).toContain("data-article-soon");
+    }
+    const xml = await text(s, "/sitemap.xml");
+    for (const slug of SLUGS) expect(xml, slug).not.toContain(`${ORIGIN}/${slug}<`);
+    const home = await text(s, "/", { Cookie: "design=keynote" });
+    expect(home).toMatch(/href="\/devline"/);
+  }, 90_000);
+});

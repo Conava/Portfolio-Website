@@ -2,9 +2,10 @@
   "name": "Marlon Kranz",
   "lede": "Softwareentwickler in Hamburg. Bei Adobe entwickle ich verteilte Cloud-Services in Java im Enterprise-Maßstab, außerdem Open-Source-Projekte in Go und TypeScript.",
   "statement": [
-    "Ich baue Backend-Services und Cloud-Architektur, und ich baue gern eine gute Oberfläche, wenn ein Projekt sie braucht, etwa diese Website.",
-    "Bei Adobe verantworte und plane ich die Migration einer Produktions-Pipeline, eines der größten Vorhaben meines Teams, und nebenbei bin ich im KI-Setup des Teams aktiv, vom AI-Harness bis zum gemeinsamen Repo mit Agent-Skills.",
-    "Privat baue ich eigene Werkzeuge: devline, das Claude-Code-Plugin, das ich täglich nutze, und Dux Player, einen Musikplayer, außerdem gehöre ich zu den Core-Contributors von Dux Shell, einer Desktop-Shell für Linux. Auch meine Bachelorarbeit an der Universität Hamburg ist ein Werkzeug: BPMNscript, eine Textsprache für Geschäftsprozesse. Den B.Sc. in Wirtschaftsinformatik mit einem Auslandsjahr an der San Diego State University schließe ich voraussichtlich im Dezember 2026 ab."
+    "Ich baue Backend-Services und Cloud-Architektur. Meine Leidenschaft ist das Lösen von Problemen, und wenn ein Projekt eine Oberfläche braucht, soll sie aufgeräumt sein.",
+    "Bei Adobe verantworte und plane ich die Migration einer Produktions-Pipeline, eines der größten Vorhaben meines Teams, und betreue vier Produktions-Services mit, die täglich Millionen Menschen nutzen. Nebenbei kümmere ich mich um das KI-Tooling meines Teams.",
+    "Privat baue ich, was ich jeden Tag benutze. Ich gehöre zu den Core-Contributors von Dux Shell, meiner Desktop-Shell unter Linux, und habe ihren Musikplayer Dux Player gebaut. Außerdem pflege ich devline, mein eigenes Claude-Code-Plugin.",
+    "Meine Bachelorarbeit an der Universität Hamburg ist BPMNscript, eine Programmiersprache, die ausführbare BPMN-2.0-Prozesse in die IDE bringt. Den B.Sc. in Wirtschaftsinformatik mit einem Auslandsjahr an der San Diego State University schließe ich voraussichtlich im Dezember 2026 ab. Im Januar 2027 beginne ich einen berufsbegleitenden M.S. in Computer Science am Georgia Tech."
   ],
   "links": [
     {

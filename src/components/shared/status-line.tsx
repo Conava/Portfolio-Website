@@ -1,10 +1,17 @@
-import { getTranslations } from "next-intl/server";
 import type { SectionProps } from "@/components/home-types";
-import { statusLine } from "@/lib/status";
+import { statusLines } from "@/lib/status";
 
-/** The hero's one-line status (current jobs, the latest school), from content dates and `today`. */
-export async function StatusLine({ content, locale, today, className }: Omit<SectionProps, "github"> & { className: string }) {
-  const t = await getTranslations({ locale, namespace: "hero" });
-  const text = statusLine(content.work, content.education, today, locale, (what, date) => t("statusFrom", { what, date }));
-  return text ? <p className={className}>{text}</p> : null;
+/** The hero's status (current jobs, the latest school), one per line, from content dates and `today`. */
+export function StatusLine({ content, today, className }: Omit<SectionProps, "github"> & { className: string }) {
+  const lines = statusLines(content.work, content.education, today);
+  return lines.length ? (
+    <p className={className}>
+      {lines.map((l, i) => (
+        <span key={l} style={{ display: "block" }}>
+          {l}
+          {i < lines.length - 1 && <span className="sr-only">. </span>}
+        </span>
+      ))}
+    </p>
+  ) : null;
 }

@@ -7,45 +7,87 @@
       "label": "Konfigurationsprofile",
       "title": "feat(settings): Add config profiles",
       "blurb": "Konfigurationsprofile sind Kopien der Einstellungen, zwischen denen sich wechseln lässt: für unterschiedliche Arbeitsweisen, als Sicherung einer funktionierenden Einrichtung mit einem Klick oder exportiert, um eine Konfiguration weiterzugeben. Importe gelten als nicht vertrauenswürdig, weil Profile zum Teilen gedacht sind.",
-      "note": "Einstellungen als Profile speichern und wechseln"
+      "note": "Einstellungen als Profile speichern und wechseln",
+      "image": {
+        "src": "/images/dux-shell/pr3867-5.webp",
+        "alt": "Die Seite Profiles mit zwei Profilen, Default und einem mit einem Desktop-Screenshot als Bild, und den Schaltflächen Import und New profile",
+        "width": 1600,
+        "height": 1368
+      }
     },
     {
       "ref": "duxlabs-dev/dux-shell#3768",
       "label": "Systemmonitor",
       "title": "feat(sysmon): rework the system monitor window",
       "blurb": "Das Fenster System Monitor hat Seiten für Prozesse, Leistung, Laufwerke und Systeminformationen. Zu jedem Prozess zeigt es die App, die Nutzung von GPU und Videoeinheit, die Internetverbindungen sowie Download und Upload.",
-      "note": "Ein neues Fenster für den Systemmonitor"
+      "note": "Ein neues Fenster für den Systemmonitor",
+      "image": {
+        "src": "/images/dux-shell/pr3768-2.webp",
+        "alt": "Die CPU-Seite mit einem Graphen pro Thread, Takt, Temperatur sowie Prozess- und Thread-Anzahl",
+        "width": 1600,
+        "height": 1184
+      }
     },
     {
       "ref": "duxlabs-dev/dux-gop#50",
       "label": "Prozessdaten",
       "title": "gops: add data for the DMS system monitor rework",
       "blurb": "Die Daten hinter dem neuen System Monitor, gesammelt in Go: GPU-, Laufwerks- und Netzwerknutzung pro Prozess, Sensoren und Speichermodule. Eine Abfrage der Prozessliste braucht auf meinem Rechner 22 statt 375 ms CPU-Zeit.",
-      "note": "GPU-, Laufwerks- und Netzwerkdaten pro Prozess, schneller gesammelt"
+      "note": "GPU-, Laufwerks- und Netzwerkdaten pro Prozess, schneller gesammelt",
+      "image": {
+        "src": "/images/dux-shell/pr4219-2.webp",
+        "alt": "Eine zusammengefasste Steam-Zeile, aufgeklappt in ihre neun Prozesse, jeder mit eigenen Werten",
+        "width": 1600,
+        "height": 1181
+      }
     },
     {
       "ref": "duxlabs-dev/dux-shell#3727",
       "label": "Netzwerkeinstellungen",
       "title": "feat(network): edit NetworkManager connections from Settings",
       "blurb": "Netzwerkverbindungen lassen sich in den Einstellungen anlegen und bearbeiten: Ethernet, WLAN, VPN und mehr, auch Unternehmensnetze wie eduroam. Dazu kommen eine Hotspot-Seite mit QR-Code, eine Tailscale-Seite und eine Anmeldung für Captive Portals.",
-      "note": "Netzwerkverbindungen in den Einstellungen anlegen und bearbeiten"
+      "note": "Netzwerkverbindungen in den Einstellungen anlegen und bearbeiten",
+      "image": {
+        "src": "/images/dux-shell/network-editor-connections.webp",
+        "alt": "Die Seite Connections mit gespeicherten Ethernet-, WLAN-, Hotspot-, VPN- und Mobilfunkprofilen sowie den Schaltflächen Add und Import",
+        "width": 1600,
+        "height": 1374
+      }
     },
     {
       "ref": "duxlabs-dev/dux-shell#4155",
       "label": "Hintergrundordner",
       "title": "wallpaper: add wallpaper folders",
       "blurb": "Hintergrundbilder können aus mehreren Ordnern kommen, und die Bildauswahl und der automatische Wechsel lassen sich auf ausgewählte Ordner beschränken.",
-      "note": "Hintergrundbilder aus mehreren Ordnern"
+      "note": "Hintergrundbilder aus mehreren Ordnern",
+      "image": {
+        "src": "/images/dux-shell/pr4155-4.webp",
+        "alt": "Das Raster der Hintergrundbilder mit geöffnetem Ordnermenü: All, ein Ordner, Browse und Settings",
+        "width": 1227,
+        "height": 654
+      }
     },
     {
       "ref": "duxlabs-dev/dux-shell#4129",
       "label": "Verbundene Popouts",
       "title": "feat(bar): connected popouts for bar & island variants",
       "blurb": "Popouts von Leiste oder Island können sich mit ihr verbinden, wie im verbundenen Rahmenmodus, aber ohne Rahmen um den Bildschirm.",
-      "note": "Popouts, die sich mit der Leiste verbinden"
+      "note": "Popouts, die sich mit der Leiste verbinden",
+      "image": {
+        "src": "/images/dux-shell/pr4129-3.webp",
+        "alt": "Das Popout des Control Centers ist oben am Bildschirm mit der Island zu einer Form verbunden",
+        "width": 849,
+        "height": 835
+      }
     }
   ],
   "shellImages": [
+    {
+      "src": "/images/dux-shell/overview.webp",
+      "alt": "Der Desktop mit Dux Shell",
+      "width": 1600,
+      "height": 1000
+    },
     {
       "src": "/images/dux-shell/pr3867-1.webp",
       "alt": "Profile unter Wallpaper & colors in den Einstellungen der Dux Shell, mit dem Kontextmenü eines Profils: Apply, Partial apply, Edit und Delete",
@@ -145,7 +187,10 @@
     },
     {
       "id": "dux-cast",
-      "usedBy": ["dux-player", "dux-plugins"],
+      "usedBy": [
+        "dux-player",
+        "dux-plugins"
+      ],
       "name": "dux-cast",
       "repo": "Conava/dux-cast",
       "url": "https://github.com/Conava/dux-cast",
@@ -182,8 +227,7 @@
     "did": [
       "Meine größten Features in der Shell sind die Konfigurationsprofile, der überarbeitete Systemmonitor, die Netzwerkeinstellungen und die Ordner für Hintergrundbilder. Die meisten reichen vom Go-Backend bis in die QML-Oberfläche, beim Systemmonitor auch in dux-gop, die Go-Bibliothek, die die Systemdaten sammelt. Für Profile und Systemmonitor habe ich die Seiten in der Dux-Dokumentation geschrieben.",
       "Die meisten meiner übrigen Pull Requests beheben Fehler: in der Shell, in dux-gop und in den QML-Komponenten, die sich die Dux-Apps teilen.",
-      "Außerdem melde ich Fehler mit ihrer Ursache, helfe Nutzern in den Support-Kanälen, diskutiere Designfragen mit, etwa wo die Profile in den Einstellungen liegen, und arbeite mit den Maintainern an größeren Features.",
-      "Dux Player und das Cast-Plugin sind meine eigenen Projekte: eine App und ein Plugin, die Einstellungen und Theme der Shell übernehmen und auch eigenständig laufen."
+      "Außerdem melde ich Fehler mit ihrer Ursache, helfe Nutzern in den Support-Kanälen, diskutiere Designfragen mit, etwa wo die Profile in den Einstellungen liegen, und arbeite mit den Maintainern an größeren Features."
     ],
     "viz": {
       "type": "pr-dots",

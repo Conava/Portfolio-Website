@@ -47,6 +47,12 @@ export async function encodeShare(source: string): Promise<EncodeResult> {
   return { ok: true, hash: `src=${payload}` };
 }
 
+/** A playground link that opens `source` as a file. */
+export async function playgroundHref(source: string): Promise<string> {
+  const r = await encodeShare(source);
+  return r.ok ? `/playground#${r.hash}` : "/playground";
+}
+
 /** The hash is untrusted input: never throws, stops inflating past 200 KB. */
 export async function decodeShare(hash: string): Promise<DecodeResult> {
   const m = /^#?src=(.*)$/.exec(hash);

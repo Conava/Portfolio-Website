@@ -52,13 +52,13 @@ for (const sig of ["SIGINT", "SIGTERM"] as const) {
 
 export type Site = { base: string; stop(): Promise<void> };
 
-/** The standalone server (`node server.js`, laid out as in Docker) on a free port. GITHUB_TOKEN, RESUME_PDF_URL, DESIGN and GITHUB_GRAPHQL_URL are unset unless `env` sets them. */
+/** The standalone server (`node server.js`, laid out as in Docker) on a free port. GITHUB_TOKEN, RESUME_PDF_URL, DESIGN and GITHUB_GRAPHQL_URL are unset unless `env` sets them; ARTICLES is on unless `env` sets it. */
 export async function startSite(env: Record<string, string> = {}): Promise<Site> {
   // Cached GitHub data from an earlier server must not leak into this one.
   prepareStandalone();
   rmSync(join(STANDALONE, ".next", "cache", "fetch-cache"), { recursive: true, force: true });
   const port = await freePort();
-  const childEnv: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: "production", PORT: String(port), HOSTNAME: "::", ...env };
+  const childEnv: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: "production", PORT: String(port), HOSTNAME: "::", ARTICLES: "on", ...env };
   for (const k of ["GITHUB_TOKEN", "RESUME_PDF_URL", "DESIGN", "GITHUB_GRAPHQL_URL"]) if (!(k in env)) delete childEnv[k];
   const proc: ChildProcess = spawn("node", ["server.js"], {
     cwd: STANDALONE,

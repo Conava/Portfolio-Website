@@ -18,12 +18,10 @@ describe("careerLayout", () => {
     expect([t.a.row, t.b.row, t.c.row, t.bsc.row, t.ms.row]).toEqual([0, 1, 0, 0, 0]);
   });
 
-  test("ongoing entries run to the today line, computed from today; a planned end is the rest", () => {
+  test("open-ended running entries stop on the today line; a set end is drawn up to it", () => {
     expect([t.a.kind, t.c.kind, t.bsc.kind, t.ms.kind]).toEqual(["done", "now", "now", "next"]);
     expect(t.c.x1).toBe(l.today);
-    expect(t.bsc.x1).toBe(l.today);
-    expect(t.bsc.rest).toBeGreaterThan(l.today);
-    expect(t.c.rest).toBeNull();
+    expect(t.bsc.x1).toBeGreaterThan(l.today);
     expect(careerLayout(input, "2024-09").today).toBeGreaterThan(l.today);
   });
 

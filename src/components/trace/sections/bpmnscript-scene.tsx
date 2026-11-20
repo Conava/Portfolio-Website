@@ -45,7 +45,7 @@ type Els = {
  * .05-.55 the other lines type in and the diagram builds with them (the shape of the current
  * line lit with it, a token riding each new flow: trace-diagram-run.ts),
  * .55-.7 the XML slides over the source, .7-.85 the terminal line types, .85-.88 its
- * "valid BPMN 2.0 XML" status appears, .85-1 links.
+ * "valid BPMN 2.0 XML" status appears. The links and the playground button stay visible throughout.
  * Narrow screens replay the build once at 60 % visible (7 x 320 ms) with a Replay button.
  * Frame writes are clip-path, transform, opacity and stroke-dashoffset only, and only on change.
  */
@@ -55,6 +55,7 @@ export function BpmnScene({
   diagram,
   xml,
   terminal,
+  playground,
   links,
 }: {
   labels: Labels;
@@ -62,6 +63,7 @@ export function BpmnScene({
   diagram: ReactNode;
   xml: string;
   terminal: string;
+  playground: ReactNode;
   links: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -155,7 +157,6 @@ export function BpmnScene({
     set(e.src, "opacity", (1 - 0.7 * x).toFixed(3));
     set(e.term, "clip-path", clipRight(steps(segment(p, 0.7, 0.85), TYPE_STEPS) / TYPE_STEPS));
     set(e.ok, "opacity", segment(p, 0.85, 0.88).toFixed(3));
-    if (e.links) set(e.links, "opacity", segment(p, 0.85, 1).toFixed(3));
   };
 
   /** Narrow panes scroll the diagram: pan to the step being drawn (one read per step, never per frame). */
@@ -254,6 +255,7 @@ export function BpmnScene({
           </div>
           <figcaption className="t-bpm-cap">
             <span>{labels.recording}</span>
+            {playground}
             <button type="button" className="btn t-bpm-replay" hidden={!replay} onClick={play}>
               <ReplayIcon />
               {labels.replay}

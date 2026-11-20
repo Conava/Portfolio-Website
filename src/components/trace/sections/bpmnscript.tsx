@@ -24,7 +24,8 @@ export async function TraceBpmnscript({ content, locale }: SectionProps) {
   const s = await getTranslations("scene");
   const tp = await getTranslations("projects");
   const { bpmnscript } = content;
-  const { links } = bpmnscript;
+  const playground = bpmnscript.links.find((l) => l.href.startsWith("/playground"));
+  const links = bpmnscript.links.filter((l) => l !== playground);
 
   return (
     <TrackedSection id="bpmnscript" className="wrap t-bpm">
@@ -41,11 +42,18 @@ export async function TraceBpmnscript({ content, locale }: SectionProps) {
         diagram={<InvoiceDiagram />}
         xml={INVOICE_XML}
         terminal={s("compiled", { file: FILE })}
+        playground={
+          playground && (
+            <ActionLink href={playground.href} primary>
+              {s("openPlayground")}
+            </ActionLink>
+          )
+        }
         links={
           links.length > 0 && (
             <p className="btn-row t-bpm-links">
               {links.map((l) => (
-                <ActionLink key={l.href} href={l.href} primary={l.href === "/playground"}>
+                <ActionLink key={l.href} href={l.href}>
                   {l.label}
                 </ActionLink>
               ))}

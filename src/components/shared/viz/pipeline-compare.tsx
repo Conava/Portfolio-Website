@@ -1,6 +1,28 @@
 import type { CSSProperties } from "react";
-import { lanesHeight, StageLanes } from "./pipeline";
 import "./viz.css";
+
+const LANE = 10; // px between parallel lanes
+
+/** One stage segment; `n` lanes stacked around the shared center line. `i0` staggers the draw. */
+function StageLanes({ n, height, i0, accent }: { n: number; height: number; i0: number; accent?: boolean }) {
+  const top = height / 2 - ((n - 1) * LANE) / 2;
+  return (
+    <svg className="viz-track viz-stage" style={{ height }} aria-hidden="true">
+      {Array.from({ length: n }, (_, k) => (
+        <rect
+          key={k}
+          className={`viz-lane${accent ? " acc" : ""}`}
+          style={{ "--i": i0 + k } as CSSProperties}
+          y={top + k * LANE - 2}
+          width="100%"
+          height="4"
+        />
+      ))}
+    </svg>
+  );
+}
+
+const lanesHeight = (maxParallel: number) => Math.max(1, maxParallel) * LANE + 4;
 
 type Flow = { label: string; stages: string[] };
 

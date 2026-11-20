@@ -1,9 +1,19 @@
+import { playgroundHref } from "@/lib/playground/share";
 import fs from "fs/promises";
 import path from "path";
 import { routing } from "../i18n/routing";
-import type { Locale, HomeContent, Panel, ArticleSlug, ArticleMap } from "./types";
+import type { Locale, HomeContent, Image, Panel, ArticleSlug, ArticleMap } from "./types";
 
 export const contentRoot = path.join(process.cwd(), "content");
+const publicRoot = path.join(process.cwd(), "public");
+
+/** The images whose file exists under `public/`, in order: an image listed before its file is added stays hidden. */
+export async function keepExisting(images: Image[] | undefined, pub: string = publicRoot): Promise<Image[] | undefined> {
+  if (!images) return images;
+  // The standalone server has public/ next to it; don't let tracing pull it in.
+  const ok = await Promise.all(images.map((i) => fs.access(path.join(/*turbopackIgnore: true*/ pub, i.src)).then(() => true, () => false)));
+  return images.filter((_, k) => ok[k]);
+}
 
 /** Reads `<root>/<locale>/data/<file>`; a missing locale file (ENOENT) falls back to `en`. */
 export async function loadJson<T>(
@@ -37,6 +47,12 @@ export async function getHomeContent(
       loadJson<never>(locale, `${f}.json`, root),
     ),
   );
+  // The playground link opens the sample shown on the page.
+  const b = bpmnscript as HomeContent["bpmnscript"];
+  const pg = await playgroundHref(b.sample);
+  b.links = b.links.map((l) => (l.href === "/playground" ? { ...l, href: pg } : l));
+  const d = dux as HomeContent["dux"];
+  d.shellImages = await keepExisting(d.shellImages);
   return { about, work, education, bpmnscript, dux, projects, contact };
 }
 

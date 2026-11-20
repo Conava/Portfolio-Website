@@ -7,45 +7,87 @@
       "label": "Config profiles",
       "title": "feat(settings): Add config profiles",
       "blurb": "Config profiles are copies of the settings to switch between: for different workloads, as a one-click backup of a working setup, or exported to share a configuration. Imports are treated as untrusted, since profiles are meant to be shared.",
-      "note": "Save and switch between sets of settings"
+      "note": "Save and switch between sets of settings",
+      "image": {
+        "src": "/images/dux-shell/pr3867-5.webp",
+        "alt": "The Profiles page with two profiles, Default and one with a desktop screenshot as its image, and the Import and New profile buttons",
+        "width": 1600,
+        "height": 1368
+      }
     },
     {
       "ref": "duxlabs-dev/dux-shell#3768",
       "label": "System monitor",
       "title": "feat(sysmon): rework the system monitor window",
       "blurb": "The System Monitor window has pages for processes, performance, disks and system information. Each process shows its app, its GPU and video use, its internet connections and its download and upload.",
-      "note": "A new system monitor window"
+      "note": "A new system monitor window",
+      "image": {
+        "src": "/images/dux-shell/pr3768-2.webp",
+        "alt": "The CPU page with a graph per thread, clock, temperature, process and thread counts",
+        "width": 1600,
+        "height": 1184
+      }
     },
     {
       "ref": "duxlabs-dev/dux-gop#50",
       "label": "Process data",
       "title": "gops: add data for the DMS system monitor rework",
       "blurb": "The data behind the new System Monitor, collected in Go: GPU, disk and network use per process, sensors and memory modules. A poll of the process list went from 375 ms to 22 ms of CPU time on my machine.",
-      "note": "Per-process GPU, disk and network data, collected faster"
+      "note": "Per-process GPU, disk and network data, collected faster",
+      "image": {
+        "src": "/images/dux-shell/pr4219-2.webp",
+        "alt": "A merged Steam row expanded into its nine processes, each with its own values",
+        "width": 1600,
+        "height": 1181
+      }
     },
     {
       "ref": "duxlabs-dev/dux-shell#3727",
       "label": "Network settings",
       "title": "feat(network): edit NetworkManager connections from Settings",
       "blurb": "Network connections can be created and edited in Settings: Ethernet, Wi-Fi, VPN and more, including enterprise networks such as eduroam. It also adds a hotspot page with a QR code, a Tailscale page and a login button for captive portals.",
-      "note": "Create and edit network connections in Settings"
+      "note": "Create and edit network connections in Settings",
+      "image": {
+        "src": "/images/dux-shell/network-editor-connections.webp",
+        "alt": "The Connections page listing saved Ethernet, Wi-Fi, hotspot, VPN and cellular profiles, with Add and Import buttons",
+        "width": 1600,
+        "height": 1374
+      }
     },
     {
       "ref": "duxlabs-dev/dux-shell#4155",
       "label": "Wallpaper folders",
       "title": "wallpaper: add wallpaper folders",
       "blurb": "Wallpapers can come from several folders, and the wallpaper picker and automatic cycling can be limited to the folders the user selects.",
-      "note": "Wallpapers from several folders"
+      "note": "Wallpapers from several folders",
+      "image": {
+        "src": "/images/dux-shell/pr4155-4.webp",
+        "alt": "The wallpaper grid with the folder menu open: All, one folder, Browse and Settings",
+        "width": 1227,
+        "height": 654
+      }
     },
     {
       "ref": "duxlabs-dev/dux-shell#4129",
       "label": "Connected popouts",
       "title": "feat(bar): connected popouts for bar & island variants",
       "blurb": "Popouts from the bar or the island can connect to it, as in connected frame mode but without the frame around the screen.",
-      "note": "Popouts that attach to the bar"
+      "note": "Popouts that attach to the bar",
+      "image": {
+        "src": "/images/dux-shell/pr4129-3.webp",
+        "alt": "The Control Center popout joined to the island at the top of the screen as one shape",
+        "width": 849,
+        "height": 835
+      }
     }
   ],
   "shellImages": [
+    {
+      "src": "/images/dux-shell/overview.webp",
+      "alt": "The Dux Shell desktop",
+      "width": 1600,
+      "height": 1000
+    },
     {
       "src": "/images/dux-shell/pr3867-1.webp",
       "alt": "Profiles under Wallpaper & colors in Dux Shell Settings, with the right-click menu of a profile: Apply, Partial apply, Edit and Delete",
@@ -145,7 +187,10 @@
     },
     {
       "id": "dux-cast",
-      "usedBy": ["dux-player", "dux-plugins"],
+      "usedBy": [
+        "dux-player",
+        "dux-plugins"
+      ],
       "name": "dux-cast",
       "repo": "Conava/dux-cast",
       "url": "https://github.com/Conava/dux-cast",
@@ -182,8 +227,7 @@
     "did": [
       "My largest features in the shell are config profiles, the reworked system monitor, the network settings and wallpaper folders. Most of them span the Go backend and the QML interface, the system monitor also dux-gop, the Go library that collects the system data, and I wrote the docs pages for profiles and the system monitor.",
       "Most of my other pull requests fix bugs: in the shell, in dux-gop and in the QML components shared by the Dux apps.",
-      "Beyond code, I report bugs with their root cause, help users in the support channels, take part in design discussions, such as where profiles sit in Settings, and work with the maintainers on larger features.",
-      "Dux Player and the Cast plugin are my own: an app and a plugin that use the shell's settings and theme and also run on their own."
+      "Beyond code, I report bugs with their root cause, help users in the support channels, take part in design discussions, such as where profiles sit in Settings, and work with the maintainers on larger features."
     ],
     "viz": {
       "type": "pr-dots",

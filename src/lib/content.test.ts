@@ -9,6 +9,7 @@ import {
   getArticle,
   getHomeContent,
   getProjectSource,
+  keepExisting,
   loadJson,
 } from "./content";
 
@@ -46,6 +47,22 @@ describe("loaders", () => {
     const refs = contentGithubRefs(await getHomeContent("en", fixtures));
     expect(refs.repos.sort()).toEqual(["o/bpmn", "o/shell"]);
     expect(refs.prs).toEqual(["o/shell#1", "o/shell#2"]);
+  });
+
+  test("keepExisting drops images whose file is missing, so the next one leads", async () => {
+    const pub = fs.mkdtempSync(path.join(os.tmpdir(), "public-"));
+    fs.mkdirSync(path.join(pub, "images"));
+    fs.writeFileSync(path.join(pub, "images", "b.webp"), "");
+    const img = (src: string) => ({ src, alt: "", width: 1, height: 1 });
+    expect(await keepExisting([img("/images/a.webp"), img("/images/b.webp")], pub)).toEqual([img("/images/b.webp")]);
+    expect(await keepExisting(undefined, pub)).toBeUndefined();
+  });
+
+  test("every featured Dux PR has an image that exists", async () => {
+    for (const l of ["en", "de"] as const) {
+      const { dux } = await getHomeContent(l);
+      for (const f of dux.featuredPrs) expect(fs.existsSync(path.join("public", f.image!.src)), `${l} ${f.ref}`).toBe(true);
+    }
   });
 });
 

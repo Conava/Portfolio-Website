@@ -4,7 +4,7 @@
     "work": "Work",
     "education": "Education",
     "bpmnscript": "BPMNscript",
-    "dux": "Dux",
+    "dux": "Dux Shell",
     "projects": "Projects",
     "contact": "Contact"
   },
@@ -46,7 +46,6 @@
     "duxCounts": "{merged} merged pull requests in {repos, plural, one {# repository} other {# repositories}}, {open} open"
   },
   "viz": {
-    "perTask": "One agent per task, each reviewed",
     "entry": "Entry",
     "period": "Period",
     "count": "Count",
@@ -83,7 +82,7 @@
     "work": "Work",
     "education": "Education",
     "bpmnscript": "BPMNscript",
-    "dux": "Dux",
+    "dux": "Dux Shell",
     "projects": "Projects",
     "contact": "Contact",
     "menu": "Menu",
@@ -92,8 +91,7 @@
   },
   "hero": {
     "resume": "Resume (PDF)",
-    "resumeShort": "Resume",
-    "statusFrom": "{what} from {date}"
+    "resumeShort": "Resume"
   },
   "scene": {
     "diagramLabel": "Compiled BPMN diagram of the invoice approval",
@@ -113,7 +111,8 @@
     "xml": "XML",
     "playground": "Playground",
     "github": "GitHub",
-    "thesis": "Thesis"
+    "thesis": "Thesis",
+    "openPlayground": "Open this code in the playground"
   },
   "trace": {
     "overlap": "{a} and {b} overlapped, {range}",
@@ -130,7 +129,7 @@
     "education": "Information systems and computer science",
     "bpmnscript": "A text language for BPMN",
     "dux": "Core contributor to Dux Shell",
-    "projects": "devline and other projects",
+    "projects": "My own projects",
     "contact": "Contact"
   },
   "gallery": {
@@ -144,7 +143,8 @@
     "page": "Project page",
     "article": "Read article",
     "usedBy": "Used by <list></list>",
-    "uses": "Uses <h>{helper}</h>, like <list></list>"
+    "uses": "Uses <h>{helper}</h>, like <list></list>",
+    "builtOn": "Built on <a>Dux Shell</a>."
   },
   "notFound": {
     "message": "No page at this address.",
@@ -286,6 +286,8 @@
     "links": "Links",
     "credit": "Image: {source}",
     "pullRequests": "Pull requests",
+    "soon": "Coming soon",
+    "soonLede": "The article on {title} isn't published yet.",
     "figure": "Figure: {caption}"
   },
   "devline": {
@@ -316,7 +318,65 @@
     "flowImpl": "Implement",
     "flowRev": "Review",
     "flowEach": "One agent per task, all tasks of a wave at once",
-    "flowLoop": "A blocking finding goes back to the implementer, then the task is reviewed again"
+    "flowLoop": "A blocking finding goes back to the implementer, then the task is reviewed again",
+    "run": {
+      "lanes": {
+        "you": "Developer",
+        "skills": "Skills",
+        "agents": "Agents"
+      },
+      "start": "Idea",
+      "end": "Merged",
+      "gate": "Manual approval gate",
+      "gateOf": {
+        "brainstorm": "Spec",
+        "plan": "Plan"
+      },
+      "skip": "No UI changes",
+      "agent": {
+        "design/designer": "Mockups, then the design system",
+        "plan/planner": "Owned files and tests per task",
+        "implement/implementer": "One per task, in its own worktree",
+        "implement/reviewer": "One review per task",
+        "implement/debugger": "When a build or test run fails",
+        "docs/docs-keeper": "README, CLAUDE.md, docs/",
+        "deep-review/reviewer": "The whole branch, on Opus"
+      },
+      "ladder": "Findings escalate",
+      "fix": "Fix loop",
+      "replan": "After three blocking rounds the planner rewrites the approach",
+      "replanShort": "Replan after 3 rounds",
+      "iterate": "Iterate: back to the plan with what should change",
+      "iterateShort": "Iterate",
+      "hooks": "Hooks on every command and file access",
+      "hook": {
+        "validate-bash": "Blocks destructive commands",
+        "validate-write": "Denies reads of keys and .env files",
+        "pre-compact": "Keeps the run state through a compaction"
+      },
+      "alone": "Standalone skills, outside the pipeline",
+      "aloneNote": {
+        "quick": "Implement, review, commit",
+        "debug": "Root cause with the debugger",
+        "review": "Review recent changes",
+        "deps": "CVE patches and migrations",
+        "writing": "Clean up a draft"
+      },
+      "srSteps": "The run, step by step",
+      "srSkill": "Skill {skill}",
+      "srAgents": "Agents: {agents}",
+      "srOptional": "Only for UI changes, skipped otherwise.",
+      "srLoops": "Loops",
+      "kinds": {
+        "skill": "Skill",
+        "agent": "Agent",
+        "kb": "kb-skill"
+      },
+      "cap": "Capability",
+      "cost": "Cost",
+      "srKinds": "Three kinds of building blocks: skills are the stages and the commands. Agents do the work a skill hands them. kb-skills are knowledge the agents load. A skill can run on its own.",
+      "srRuns": "Runs {agents}."
+    }
   },
   "bpmnscript": {
     "openInPlayground": "Open in the playground",

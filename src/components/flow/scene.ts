@@ -374,12 +374,12 @@ function buildLayouts(data: FlowSceneData, codeCursor: { cur: number }, focus: n
     });
   }
 
-  // 7 Dux: a desktop shell; one bar item per featured PR and a stack of windows, one per Dux project, as listed.
+  // 7 Dux Shell: a desktop; one bar item per featured PR and a stack of windows, one per PR screenshot, as listed.
   // The popout opens under the PR being read, or under one PR after another.
   {
     const cols = 13, rows = 7, sp = 0.42;
     const barY = ((rows - 1) / 2) * sp + 0.42, barX = (i: number) => (i - (cols - 1) / 2) * sp;
-    const np = Math.max(1, Math.min(cols, data.prs)), nw = Math.min(4, data.duxProjects);
+    const np = Math.max(1, Math.min(cols, data.prs)), nw = Math.min(4, data.shots);
     const items = Array.from({ length: np }, (_, i) => Math.round(((i + 0.5) * cols) / np - 0.5));
     const a: Slot[] = [];
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) a.push({ p: V(barX(c), ((rows - 1) / 2 - r) * sp, -0.2), s: V(0.38, 0.38, 0.05), screen: true, c });
@@ -391,7 +391,7 @@ function buildLayouts(data: FlowSceneData, codeCursor: { cur: number }, focus: n
     for (let w = 0; w < nw; w++)
       for (let r = 0; r < 4; r++)
         for (let c = 0; c < 5; c++)
-          a.push({ p: V((w - (nw - 1) / 2) * 1.1 + (c - 2) * 0.34, 0.8 - w * 0.48 - r * 0.34, 0.18 + w * 0.34), s: V(0.32, r === 0 ? 0.2 : 0.32, 0.07), win: w, title: r === 0, item: data.prs + w });
+          a.push({ p: V((w - (nw - 1) / 2) * 1.1 + (c - 2) * 0.34, 0.8 - w * 0.48 - r * 0.34, 0.18 + w * 0.34), s: V(0.32, r === 0 ? 0.2 : 0.32, 0.07), win: w, title: r === 0, item: w });
     for (let i = 0; i < 9; i++) a.push({ p: V(barX(items[0]) + ((i % 3) - 1) * 0.3, barY - 0.4 - Math.floor(i / 3) * 0.3, 1.0), s: V(0.27, 0.27, 0.07), pop: i });
     L.push({
       slots: spares(a, [V(0, 0, 0)]),

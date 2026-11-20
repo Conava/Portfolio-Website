@@ -14,3 +14,6 @@ export const siteConfig = {
   duxOrg: "duxlabs-dev",
   photoPath: "/images/profile.jpg",
 } as const;
+
+/** Articles are published only with `ARTICLES=on` (runtime env); otherwise their routes show "coming soon" and stay out of the sitemap. */
+export const articlesLive = () => process.env.ARTICLES === "on";

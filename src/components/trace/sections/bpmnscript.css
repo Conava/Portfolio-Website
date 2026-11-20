@@ -160,11 +160,6 @@
     display: none;
   }
 
-  /* Keyboard focus never lands on an invisible link. */
-  .t-bpm-links:focus-within {
-    opacity: 1 !important;
-  }
-
   .t-bpm-proof {
     max-width: 720px;
     margin-top: var(--sp-9);

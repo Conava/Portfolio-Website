@@ -2,9 +2,10 @@
   "name": "Marlon Kranz",
   "lede": "Software engineer in Hamburg. I build distributed, enterprise-scale cloud services in Java at Adobe, and open-source projects in Go and TypeScript.",
   "statement": [
-    "I build backend services and cloud architecture, and I enjoy a good interface when a project needs one, like this site.",
-    "At Adobe I own and plan the migration of a production pipeline, one of my team's biggest efforts, and on the side I'm active in the team's AI setup, from its harness to the shared repo of agent skills.",
-    "Beyond work I build my own tools: devline, the Claude Code plugin I use every day, and Dux Player, a music player, and I'm a core contributor to Dux Shell, a Linux desktop shell. My bachelor thesis at the University of Hamburg is a tool too: BPMNscript, a text language for business processes. The B.Sc. in Information Systems, with an exchange year at San Diego State University, is expected in December 2026."
+    "I build backend services and cloud architecture. I'm passionate about solving problems, and when a project needs an interface, I like it clean.",
+    "At Adobe I own and plan the migration of a production pipeline, one of my team's biggest efforts, and help maintain four production services that millions of people use every day. On the side, I'm invested in my team's AI tooling.",
+    "Beyond work I build what I use every day. I'm a core contributor to Dux Shell, my Linux desktop shell, and built its music player, Dux Player. I also maintain devline, my own Claude Code plugin.",
+    "My bachelor thesis at the University of Hamburg is BPMNscript, a programming language that brings executable BPMN 2.0 processes into the IDE. The B.Sc. in Information Systems, with an exchange year at San Diego State University, is expected in December 2026. In January 2027 I start a part-time M.S. in Computer Science at Georgia Tech."
   ],
   "links": [
     {

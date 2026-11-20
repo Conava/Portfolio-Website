@@ -25,3 +25,9 @@ export async function DuxRelations({ project, projects, locale }: { project: Dux
   if (!helper || !others.length) return null;
   return <p className="dux-rel">{t.rich("uses", { helper: helper.name, h: (c) => <a href={`#${helper.id}`}>{c}</a>, list: () => list(others) })}</p>;
 }
+
+/** The one line that ties the Dux projects to the Dux Shell section (`#dux`). */
+export async function DuxBuiltOn({ locale }: { locale: Locale }) {
+  const t = await getTranslations({ locale, namespace: "projects" });
+  return <p className="dux-rel">{t.rich("builtOn", { a: (c) => <a href="#dux">{c}</a> })}</p>;
+}

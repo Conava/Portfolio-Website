@@ -132,8 +132,8 @@ async function coverage(page: Page) {
                 const tw = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
                 for (let n = tw.nextNode(); n; n = tw.nextNode()) {
                   const el = n.parentElement!;
-                  // a filled button carries its own ground
-                  if (!n.textContent!.trim() || el.closest(".btn-primary") || !el.checkVisibility({ opacityProperty: true })) continue;
+                  // a filled button carries its own ground; visually hidden text is never drawn
+                  if (!n.textContent!.trim() || el.closest(".btn-primary, .sr-only") || !el.checkVisibility({ opacityProperty: true })) continue;
                   const lt = lum(getComputedStyle(el).color.match(/\d+(\.\d+)?/g)!.map(Number));
                   range.selectNodeContents(n);
                   for (const r of range.getClientRects())

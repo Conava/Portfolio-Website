@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { formatDate, formatLineChanges } from "@/lib/format";
 import { freshness, parsePrRef, type GithubData } from "@/lib/github";
@@ -10,7 +11,8 @@ import "./github.css";
 
 /**
  * Ledger of featured PRs: the `repo#number` link, then the plain-language note (title as fallback).
- * Live data adds badge, meta and the sync line; without it text and links remain.
+ * Live data adds badge, meta and the sync line; without it text and links remain. A PR with an
+ * `image` shows it small beside the blurb, linked to the full-size file.
  * `sync={false}` drops the sync line, for pages that show several lists and one line after the last.
  */
 export async function PrList({
@@ -64,7 +66,16 @@ export async function PrList({
                   ))}
                 </p>
               )}
-              {f.blurb && <p className="gh-blurb">{f.blurb}</p>}
+              {f.image ? (
+                <div className="gh-feat">
+                  {f.blurb && <p className="gh-blurb">{f.blurb}</p>}
+                  <a className="gh-shot" href={f.image.src}>
+                    <Image src={f.image.src} alt={f.image.alt} width={f.image.width} height={f.image.height} sizes="176px" loading="lazy" />
+                  </a>
+                </div>
+              ) : (
+                f.blurb && <p className="gh-blurb">{f.blurb}</p>
+              )}
             </li>
           );
         })}

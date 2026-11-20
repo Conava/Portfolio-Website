@@ -4,7 +4,7 @@
   .t-contact {
     padding-block: var(--section);
   }
-  .t-projects > .lede,
+  .t-projects > .wrap > .lede,
   .t-contact > .lede {
     margin-top: var(--sp-5);
   }
@@ -194,20 +194,8 @@
 }
 
 /* Reveals arm only after mount (data-armed), so no-JS and reduced motion show the final state. */
-@keyframes t-lane {
-  from {
-    transform: scaleX(0);
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
   :root[data-design="thread"] {
-    .t-feature[data-armed]:not([data-in]) .viz-lane {
-      transform: scaleX(0);
-    }
-    .t-feature[data-in] .viz-lane {
-      animation: t-lane 900ms var(--ease-out-quart) both;
-      animation-delay: min(calc(var(--i, 0) * 120ms), 480ms);
-    }
     /* Armed by the trace layer until the lit line reaches the ring. */
     .terminus[data-armed]:not([data-arrived]) {
       opacity: 0;

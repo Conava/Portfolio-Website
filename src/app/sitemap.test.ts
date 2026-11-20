@@ -1,6 +1,9 @@
 import { expect, test } from "bun:test";
 import { loadSitemapInput, sitemapEntries } from "./sitemap";
 
+// The real content with articles published; the unpublished case is the last test.
+process.env.ARTICLES = "on";
+
 test("sitemap has an EN and a DE entry per page, each with both alternates", async () => {
   const input = await loadSitemapInput();
   const entries = sitemapEntries(input);
@@ -29,4 +32,13 @@ test("removed project pages are not listed, and dates are real", async () => {
   }
   expect(entries.find((e) => e.url.endsWith("/dux"))?.lastModified).toBeDefined();
   expect(entries.find((e) => e.url.endsWith("/projects/minj"))?.lastModified).toBeUndefined();
+});
+
+test("unpublished articles stay out of the sitemap", async () => {
+  process.env.ARTICLES = "";
+  try {
+    expect((await loadSitemapInput()).articles).toEqual([]);
+  } finally {
+    process.env.ARTICLES = "on";
+  }
 });

@@ -164,9 +164,10 @@
       }
     }
   }
-  @keyframes t-bar {
-    to {
-      transform: scaleY(0.2);
-    }
+}
+
+@keyframes t-bar {
+  to {
+    transform: scaleY(0.2);
   }
 }
