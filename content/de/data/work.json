@@ -1,0 +1,111 @@
+{
+  "jobs": [
+    {
+      "id": "adobe",
+      "brief": "Cloud Software Engineer bei Adobe",
+      "figures": {
+        "services": 5,
+        "moved": 9,
+        "apps": 10
+      },
+      "logo": {
+        "src": "/images/logos/adobe.svg",
+        "alt": "Adobe",
+        "width": 66.25,
+        "height": 16.75
+      },
+      "company": "Adobe",
+      "url": "https://www.adobe.com",
+      "role": "Cloud Software Engineer (Werkstudent)",
+      "location": "Hamburg, Deutschland",
+      "start": "2026-07",
+      "end": null,
+      "summary": "Ich bin Werkstudent in einem Team im Bereich Adobe Cloud Platform and Collaboration (ACPC). Wir betreiben vier eventgetriebene Java-Services auf AWS, die Millionen Menschen in Adobe-Produkten nutzen, etwa für Kommentare, Teilen, Suchvorschläge und als Speicherschicht für Assets. Neben Entwicklung, Deployments und Code Reviews verantworte ich den Umzug einer Produktions-Pipeline auf GitOps mit Kubernetes. Das gemeinsame KI-Tooling und die Skills meines Teams habe ich angestoßen.",
+      "panel": {
+        "did": [
+          "Die Migration einer Produktions-Pipeline von Spring Cloud Data Flow auf unsere interne GitOps-Plattform auf Kubernetes verantworte ich von Anfang bis Ende. Das System war kaum dokumentiert, also habe ich es erst einmal durchleuchtet und dann den Plan entwickelt, mit dem 10 teils zustandsbehaftete Services sicher und ohne Downtime umziehen. Mit Senior Engineers habe ich daraus eine Roadmap über vier Monate gemacht.",
+          "Am schwierigsten ist eine zustandsbehaftete App, die sich mit keinem der beiden Backups vollständig wiederherstellen ließ. Ich habe ihren State in ein Changelog von Kafka Streams verlagert. Seitdem übersteht sie Ausfälle, skaliert über mehrere Instanzen und baut ihren inzwischen kleineren State schneller wieder auf.",
+          "Das Repository mit den Agent-Skills des Teams für Wartung und wiederkehrende Aufgaben habe ich angelegt. Am KI-Harness des Teams habe ich mitgebaut: Kontext und Wissen zu Tests, CI/CD, Architektur, unserer Umgebung und den angebundenen Services, für Agents genauso wie für Entwickler.",
+          "Ich habe an einer Multi-Region-CI/CD-Pipeline für neue AWS-Regionen mitgearbeitet und das Monitoring mit Splunk, Grafana und New Relic ausgebaut. Die Services laufen auf EKS, MSK, Aurora, Neptune, OpenSearch, SQS und S3, bisher mit über 30 Deployments in Produktion.",
+          "In mehreren Services habe ich Tech Debt abgebaut: Bugs behoben, CI/CD mit Jenkins und Argo Workflows und den Umgang mit Secrets vereinheitlicht, Major-Upgrades mit Breaking Changes umgesetzt und einen großen Security-Backlog abgearbeitet.",
+          "Bugs, auf die ich selbst gestoßen bin, habe ich auch behoben, etwa eine Race Condition, durch die parallele CI- und Release-Läufe Builds ohne Review in Produktion bringen konnten, und einen jahrealten Bug beim Account-Linking, den ein falsch konfigurierter Test versteckt hatte."
+        ]
+      }
+    },
+    {
+      "id": "uhh-ta",
+      "short": "TA",
+      "logo": {
+        "src": "/images/logos/uhh.svg",
+        "alt": "Universität Hamburg",
+        "width": 392.463,
+        "height": 127.19
+      },
+      "company": "Universität Hamburg",
+      "url": "https://www.uni-hamburg.de",
+      "role": "Tutor, Software Engineering II",
+      "location": "Hamburg, Deutschland",
+      "start": "2026-04",
+      "end": "2026-07",
+      "summary": "Tutor für Software Engineering II im Sommersemester. Ich habe eine wöchentliche Übungsgruppe betreut, Fragen beantwortet, Abgaben bewertet und mich mit anderen Tutoren beim Live-Coding in der Vorlesung abgewechselt.",
+      "panel": {
+        "did": [
+          "In der wöchentlichen Übung habe ich eine Tutoriumsgruppe geleitet, etwa zwei Stunden pro Woche: Fragen beantwortet, Tipps gegeben, wenn jemand nicht weiterkam, und die Abgaben korrigiert und bewertet.",
+          "Im Wechsel mit zwei anderen Tutoren habe ich in der Vorlesung vor mehreren hundert Studierenden live programmiert. Dabei habe ich den Stoff praktisch gezeigt und bin auf Fragen eingegangen."
+        ]
+      }
+    },
+    {
+      "id": "otto",
+      "figures": {
+        "apps": 4
+      },
+      "logo": {
+        "src": "/images/logos/otto.svg",
+        "alt": "OTTO",
+        "width": 100,
+        "height": 37
+      },
+      "company": "OTTO",
+      "url": "https://www.otto.de",
+      "role": "Software Engineer (Werkstudent)",
+      "location": "Hamburg, Deutschland",
+      "start": "2025-08",
+      "end": "2026-06",
+      "summary": "Mein crossfunktionales Team bei OTTO war für das Onboarding von Produktdaten und die zugehörigen Integrationen verantwortlich. Ich habe dafür Java-Microservices gebaut und betreut, von der Architektur über die Entwicklung bis zu Tests und Deployment.",
+      "panel": {
+        "did": [
+          "Ich habe Microservices mit Java und Spring Boot in hexagonaler Architektur gebaut. Sie tauschen Daten eventgetrieben über Kafka aus und laufen auf AWS mit ECS, Lambda, S3 und CloudWatch, dazu MongoDB und Terraform.",
+          "Für das Team habe ich ein KI-gestütztes Entwicklungs-Setup konzipiert und eingeführt, das den generischen GitHub Copilot ablöste: KI-Code-Reviews und eigene Agents, zugeschnitten auf unsere Workflows und Konventionen.",
+          "Ich habe einen Service für Media Assets mitgebaut. Er liest Produktdaten-Events aus Kafka, validiert sie, bereitet Uploads in ein nachgelagertes Mediensystem vor und gleicht die Media Assets mit diesem System ab.",
+          "Einen Service in Produktion habe ich ohne Downtime auf ein neues, anders aufgebautes Kafka migriert.",
+          "Ich war an Architekturplanung und Designentscheidungen, Refinements und Plannings beteiligt, habe CI/CD-Pipelines mit GitHub Actions aufgebaut, ein React-Frontend gepflegt und Sicherheitslücken geschlossen."
+        ]
+      }
+    },
+    {
+      "id": "msg-life",
+      "logo": {
+        "src": "/images/logos/msg-life.svg",
+        "alt": "msg.life",
+        "width": 493.4,
+        "height": 157.7
+      },
+      "company": "msg.life",
+      "url": "https://www.msg-life.com",
+      "role": "Software Engineer (Werkstudent)",
+      "location": "Hamburg, Deutschland",
+      "start": "2023-10",
+      "end": "2024-07",
+      "summary": "msg.Pension Data ist eine Standardsoftware, die Rentendaten an eine zentrale staatliche Stelle liefert. Als einziger deutscher Entwickler im Produkt war ich das Bindeglied zwischen unseren deutschen Product Managern und der Kundenkommunikation auf der einen Seite und dem Entwicklungsteam in Slowenien auf der anderen. Ich habe das Produkt getestet, dokumentiert und in Java und Vue.js weiterentwickelt.",
+      "panel": {
+        "did": [
+          "Aus der Kundenkommunikation habe ich technische Anforderungen abgeleitet und mit den regulatorischen Vorgaben abgeglichen.",
+          "API- und Funktionstests lagen bei mir: Ich habe Tests mit Postman und Jenkins entworfen, ausgeführt und dokumentiert, dazu kamen manuelle QA und Code Reviews.",
+          "Ich habe User Stories aus Jira umgesetzt, erst kleine Fixes, später größere Bugs und Features in Java mit Spring Boot und im Vue.js-Frontend.",
+          "Mein erstes eigenständiges Projekt war eine Documentation-as-Code-Pipeline, die ich entworfen und gebaut habe. Außerdem habe ich die Produktdokumentation geprüft und erweitert."
+        ]
+      }
+    }
+  ]
+}

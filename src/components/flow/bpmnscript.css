@@ -1,0 +1,22 @@
+/* Flow BPMNscript: the explainer inside the dark beat column. */
+.fl-bs-what {
+  margin: 18px 0;
+}
+.fl-bs-what .fl-code {
+  margin: 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+}
+.fl-bs-rt {
+  margin: 28px 0 18px;
+}
+.fl-bs-rt .bs-rt-head {
+  font-family: var(--s-font-mono);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.fl-bs-rt .bs-rt-n {
+  color: var(--s-accent);
+}

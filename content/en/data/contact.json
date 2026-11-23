@@ -1,0 +1,9 @@
+{
+  "intro": "Send me an email or reach out on LinkedIn.",
+  "email": "contact@marlonkranz.com",
+  "links": [
+    { "label": "GitHub", "href": "https://github.com/conava" },
+    { "label": "LinkedIn", "href": "https://linkedin.com/in/marlon-kranz" },
+    { "label": "Resume", "href": "/resume.pdf" }
+  ]
+}

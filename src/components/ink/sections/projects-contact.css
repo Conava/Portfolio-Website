@@ -1,0 +1,159 @@
+/* Ink projects, contact and 404. Scoped to the keynote design; the layout loads every design's CSS. */
+:root[data-design="keynote"] {
+  .ink-projects {
+    padding-block: var(--section-lg);
+  }
+  .ink-projects .lede {
+    margin-top: var(--sp-5);
+  }
+  .ip-rows {
+    margin: var(--sp-8) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line-2);
+  }
+  .ip-row {
+    align-items: start;
+    row-gap: var(--sp-4);
+    padding-block: var(--sp-7);
+    border-bottom: 1px solid var(--line);
+  }
+  .ip-row h3 {
+    font-size: clamp(24px, 2.2vw, 30px);
+  }
+  .ip-body {
+    display: grid;
+    gap: var(--sp-3);
+  }
+  .ip-body p {
+    margin: 0;
+  }
+  /* Live facts on their own line: no middle-dot meta string (design system 9.17). */
+  .ip-body .gh-facts {
+    display: block;
+  }
+  /* devline: the h3 role at full size (other rows are smaller), text over a wide pipeline. */
+  .ip-feature {
+    padding-block: var(--sp-9);
+    border-bottom-color: var(--line-2);
+  }
+  .ip-feature h3 {
+    font-size: clamp(26px, 2.6vw, 38px);
+  }
+  .ip-viz {
+    grid-column: 1 / -1;
+    margin-top: var(--sp-6);
+  }
+  .ip-row .dp-actions {
+    grid-column: 1 / -1;
+  }
+  .ip-body > .ip-actions {
+    margin-top: var(--sp-3);
+  }
+
+  @media (min-width: 900px) {
+    /* The work rows' lines: names on 1-3, text on 4-9. */
+    .ip-row h3 {
+      grid-column: 1 / 4;
+    }
+    .ip-body,
+    .ip-row .dp-actions {
+      grid-column: 4 / 10;
+    }
+    .ip-feature h3 {
+      grid-column: 1 / -1;
+    }
+    .ip-feature .ip-body {
+      grid-column: 1 / span 8;
+    }
+  }
+
+  /* Contact: a scene band. The address is the headline. */
+  .ink-contact {
+    padding-block: var(--section-md);
+  }
+  .ink-contact .lede {
+    margin-top: var(--sp-5);
+  }
+  .ic-email {
+    margin-top: var(--sp-7);
+    font-family: var(--sans);
+    font-size: clamp(24px, 5.2vw, 64px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    flex-wrap: wrap;
+  }
+  .ic-email .ce-btn {
+    min-height: 44px;
+    overflow-wrap: anywhere;
+  }
+  .ic-email .ce-stroke {
+    height: 8px;
+    color: var(--accent);
+  }
+  .ic-email .ce-status {
+    font: 500 14px/1 var(--sans);
+    color: var(--mute);
+  }
+  .ic-links {
+    margin-top: var(--sp-7);
+  }
+
+  /* 404 */
+  .ink-nf {
+    padding-block: var(--section-lg);
+  }
+  .ink-nf-path {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    margin: 0 0 var(--sp-6);
+    font-size: clamp(20px, 3vw, 36px);
+    overflow-wrap: anywhere;
+  }
+  .ink-nf-path svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .ink-nf-path path {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .ink-nf h1 {
+    font-size: clamp(32px, 4.6vw, 64px);
+    font-stretch: 90%;
+    line-height: 1.05;
+    letter-spacing: -0.022em;
+  }
+  .ink-nf h1 + p {
+    margin-top: var(--sp-5);
+  }
+
+  /* Copy: the pen stroke redraws over 600ms (the shared base is 400ms). */
+  .copy-email[data-copied] .ce-stroke {
+    transition-duration: 600ms;
+    transition-timing-function: var(--ease-in-out-quart);
+  }
+}
+
+/* Motion arms only after mount (data-armed), so no-JS and reduced motion show the final state. */
+@keyframes ink-strike {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-design="keynote"] {
+    .ink-nf-path path {
+      animation: ink-strike 700ms var(--ease-in-out-quart) 250ms both;
+    }
+  }
+}

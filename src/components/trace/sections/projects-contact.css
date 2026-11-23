@@ -1,0 +1,214 @@
+/* Trace projects, contact and 404. */
+:root[data-design="thread"] {
+  .t-projects,
+  .t-contact {
+    padding-block: var(--section);
+  }
+  .t-projects > .wrap > .lede,
+  .t-contact > .lede {
+    margin-top: var(--sp-5);
+  }
+  .t-meta {
+    margin-top: var(--sp-3);
+  }
+  .t-meta .gh-facts {
+    margin-left: 12px;
+  }
+
+  /* devline: an outlined block on the page's own surface, in both modes. */
+  .t-feature {
+    position: relative;
+    margin-top: var(--sp-8);
+    padding: clamp(24px, 4vw, 56px);
+    border: 1px solid var(--line-2);
+    color: var(--s-text);
+  }
+  &.dark .t-feature {
+    --s-mute: #8d9893;
+    --s-line-2: #4a5853;
+  }
+  /* The devline pad hangs on the spine, outside the box, level with the name's first line. */
+  .t-feature .pad {
+    --pad-y: calc(clamp(32px, 4.4vw, 60px) / 2);
+    left: calc(var(--g) / -2 - var(--pad-size, 11px) / 2 - clamp(24px, 4vw, 56px) - 1px);
+  }
+  .t-feature a {
+    text-decoration-color: var(--s-line-2);
+  }
+  .t-feature h3 {
+    font-size: clamp(32px, 4.4vw, 60px);
+    font-weight: 700;
+    font-stretch: 112%;
+    line-height: 1;
+  }
+  .t-feature-blurb {
+    max-width: 58ch;
+    margin-top: var(--sp-5);
+    color: var(--s-text-2);
+    font-size: clamp(16px, 1.4vw, 19px);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .t-feature .meta {
+    color: var(--s-mute);
+    max-width: 62ch;
+    margin-top: var(--sp-3);
+  }
+  .t-feature .t-actions {
+    margin-top: var(--sp-5);
+  }
+  .t-feature .viz {
+    margin-top: var(--sp-7);
+  }
+  /* the devline run takes the block's padding too: it pins and needs the width */
+  .t-feature .dlr {
+    margin-inline: calc(-1 * clamp(24px, 4vw, 56px) + 8px);
+  }
+  .t-feature .viz-label {
+    color: var(--s-text);
+  }
+  .t-feature .viz figcaption {
+    color: var(--s-mute);
+  }
+
+  .t-rows {
+    margin: var(--sp-8) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+  .t-row {
+    position: relative;
+    display: grid;
+    gap: var(--sp-2) var(--sp-7);
+    padding: var(--sp-6) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  @media (min-width: 960px) {
+    .t-row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    }
+    .t-row h3 {
+      grid-row: 1 / span 2;
+    }
+    .t-row > .t-meta {
+      margin-top: 0;
+    }
+    .t-row > .dp-actions {
+      grid-column: 2;
+    }
+  }
+  @media (hover: hover) {
+    .t-row:hover {
+      background: var(--bg-2);
+    }
+  }
+
+  /* Contact: the ring and the underline arrive with the lit trace. */
+  .t-contact-line {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-top: var(--sp-7);
+    font-size: clamp(17px, 4.6vw, 44px);
+    font-weight: 600;
+    font-stretch: 104%;
+    letter-spacing: -0.02em;
+  }
+  /* A BPMN end event (thick ring), like Done in the BPMNscript diagram. */
+  .terminus {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--acc);
+    border-radius: 50%;
+    box-sizing: border-box;
+    transition: background-color 260ms var(--ease-out-quart);
+  }
+  .t-contact:has([data-copied]) .terminus,
+  .terminus[data-filled] {
+    background: var(--acc);
+  }
+  .t-ce {
+    flex-wrap: wrap;
+  }
+  .t-ce .ce-btn::before {
+    display: none;
+  }
+  .t-ce .ce-btn {
+    padding-bottom: 8px;
+    min-height: 44px;
+    letter-spacing: inherit;
+  }
+  .t-ce .ce-btn::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1.5px;
+    background: var(--fg);
+    transform-origin: 0 50%;
+    transition: transform 600ms var(--ease-in-out-quart);
+  }
+  .t-ce .ce-text {
+    overflow-wrap: anywhere;
+  }
+  .t-ce .ce-status {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .t-links {
+    margin-top: var(--sp-7);
+  }
+
+  /* 404 */
+  .t-nf {
+    --nf-size: clamp(30px, 4.6vw, 56px);
+    position: relative;
+    padding-top: 22vh;
+    padding-bottom: var(--section);
+  }
+  .t-nf-trace {
+    position: absolute;
+    top: 0;
+    left: calc(var(--pad) + var(--g) / 2 - 6px);
+    height: calc(22vh + 0.6 * var(--nf-size));
+    fill: none;
+    overflow: visible;
+  }
+  .t-nf-trace rect {
+    fill: var(--acc);
+  }
+  .t-nf-trace circle {
+    stroke: var(--acc);
+    stroke-width: 1.5;
+  }
+  .t-nf h1 {
+    font-size: var(--nf-size);
+    font-weight: 650;
+    font-stretch: 108%;
+    line-height: 1.2;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+  .t-nf p {
+    margin-top: var(--sp-6);
+  }
+}
+
+/* Reveals arm only after mount (data-armed), so no-JS and reduced motion show the final state. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-design="thread"] {
+    /* Armed by the trace layer until the lit line reaches the ring. */
+    .terminus[data-armed]:not([data-arrived]) {
+      opacity: 0;
+    }
+    .t-contact-line:has(> .terminus[data-armed]:not([data-arrived])) .ce-btn::after {
+      transform: scaleX(0);
+    }
+    .terminus {
+      transition-property: background-color, opacity;
+      transition-duration: 260ms;
+    }
+  }
+}

@@ -1,0 +1,273 @@
+/*
+ * Trace BPMNscript. Default (no JS, reduced motion, < 960px): the editor window shows its final
+ * state with the panes stacked (source, diagram, XML, terminal). Pinned (the gate at the end):
+ * a 420vh scene whose sticky stage holds the window with the XML laid over the source.
+ * The server markup is the pinned final state; the scene writes inline styles from there.
+ */
+:root[data-design="thread"] {
+  .t-bpm {
+    padding-block: var(--section);
+  }
+  .t-bpm > .lede {
+    max-width: 56ch;
+    margin-top: var(--sp-5);
+  }
+
+  .t-bpm-scene {
+    margin-top: var(--sp-8);
+  }
+  .t-bpm-stage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .t-bpm-fig {
+    margin: 0;
+  }
+
+  /* The one surface with a shadow (§4.3). */
+  .t-bpm-win {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    box-shadow: var(--shadow-window);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .t-bpm-win :focus-visible {
+    outline-offset: -2px;
+  }
+
+  /* Each pane names itself; the active tab is the --bg-3 fill. */
+  .t-bpm-tab {
+    display: flex;
+    margin: 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--fg);
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .t-bpm-tab span {
+    white-space: nowrap;
+    padding: 8px 14px;
+    background: var(--bg-3);
+    border-right: 1px solid var(--line);
+  }
+
+  .t-bpm-src {
+    background: var(--bg-2);
+  }
+  .t-bpm-src .bpmn-src {
+    padding-block: 14px;
+  }
+  /* Each line is as wide as its text (or the pane), so the typing clip tracks the text. */
+  .t-bpm-src .ln {
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+    padding-inline: 16px;
+  }
+  .t-bpm-src .ln[data-cur] {
+    background: var(--bg-3);
+  }
+  .t-bpm-dg {
+    padding: clamp(16px, 2.5vw, 28px);
+    border-top: 1px solid var(--line);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  /* Diagram labels stay >= 12px: narrow panes scroll instead of shrinking it. */
+  .t-bpm-dg .bpmn-diagram {
+    min-width: 720px;
+  }
+  .t-bpm-dg [data-s] {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  /* The shape the current source line compiles to is lit with it. */
+  .t-bpm-dg [data-cur] .nd,
+  .t-bpm-dg .ed[data-cur] {
+    stroke: var(--acc);
+  }
+
+  .t-bpm-xml {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--bg-2);
+    border-top: 1px solid var(--line);
+  }
+  .t-bpm-xml pre {
+    flex: 1;
+    min-height: 0;
+    max-height: 20em;
+    margin: 0;
+    padding: 14px 16px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    color: var(--fg-2);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    white-space: pre;
+  }
+  .t-bpm-xml code {
+    font: inherit;
+  }
+
+  .t-bpm-term {
+    margin: 0;
+    padding: 10px 16px;
+    border-top: 1px solid var(--line);
+    color: var(--fg-2);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .t-bpm-term span {
+    display: inline-block;
+    white-space: pre;
+  }
+  /* The compiler's verdict, in the "passed" green (as Ink's status line). */
+  .t-bpm-term .t-bpm-ok {
+    color: var(--acc);
+  }
+  /* Narrow phones: the DE line ("kompiliert: …") fits at 375 without a scroll. */
+  @media (max-width: 759px) {
+    .t-bpm-term {
+      padding-inline: 12px;
+    }
+  }
+
+  .t-bpm-cap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    min-height: 40px;
+    margin-top: var(--sp-3);
+    color: var(--fg-3);
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .t-bpm-replay[hidden] {
+    display: none;
+  }
+
+  .t-bpm-proof {
+    max-width: 720px;
+    margin-top: var(--sp-9);
+  }
+  .t-bpm-more {
+    display: grid;
+    margin-top: var(--sp-5);
+  }
+
+  /* Mobile replay: CSS carries each step (the scene writes the targets). */
+  .t-bpm-scene[data-replay] {
+    & .ln {
+      transition: clip-path 240ms steps(12, end), background-color 120ms var(--ease-std);
+    }
+    & .bpmn-diagram [data-s] {
+      transition-property: opacity, transform, stroke-dashoffset;
+      transition-duration: 240ms;
+      transition-timing-function: var(--ease-out-quart);
+    }
+  }
+}
+
+/* Proof bars draw once on enter (900 ms); static under reduced motion and without JS. */
+@keyframes t-bpm-bar {
+  from {
+    transform: scaleX(0);
+  }
+}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  :root[data-design="thread"] .t-bpm-proof[data-armed]:not([data-in]) .viz-bar {
+    transform: scaleX(0);
+  }
+  :root[data-design="thread"] .t-bpm-proof[data-in] .viz-bar {
+    animation: t-bpm-bar 900ms var(--ease-out-quart) both;
+    animation-delay: calc(var(--i, 0) * 40ms);
+  }
+}
+
+/* ---- Pinned ---- */
+@media (scripting: enabled) and (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+  :root[data-design="thread"] .t-bpm-scene:not([data-scene-disabled]) {
+    height: 420vh;
+
+    & .t-bpm-stage {
+      position: sticky;
+      top: var(--hdr);
+      height: calc(100svh - var(--hdr));
+      justify-content: center;
+    }
+    & .t-bpm-win {
+      grid-template-areas: "ed" "dg" "term";
+    }
+    /* The pane rule sits inside the shared cell, so the sliding XML never covers it. */
+    & .t-bpm-src,
+    & .t-bpm-xml {
+      grid-area: ed;
+      border-bottom: 1px solid var(--line);
+    }
+    /* Final state: the XML lies over the dimmed source, sized by the source (not by itself). */
+    & .t-bpm-src {
+      opacity: 0.3;
+    }
+    & .t-bpm-xml {
+      z-index: 1;
+      contain: size;
+      border-top: 0;
+      /* Its leading edge while it slides; clipped by the window at rest. */
+      box-shadow: -1px 0 0 var(--line);
+    }
+    /* Not a scroller while pinned: the wheel drives the scene, and the pane paints only what shows.
+       Keyboard focus makes it scrollable. */
+    & .t-bpm-xml pre {
+      max-height: none;
+      overflow: hidden;
+    }
+    & .t-bpm-xml pre:focus-visible {
+      overflow: auto;
+    }
+    & .t-bpm-xml:focus-within {
+      transform: none !important;
+    }
+    & .t-bpm-dg {
+      grid-area: dg;
+      border-top: 0;
+    }
+    & .t-bpm-term {
+      grid-area: term;
+    }
+    &[data-active] :is(.t-bpm-win, .t-bpm-xml) {
+      will-change: transform;
+    }
+  }
+}
+
+/* What it is, and the round trip drawn on the notation line: accent rule, mono stations. */
+.t-bpm > .bs-what {
+  margin-top: var(--sp-6);
+}
+.t-bpm .bs-rt-steps li:not(:last-child)::before {
+  border-left: 2px solid var(--s-accent);
+  left: 12.5px;
+}
+.t-bpm .bs-rt-n {
+  border-radius: var(--s-r-tag);
+  border-color: var(--s-accent);
+  color: var(--s-text);
+}
+.t-bpm .bs-what-tag,
+.t-bpm .bs-what-terms dt {
+  font-family: var(--s-font-mono);
+}

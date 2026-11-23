@@ -1,0 +1,78 @@
+.pg-diagram {
+  position: relative;
+  isolation: isolate;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--pg-bg);
+  color: var(--pg-text);
+
+  /* bpmn-js selection and focus follow the playground, not bpmn.io blue. */
+  --element-selected-outline-stroke-color: var(--pg-accent);
+  --element-selected-outline-secondary-stroke-color: var(--pg-line-2);
+}
+
+.pg-diagram-canvas {
+  position: absolute;
+  inset: 0;
+  background: var(--pg-grid);
+  font-family: var(--pg-font-ui);
+}
+/* Only the drawing fades at a clipped edge; the watermark beside it stays untouched. */
+.pg-diagram-canvas .djs-container > svg {
+  mask-image: linear-gradient(to right, transparent, #000 var(--pg-fade-l, 0px), #000 calc(100% - var(--pg-fade-r, 0px)), transparent);
+}
+.pg-diagram-canvas svg:focus-visible {
+  outline: 2px solid var(--pg-text);
+  outline-offset: -2px;
+}
+
+.pg-diagram-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow: auto;
+  background: var(--pg-grid), var(--pg-bg);
+}
+
+/* The bpmn.io watermark stays unaltered where bpmn-js puts it, on a light plate in both modes. */
+.pg-diagram .bjs-powered-by {
+  text-decoration: none;
+  background: #fff;
+  padding: 2px 4px;
+  border-radius: var(--pg-r-1);
+}
+
+.pg-diagram-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--pg-line);
+  border-radius: var(--pg-r-2);
+  background: var(--pg-panel);
+  font: 400 14px/1 var(--pg-font-ui);
+}
+.pg-diagram-controls .icon-btn {
+  color: var(--pg-text-2);
+  font-size: 18px;
+  border-radius: var(--pg-r-1);
+}
+.pg-diagram-zoom {
+  min-width: 48px;
+  text-align: center;
+  color: var(--pg-text-2);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+@media (hover: hover) {
+  .pg-diagram-controls .icon-btn:hover {
+    color: var(--pg-text);
+    background: var(--pg-bg);
+  }
+}

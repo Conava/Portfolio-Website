@@ -1,0 +1,55 @@
+<Section id="what">
+
+devline is a plugin for Claude Code, Anthropic's coding agent for the terminal. One command, `/devline` followed by an idea, runs the whole pipeline: a brainstorm that settles the scope, a test-driven plan, the implementation in parallel git worktrees with a review for every task, a documentation pass and a final review of the whole branch.
+
+I approve twice, after the brainstorm and after the plan, because that is where a wrong decision is still cheap to fix. At the end I decide whether to merge or to go another round. A small change skips most of this: the fast lane implements it, reviews it once and commits.
+
+<DevlineCounts />
+
+</Section>
+
+<Section id="pipeline">
+
+<DevlinePipeline />
+
+<StageList />
+
+The plan gives every task the files it owns. Tasks of one wave can run side by side because no two of them touch the same file, and the next wave starts only after every task of the current one is reviewed and merged.
+
+Everything a run decides is written to files in the project (the spec, the plans, the open review findings), so a run that loses its context picks up where it stopped.
+
+</Section>
+
+<Section id="agents">
+
+Each agent is a Markdown file that sets its role, the tools it may use and its model. What an agent needs to know beyond its role, such as the test-driven workflow for the implementer, comes from a skill loaded at launch.
+
+<AgentList />
+
+</Section>
+
+<Section id="skills">
+
+Skills are either commands I run or knowledge bases the agents load.
+
+<SkillList />
+
+</Section>
+
+<Section id="hooks">
+
+I run devline in Claude Code's auto-accept mode, so the agents don't stop for a prompt on every command. The hooks are what make that safe enough for me: they check each command and file access before it runs. They stop what can't be undone and what exposes credentials, for example a force push, `rm -rf` outside the working directory, `npm publish`, a `DROP TABLE`, or reading a private key or an `.env` file. Workflow rules, such as the commit message format or pushes to a protected branch, are not checked.
+
+<HookList />
+
+</Section>
+
+<Section id="install">
+
+<DevlineVersion />
+
+<Install />
+
+After installing, `/devline:setup` creates a `CLAUDE.md` with project context for the agents and a settings file for the pipeline. devline needs `jq`, `git` and the GitHub CLI `gh`.
+
+</Section>

@@ -1,0 +1,140 @@
+/*
+ * Ink education. Default (no JS, reduced motion, < 900px, pin dropped): the
+ * final state, three columns (stacked below 900) with the GPA circled. Pinned:
+ * a 240vh scene whose sticky stage holds the columns; the frame loop writes only
+ * clip-path on the columns and stroke-dashoffset/opacity on the pen.
+ */
+:root[data-design="keynote"] .edu {
+  padding-block: var(--section-lg);
+}
+.edu-intro {
+  margin-top: var(--sp-5);
+}
+/* ---- Columns: stacked ledger rows below 900, three equal columns with rules above ---- */
+.edu-grid {
+  display: grid;
+  margin-top: var(--sp-8);
+  grid-template-columns: minmax(0, 1fr);
+}
+.edu-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding-block: var(--sp-6);
+}
+.edu-col + .edu-col {
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 900px) {
+  .edu-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .edu-col {
+    padding: 0 var(--gutter);
+  }
+  .edu-col:first-child {
+    padding-left: 0;
+  }
+  .edu-col:last-child {
+    padding-right: 0;
+  }
+  .edu-col + .edu-col {
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+}
+
+.edu-plate {
+  display: flex;
+  align-self: stretch;
+  margin-bottom: var(--sp-5);
+}
+.edu-name {
+  margin: 0 0 var(--sp-3);
+}
+.edu-degree {
+  margin: 0 0 var(--sp-1);
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.edu-col .meta {
+  margin: 0;
+}
+.edu-col > .dp-trigger,
+.edu-col > .dp-region {
+  margin-top: var(--sp-4);
+}
+.edu-col > .dp-region {
+  align-self: stretch;
+}
+/* The panel opens inside its column, not across the 12-column row. */
+:root[data-design="keynote"] .edu-col .dp-body {
+  grid-template-columns: minmax(0, 1fr);
+}
+:root[data-design="keynote"] .edu-col .dp-body > * {
+  grid-column: auto;
+}
+
+/* ---- GPA and the red pen ---- */
+.edu-gpa {
+  margin: var(--sp-4) 0 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.edu-pen {
+  position: relative;
+  display: inline-block;
+  /* Room for the loop, which is wider than the number. */
+  margin-inline: 14px;
+}
+.edu-pen svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 36px;
+  margin: -18px 0 0 -32px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---- Pinned (wide, motion allowed, scripting): 240vh scene, sticky full-height stage ---- */
+@media (scripting: enabled) and (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  /* The stage carries the section padding itself and is only as tall as its content
+     (education-scene.tsx centres it with `top` and caps it at the viewport), so the
+     band above the heading and below the grid is the usual section space instead of
+     padding plus half the spare viewport. */
+  :root[data-design="keynote"] .edu:has(.edu-scene:not([data-scene-disabled])) {
+    padding-block: 0;
+  }
+  .edu-scene:not([data-scene-disabled]) {
+    height: 240vh;
+
+    & .edu-stage {
+      position: sticky;
+      top: 0;
+      padding-block: var(--section-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      isolation: isolate;
+    }
+    /* Own layers while on screen, so moving the clip does not re-raster the columns. */
+    &[data-active] .edu-col {
+      will-change: transform;
+    }
+  }
+}

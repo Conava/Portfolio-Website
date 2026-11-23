@@ -1,0 +1,11 @@
+{
+  "meta": {
+    "title": "T", "description": "D", "lede": "L", "published": "2026-01-01", "updated": "2026-01-02",
+    "ogImage": { "src": "/og.jpg", "alt": "x", "width": 1200, "height": 630 },
+    "sections": [{ "id": "intro", "title": "Intro" }, { "id": "work", "title": "Work" }],
+    "links": [{ "label": "Org", "href": "https://example.test" }]
+  },
+  "figures": [{ "id": "fig-a", "src": "/a.png", "alt": "a", "width": 10, "height": 10 }],
+  "contributions": [{ "id": "c-a", "title": "C", "summary": "S", "prs": [{ "ref": "o/shell#1", "title": "P" }] }],
+  "projects": [{ "id": "shell", "summary": ["S"] }]
+}

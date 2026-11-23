@@ -1,0 +1,373 @@
+/* Visualizations: tokens only (alias layer), so both designs and both modes skin themselves. */
+.viz {
+  --viz-bar: 14px;
+  --viz-gap: 12px;
+  margin: 0;
+  color: var(--s-text);
+  font: 400 13px/1.35 var(--s-font-ui);
+  font-variant-numeric: tabular-nums lining-nums;
+  /* Charts fit their own width: the narrow layouts below key off the figure, not the viewport. */
+  container-type: inline-size;
+}
+:root:is([data-design="thread"], [data-design="flow"]) .viz {
+  --viz-bar: 12px;
+}
+
+/* Last resort only: every chart fits a phone panel, so this should never scroll. */
+.viz-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.viz-label {
+  font-weight: 500;
+}
+.viz-axis {
+  color: var(--s-mute);
+}
+.viz-num {
+  font-weight: 500;
+}
+
+.viz-track {
+  display: block;
+  width: 100%;
+  height: var(--viz-bar);
+  overflow: visible;
+}
+.viz-bar,
+.viz-lane {
+  fill: var(--s-line-2);
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+}
+.viz-bar.acc,
+.viz-lane.acc {
+  fill: var(--s-accent);
+}
+.viz-bar.out {
+  fill: none;
+  stroke: var(--s-mute);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+.viz-bar.out.acc {
+  stroke: var(--s-accent);
+}
+
+.viz figcaption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--s-mute);
+  text-wrap: pretty;
+}
+.viz figcaption,
+.viz summary {
+  max-width: 48ch;
+}
+.viz figcaption:has(details) {
+  max-width: none;
+}
+/* The disclosure reads like the panels' "Read more": no native triangle, a drawn chevron. */
+.viz summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  width: fit-content;
+  list-style: none;
+}
+.viz summary::-webkit-details-marker {
+  display: none;
+}
+.viz summary svg {
+  flex: none;
+  transition: transform var(--dur-panel-open) var(--ease-out-quart);
+}
+.viz details[open] > summary svg {
+  transform: rotate(180deg);
+}
+.viz-table {
+  margin-top: 8px;
+  border-collapse: collapse;
+  color: var(--s-text-2);
+}
+.viz-table th,
+.viz-table td {
+  padding: 4px 16px 4px 0;
+  border-bottom: 1px solid var(--s-line);
+  text-align: left;
+  vertical-align: top;
+}
+.viz-table thead th {
+  font-weight: 500;
+  color: var(--s-mute);
+}
+.viz-table tbody th {
+  font-weight: 400;
+}
+.viz-table td {
+  white-space: nowrap;
+}
+/* Every PR as a link (the marks themselves are drawn only). */
+.viz-links {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--s-text-2);
+}
+.viz-links li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--s-line);
+}
+.viz-links .viz-sub-inline {
+  color: var(--s-mute);
+  white-space: nowrap;
+}
+
+/* Funnel: label and value on a line, the bar beneath. */
+.viz-steps {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.viz-steps li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: var(--viz-gap);
+  row-gap: 6px;
+}
+.viz-steps .viz-track {
+  grid-column: 1 / -1;
+}
+
+/* Timeline and PR marks: labels left, a shared time axis right. */
+.viz-plot {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--viz-gap);
+  row-gap: 8px;
+  align-items: center;
+  padding-right: 32px; /* room for the last centered axis label */
+}
+.viz-plot > .viz-label {
+  grid-column: 1;
+  max-width: 13em;
+}
+/* A group's name heads its rows; later groups keep a gap above. */
+.viz-plot > .viz-group {
+  grid-column: 1;
+  color: var(--s-mute);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.viz-plot > .viz-label + .viz-track + .viz-group {
+  margin-top: 14px;
+}
+.viz-prs .viz-plot > .viz-label {
+  align-self: start;
+}
+.viz-plot > .viz-track {
+  grid-column: 2;
+}
+.viz-axis {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  height: 1.35em;
+  /* Its own width decides how many labels fit (below). */
+  container-type: inline-size;
+}
+/* Thinned by count (thinTicks): data-w for a wide axis, data-n under 240px. The rules stay. */
+.viz-axis span[data-w="0"] {
+  display: none;
+}
+@container (width < 240px) {
+  .viz-axis span[data-n="0"] {
+    display: none;
+  }
+  .viz-axis span[data-n="1"][data-w="0"] {
+    display: block;
+  }
+}
+/* Centered on its rule; max-content stops the box shrinking near the right edge. */
+.viz-axis span {
+  position: absolute;
+  top: 0;
+  width: max-content;
+  transform: translateX(-50%);
+}
+.viz-rules {
+  grid-column: 2;
+  align-self: stretch;
+  position: relative;
+}
+.viz-rules svg {
+  position: absolute;
+  inset: -8px 0;
+  width: 100%;
+  height: calc(100% + 16px);
+  overflow: visible;
+}
+.viz-tick {
+  stroke: var(--s-line);
+  stroke-width: 1;
+}
+.viz-now {
+  stroke: var(--s-text);
+  stroke-width: 1;
+}
+
+/* PR marks: shape carries the state, never color alone. */
+.viz-dot {
+  stroke: var(--s-text-2);
+  stroke-width: 1.5;
+  fill: var(--s-text-2);
+}
+.viz-dot.open,
+.viz-dot.closed {
+  fill: none;
+  pointer-events: visible; /* the hollow inside still shows the <title> tooltip */
+}
+.viz-slash {
+  stroke: var(--s-text-2);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.viz-count {
+  fill: var(--s-mute);
+  font-size: 12px;
+}
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--s-text-2);
+}
+.viz-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.viz-legend svg {
+  overflow: visible;
+}
+
+/* Pipelines: equal columns, segments touch across a 3px seam. */
+.viz-stages {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.viz-stages li {
+  min-width: 0;
+}
+.viz-stages .viz-label {
+  display: block;
+  margin-top: 8px;
+  padding-right: 6px;
+  /* Long German stages ("Implementierung") break at a syllable rather than overflow. */
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+.viz-flow + .viz-flow {
+  margin-top: 20px;
+}
+.viz-flow-label {
+  margin: 0 0 6px;
+  color: var(--s-text-2);
+}
+
+/* Narrow charts: pipelines wrap into rows of three; timeline labels give the plot more room. */
+@container (width < 520px) {
+  .viz-stages {
+    grid-template-columns: repeat(min(var(--cols), 3), minmax(0, 1fr));
+    row-gap: 16px;
+  }
+}
+/* Seven stages at ~690px: a smaller label keeps "Documentation" whole (no EN hyphenation in Chromium on Linux). */
+@container (520px <= width < 720px) {
+  .viz-stages .viz-label {
+    padding-right: 4px;
+    font-size: 12px;
+  }
+}
+@container (width < 300px) {
+  .viz-stages {
+    grid-template-columns: repeat(min(var(--cols), 2), minmax(0, 1fr));
+  }
+}
+@container (width < 480px) {
+  .viz-plot > .viz-label {
+    max-width: 8em;
+  }
+}
+
+/* Course map */
+.viz-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12em, 1fr));
+  gap: 20px var(--viz-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.viz-area {
+  margin: 0 0 6px;
+  font-weight: 500;
+}
+.viz-area .viz-num {
+  margin-left: 6px;
+  color: var(--s-mute);
+  font-weight: 400;
+}
+.viz-groups ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--s-text-2);
+}
+
+/* Drawn once, on the panel's first open; never under reduced motion or outside a panel. */
+@keyframes viz-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dp-region[data-seen] .viz:not([data-static]) :is(.viz-bar, .viz-lane) {
+    animation: viz-draw 850ms var(--ease-out-quart) both;
+    animation-delay: min(calc(var(--i, 0) * 40ms), 400ms);
+  }
+}
+
+@media (forced-colors: active) {
+  .viz-bar,
+  .viz-lane,
+  .viz-dot.merged {
+    fill: CanvasText;
+  }
+  .viz-bar.acc,
+  .viz-lane.acc {
+    fill: Highlight;
+  }
+  .viz-bar.out {
+    fill: none;
+    stroke: CanvasText;
+  }
+  .viz-dot,
+  .viz-slash,
+  .viz-now {
+    stroke: CanvasText;
+  }
+}

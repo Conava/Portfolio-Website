@@ -1,0 +1,70 @@
+/*
+ * Design toggle crossfade: a native cross-document View Transition on the
+ * `?design=` link and its redirect. Other navigations skip it in `pageswap`.
+ * Reduced motion and browsers without support: instant.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease-drawer);
+}
+
+/* Inline switches: "EN DE" and "Design Ink Trace". */
+.ctl-switch {
+  display: inline-flex;
+  align-items: center;
+  color: var(--s-mute);
+  font: 400 13.5px/1 var(--s-font-ui);
+  white-space: nowrap;
+}
+.ctl-locale {
+  font-size: 14px;
+}
+.ctl-design > [aria-hidden] {
+  margin-right: 2px;
+}
+
+/* 40x40 target (44x44 on touch) from the box itself, so neighbors never overlap. */
+.ctl-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  color: inherit;
+  text-decoration: none;
+  transition-property: color;
+  transition-duration: var(--dur-hover);
+  transition-timing-function: var(--ease-std);
+}
+@media (pointer: coarse) {
+  .ctl-item {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+.ctl-item[aria-current] {
+  color: var(--s-text);
+  font-weight: 650;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: currentColor;
+}
+@media (hover: hover) {
+  a.ctl-item:not([aria-current]):hover {
+    color: var(--s-text);
+  }
+}
+
+/* The header icon is for wide screens; the footer text switch covers the rest. */
+@media (max-width: 759.98px) {
+  .ctl-design-icon {
+    display: none;
+  }
+}

@@ -1,0 +1,206 @@
+/* /devline: the pipeline figure and the reference lists (stages, agents, skills, hooks). */
+
+/* Term lists: the name (and its tag) over a short description, ruled like a table without columns. */
+:root[data-design] .pj-body > .dl-list {
+  margin-top: 1.4em;
+  border-top: 1px solid var(--s-line);
+}
+.dl-list > div {
+  padding-block: 12px;
+  border-bottom: 1px solid var(--s-line);
+}
+.dl-list dt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  color: var(--s-text);
+  font: 500 15px/1.4 var(--s-font-ui);
+}
+.dl-list dd {
+  margin: 4px 0 0;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.dl-tag,
+.dl-sub {
+  color: var(--s-mute);
+  font: 400 13px/1.4 var(--s-font-ui);
+}
+.dl-sub {
+  display: block;
+  margin-top: 4px;
+}
+:root[data-design] .pj-body .dl-list :is(dt, .dl-sub) code {
+  padding: 0;
+  background: none;
+  font-family: var(--s-font-mono);
+  font-size: 0.93em;
+}
+.dl-facts,
+.dl-install {
+  font-family: var(--s-font-ui);
+  font-size: 15px;
+}
+:root[data-design] .pj-body > .dl-install + pre {
+  margin-top: 0.4em;
+}
+
+/* The run: a rail of stages, diamonds at approval gates, a fan-out of lanes under "implement". */
+.dl-flow {
+  margin: 0;
+  color: var(--s-text);
+  font: 400 14px/1.4 var(--s-font-ui);
+}
+.dl-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.dl-rail {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dl-rail > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(7.5rem, max-content) 1fr;
+  gap: 2px 16px;
+  align-items: baseline;
+  padding: 0 0 20px 28px;
+}
+.dl-rail > li:last-child {
+  padding-bottom: 0;
+}
+.dl-rail > li::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: -4px;
+  width: 1px;
+  background: var(--s-line-2);
+}
+.dl-rail > li:last-child::before {
+  display: none;
+}
+.dl-node {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--s-mute);
+  background: var(--s-bg);
+  border-radius: 50%;
+}
+.dl-gate > .dl-node {
+  border-color: var(--s-accent);
+  background: var(--s-accent);
+  border-radius: 0;
+  transform: rotate(45deg) scale(0.85);
+}
+.dl-name {
+  font-weight: 500;
+}
+.dl-what {
+  color: var(--s-mute);
+}
+.dl-appr {
+  grid-column: 2;
+  color: var(--s-accent);
+}
+.dl-fan {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--s-line);
+  max-width: 30rem;
+}
+.dl-each,
+.dl-loop {
+  margin: 0;
+  color: var(--s-mute);
+  font-size: 13px;
+}
+.dl-heads,
+.dl-lane {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 6.5rem;
+  align-items: center;
+}
+.dl-heads {
+  margin: 10px 0 6px;
+  color: var(--s-mute);
+  font-size: 12px;
+}
+.dl-heads span:last-child {
+  grid-column: 3;
+}
+.dl-lane {
+  margin-bottom: 6px;
+}
+.dl-pill {
+  padding: 3px 8px;
+  border: 1px solid var(--s-accent);
+  color: var(--s-text);
+  font-size: 13px;
+  text-align: center;
+  white-space: nowrap;
+}
+.dl-link {
+  height: 1px;
+  background: var(--s-accent);
+}
+.dl-more .dl-pill {
+  border-style: dashed;
+  border-color: var(--s-mute);
+  color: var(--s-mute);
+  padding-block: 0;
+  line-height: 1.1;
+}
+.dl-more .dl-link {
+  background: var(--s-line-2);
+}
+.dl-loop {
+  margin-top: 8px;
+  color: var(--s-text);
+}
+.dl-flow figcaption {
+  margin-top: 16px;
+  color: var(--s-mute);
+  font-size: 13px;
+}
+@media (max-width: 480px) {
+  .dl-rail > li {
+    grid-template-columns: 1fr;
+  }
+  .dl-appr {
+    grid-column: 1;
+  }
+  .dl-heads,
+  .dl-lane {
+    grid-template-columns: 5.2rem 1fr 4.6rem;
+  }
+}
+
+/* The fan-out lanes appear one after another once, then stay. */
+@media (prefers-reduced-motion: no-preference) {
+  .dl-pipe[data-armed]:not([data-in]) .dl-lane {
+    opacity: 0;
+  }
+  .dl-pipe[data-in] .dl-lane {
+    animation: dl-in 500ms var(--ease-out-quart) both;
+    animation-delay: calc(var(--i, 0) * 120ms);
+  }
+  @keyframes dl-in {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+  }
+}

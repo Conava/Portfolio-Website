@@ -1,0 +1,74 @@
+/* Logos, copy email, gallery. Both skins read --s-* aliases; the flourishes are the only skin-specific rules. */
+.logo-plate {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  vertical-align: baseline;
+}
+/* No plate: colour logo on light grounds, the brand-colour dark variant on dark ones, the white
+   one on Type's rust ground where red vanishes. The display values inherit: the nearest ground wins. */
+:root { --lp-light: block; --lp-dark: none; --lp-white: none; }
+:root.dark,
+:root :is([data-tone="scene"], [data-ink-dark]),
+:root[data-design="type"]:not(.dark) [data-ground="ink"] { --lp-light: none; --lp-dark: block; --lp-white: none; }
+:root[data-design="type"] [data-ground="alt"] { --lp-light: none; --lp-dark: none; --lp-white: block; }
+:root[data-design="type"].dark [data-ground="ink"],
+:root[data-design="type"]:not(.dark) [data-ground="paper"] { --lp-light: block; --lp-dark: none; --lp-white: none; }
+:root[data-design="type"].dark [data-ground="paper"] { --lp-light: none; --lp-dark: block; --lp-white: none; }
+.lp-light { display: var(--lp-light); }
+.lp-dark { display: var(--lp-dark); }
+.lp-white { display: var(--lp-white); }
+.logo-plate { max-width: 100%; }
+.logo-plate img { max-width: 100%; }
+/* One box size for a row of logos; the padding is at least each logo's clear space. */
+.logo-plate[data-size="box"] { width: 240px; aspect-ratio: 240 / 104; padding: 20px 32px 20px 0; }
+.logo-plate[data-size="box"] img { width: 100%; height: 100%; object-fit: contain; object-position: left center; }
+
+.copy-email { display: inline-flex; align-items: baseline; gap: 12px; }
+.ce-btn {
+  position: relative; display: inline-block; padding: 0 0 6px; background: none; border: 0;
+  color: inherit; font: inherit; cursor: pointer; text-align: left;
+}
+/* Hit area >= 40px (44px on touch) around the ~31px line, without moving the text. */
+.ce-btn::after { content: ""; position: absolute; inset: -6px 0; }
+@media (pointer: coarse) { .ce-btn::after { inset: -7px 0; } }
+.ce-btn, .gal-nav button { transition: transform var(--dur-press, 100ms) var(--ease-std, ease); }
+.ce-btn:active, .gal-nav button:not(:disabled):active { transform: scale(0.97); }
+/* The address is the one long token on the page: it may break anywhere rather than overflow. */
+.ce-text { overflow-wrap: anywhere; }
+.ce-stroke { display: none; }
+:root[data-design="keynote"] .ce-stroke {
+  display: block; position: absolute; left: 0; bottom: 0; width: 100%; height: 6px;
+  color: var(--s-accent); stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0;
+}
+:root[data-design="keynote"] .copy-email[data-copied] .ce-stroke { opacity: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 0.4s ease-out; }
+:root:is([data-design="thread"], [data-design="flow"]) .ce-btn::before {
+  content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 10px; border-radius: 50%;
+  border: 2px solid var(--s-accent); background: transparent; box-sizing: border-box;
+}
+:root:is([data-design="thread"], [data-design="flow"]) .copy-email[data-copied] .ce-btn::before { background: var(--s-accent); }
+.ce-status { font-size: 13px; color: var(--s-mute); min-width: 6ch; }
+@media (prefers-reduced-motion: reduce) { .ce-stroke { transition: none !important; } }
+
+.gal-row {
+  display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+  scrollbar-width: none; cursor: grab; outline-offset: 4px;
+}
+.gal-row::-webkit-scrollbar { display: none; }
+.gal-row[data-dragging] { cursor: grabbing; scroll-snap-type: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .gal-row { scroll-behavior: smooth; }
+  .gal-row[data-dragging] { scroll-behavior: auto; }
+}
+.gal-item { flex: 0 0 auto; max-width: 100%; margin: 0; scroll-snap-align: start; }
+.gal-item img { display: block; height: min(360px, 48vw); width: auto; max-width: 100%; border-radius: var(--s-r-frame); user-select: none; }
+.gal-item figcaption { margin-top: 8px; font-size: 13px; color: var(--s-mute); }
+.gal-item figcaption a { color: inherit; text-decoration: underline; }
+.gal-nav { display: flex; gap: 8px; margin-top: 12px; }
+.gal-nav:not([data-ready]) { visibility: hidden; }
+.gal-nav button {
+  display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; cursor: pointer;
+  color: var(--s-text); background: transparent; border: 1px solid var(--s-line-2); border-radius: var(--s-r-btn);
+}
+.gal-nav button:disabled { opacity: 0.4; cursor: default; }
+@media (pointer: coarse) { .gal-nav button { width: 44px; height: 44px; } }

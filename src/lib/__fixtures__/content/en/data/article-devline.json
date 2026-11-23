@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "title": "T", "description": "D", "lede": "L", "published": "2026-01-01", "updated": "2026-01-02",
+    "ogImage": { "src": "/og.jpg", "alt": "x", "width": 1200, "height": 630 },
+    "sections": [{ "id": "intro", "title": "Intro" }, { "id": "stages", "title": "Stages" }],
+    "links": [{ "label": "Repo", "href": "https://example.test" }]
+  },
+  "figures": [{ "id": "fig-a", "src": "/a.png", "alt": "a", "width": 10, "height": 10 }],
+  "repo": "o/devline",
+  "stages": [{ "id": "plan", "label": "Plan", "summary": "S", "agents": ["planner"] }],
+  "agents": [{ "id": "planner", "role": "R" }],
+  "skills": [{ "id": "tdd", "summary": "S" }],
+  "hooks": [{ "id": "guard.sh", "event": "PreToolUse", "summary": "S" }],
+  "install": [{ "label": "Install", "command": "run it" }]
+}

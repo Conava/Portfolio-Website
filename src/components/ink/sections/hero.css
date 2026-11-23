@@ -1,0 +1,102 @@
+/* Ink hero: name bottom-left over the ink canvas; lede and status line hang from the same left edge. */
+:root[data-design="keynote"] .ink-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: flex;
+  align-items: flex-end;
+  min-height: calc(100svh - var(--hdr));
+}
+/* Above the canvas (both z 0; the content comes later in the DOM). */
+:root[data-design="keynote"] .ink-hero-in {
+  position: relative;
+  z-index: var(--z-content);
+  width: 100%;
+  padding-block: 72px 48px;
+  /* Text over the canvas is always --ink: it keeps contrast where the dye is dense. */
+  color: var(--ink);
+}
+
+:root[data-design="keynote"] .ink-hero-name {
+  margin: 0 0 0 -0.04em;
+  color: var(--ink);
+}
+:root[data-design="keynote"] .ink-hero-name .l {
+  display: inline-block;
+}
+:root[data-design="keynote"] .period {
+  position: relative;
+  display: inline-block;
+  color: var(--accent);
+  transform-origin: 50% 77%;
+}
+/* 44px target around the dot glyph (it sits low in the line box). */
+:root[data-design="keynote"] .period::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 77%;
+  width: 44px;
+  height: 44px;
+  translate: -50% -50%;
+}
+
+/* The one authored first-viewport moment: each line rises out of its own mask once.
+   `backwards` fill: the mask exists only while rising, so nothing stays clipped at rest.
+   It starts 60 % revealed: a fully masked first paint would hand LCP to the lede. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-design="keynote"] .ink-hero-name .l {
+    animation: ink-rise 900ms var(--ease-out-expo) backwards;
+  }
+  :root[data-design="keynote"] .ink-hero-name .l + .l {
+    animation-delay: 80ms;
+  }
+}
+@keyframes ink-rise {
+  from {
+    transform: translateY(40%);
+    clip-path: inset(-30% -20% 40% -20%);
+  }
+  to {
+    transform: none;
+    clip-path: inset(-30% -20% -10% -20%);
+  }
+}
+
+:root[data-design="keynote"] .ink-hero-lede {
+  margin: clamp(24px, 4vh, 40px) 0 0;
+  color: var(--ink);
+}
+
+:root[data-design="keynote"] .ink-hero-status {
+  margin: clamp(24px, 4vh, 40px) 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  max-width: 60ch;
+  font-size: 15px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+:root[data-design="keynote"] .ink-hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+@media (min-width: 900px) {
+  :root[data-design="keynote"] .ink-hero-in > * {
+    grid-column: 1 / -1;
+  }
+  :root[data-design="keynote"] .ink-hero-name {
+    grid-column: 1 / 12;
+  }
+  :root[data-design="keynote"] .ink-hero-lede {
+    grid-column: 1 / 7;
+  }
+  :root[data-design="keynote"] .ink-hero-status {
+    grid-column: 1 / 7;
+  }
+}

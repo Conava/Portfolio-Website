@@ -1,0 +1,110 @@
+/* Trace Dux Shell: huge heading, intro beside the links, the Shell lane. The Player and Plugins lanes sit under projects. */
+:root[data-design="thread"] {
+  .t-dux-sec {
+    padding-block: var(--section);
+  }
+  .t-dux {
+    /* Wide glyphs overhang their box on the left; pull back so the D sits on the content edge. */
+    margin-left: -0.04em;
+  }
+  /* ...and give the pad that 0.04em back so it stays on the spine (the pad inherits 1em). */
+  .t-dux > .pad {
+    left: calc(var(--g) / -2 - var(--pad-size, 11px) / 2 + 0.04em);
+  }
+  .t-dux-top {
+    margin-top: var(--sp-7);
+  }
+  .t-dux-top .lede {
+    max-width: 44ch;
+  }
+
+  .t-dux-repo {
+    margin-top: var(--sp-4);
+  }
+
+  .t-lane {
+    position: relative;
+    margin-top: clamp(64px, 8vw, 104px);
+  }
+  .t-lane-head {
+    position: relative;
+  }
+  .t-lane-head .prose {
+    margin-top: var(--sp-3);
+  }
+  .t-lane-head .meta {
+    margin-top: var(--sp-2);
+  }
+  .t-lane .meta:empty {
+    display: none;
+  }
+
+  .t-shell {
+    display: grid;
+    gap: var(--sp-6);
+    margin-top: var(--sp-6);
+  }
+  @media (min-width: 1080px) {
+    .t-shell {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      gap: 48px;
+      align-items: start;
+    }
+    /* The ledger runs about three times the screenshot's height; keep the screenshot beside it. */
+    .t-shot {
+      position: sticky;
+      top: calc(var(--hdr) + var(--sp-6));
+    }
+  }
+  .t-shot {
+    margin: 0;
+  }
+  .t-shell .gh-blurb {
+    text-wrap: pretty;
+  }
+  .t-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--s-r-frame);
+  }
+  .t-shot figcaption {
+    margin-top: var(--sp-2);
+  }
+
+  .t-dux-panel {
+    display: grid;
+    margin-top: var(--sp-5);
+  }
+
+  /* Static row (no pin): line its first screenshot up with the .wrap content edge, also past --max. */
+  .t-projects .pscene {
+    --pscene-inset: max(calc(var(--pad) + var(--g)), calc((100% - var(--max)) / 2 + var(--pad) + var(--g)));
+    margin-top: var(--sp-6);
+  }
+
+  /* Pinned cover title: a lower third on the content edge, over the screenshot's quiet list
+     rows instead of centred on the album art. (Only displayed while pinned; shared CSS.) */
+  .t-projects .pscene .pscene-title {
+    justify-self: start;
+    align-self: end;
+    margin: 0 0 var(--sp-6)
+      calc(max(var(--pad) + var(--g), (100cqw - var(--max)) / 2 + var(--pad) + var(--g)) - (100cqw - var(--fw)) / 2);
+    text-align: left;
+  }
+
+  .t-lane .gallery {
+    margin-top: var(--sp-6);
+  }
+  .t-dux-sub {
+    max-width: 64ch;
+    margin-top: var(--sp-8);
+  }
+  .t-dux-sub .prose {
+    margin-top: var(--sp-2);
+  }
+  .t-dux-sub .meta {
+    margin-top: var(--sp-2);
+  }
+}

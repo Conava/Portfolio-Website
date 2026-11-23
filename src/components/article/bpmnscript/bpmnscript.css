@@ -1,0 +1,11 @@
+/* /bpmnscript: the invoice example opens the article; the round trip sits in the evaluation. */
+.pj-body > .bs-example,
+.pj-body > .bs-roundtrip {
+  margin-block: 28px;
+}
+/* The source pane is already framed; the prose code-block skin would box it twice. */
+.pj-body .bs-what pre.bpmn-src {
+  padding: 0;
+  background: none;
+  font-size: 12px;
+}

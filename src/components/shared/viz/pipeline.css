@@ -1,0 +1,1426 @@
+/*
+ * Run (Pipeline) as swimlanes. Default: lanes are columns and the run goes down. From 1100px of
+ * figure width the lanes are rows and the run goes across. Under 520px one column, the lanes
+ * folded into it. Tokens only (alias layer), so every design and mode skins it; Ink adds a ground.
+ */
+.viz-run {
+  --vr-x: 18px; /* rail position inside the skills lane (down) */
+  --vr-y: 28px; /* node centre from the top of a row (down) or of the skills lane (across) */
+  --vr-in: 44px; /* card indent from the rail */
+  --vr-main: var(--s-text-2);
+  --vr-acc: var(--s-accent);
+  --vr-gw: 4.75rem; /* gate column (across): fixed, so the iterate loop can drop from its centre */
+  --vr-kb: var(--s-merged);
+  --vr-tint: color-mix(in srgb, var(--s-text) 4%, transparent);
+  --vr-ground: var(--s-bg);
+  --vr-t0: 250ms; /* motion: when the token leaves the start */
+  --vr-dt: 230ms; /* motion: time per step */
+  display: grid;
+  gap: 20px;
+}
+.viz-run code {
+  font-family: var(--s-font-mono);
+  font-size: 0.95em;
+}
+.vr-ico {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Ink: the figure gets its own ground, a slightly darker sheet with a dot grid. */
+:root[data-design="keynote"] .viz-run {
+  --vr-ground: var(--paper-2);
+  padding: 16px;
+  border: 1px solid var(--line-2);
+  border-radius: calc(var(--r-3) + 6px);
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--ink) 13%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px,
+    var(--paper-2);
+}
+@media (width < 600px) {
+  :root[data-design="keynote"] .viz-run {
+    padding: 12px;
+  }
+}
+:root[data-design="keynote"].dark .viz-run {
+  --vr-ground: var(--raised);
+  border-color: var(--line-2);
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px,
+    var(--raised);
+}
+:root[data-design="keynote"].dark .viz-run .vr-card,
+:root[data-design="keynote"].dark .viz-run .vr-chip {
+  background: var(--paper-2);
+}
+
+/* The hooks guard the whole run: a hatched band frames it. */
+.vr-guard {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: 14px 16px 18px;
+}
+.vr-guard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 5px;
+  border-radius: calc(var(--s-r-frame) + 6px);
+  background: repeating-linear-gradient(-45deg, var(--vr-acc) 0 2px, transparent 2px 7px);
+  opacity: 0.45;
+  pointer-events: none;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+.vr-hooks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 12px;
+  padding-inline: 4px;
+}
+.vr-hooks > p,
+.vr-alone > p,
+.vr-lane > span {
+  margin: 0;
+  color: var(--s-mute);
+  font: 600 12.5px/1.2 var(--s-font-ui);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.vr-hooks > p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  color: var(--vr-acc);
+}
+.vr-hooks > p .vr-ico {
+  width: 18px;
+  height: 18px;
+}
+:is(.vr-hooks, .vr-alone) ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Hooks and standalone skills: a chip that opens its note as a popover anchored under it (top
+ * layer, so nothing in the page moves). Hooks are square tags with an icon tile; standalone
+ * skills carry the skill card's accent edge.
+ */
+.vr-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 8px 3px 3px;
+  border: 1px solid var(--s-line-2);
+  border-radius: 6px;
+  background: var(--s-raised);
+  color: var(--s-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.vr-tip > .vr-ico:first-child {
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--vr-acc) 14%, transparent);
+  color: var(--vr-acc);
+}
+.vr-tip > .vr-i {
+  width: 14px;
+  height: 14px;
+  color: var(--s-mute);
+  transition: color 160ms;
+}
+.vr-tip:hover,
+.vr-tip:has(+ .vr-pop:popover-open) {
+  border-color: var(--vr-acc);
+}
+.vr-tip:hover > .vr-i,
+.vr-tip:has(+ .vr-pop:popover-open) > .vr-i {
+  color: var(--vr-acc);
+}
+.vr-tip:focus-visible {
+  outline: 2px solid var(--s-focus, var(--vr-acc));
+  outline-offset: 2px;
+}
+.vr-alone .vr-tip {
+  padding-left: 8px;
+  border-left: 4px solid var(--vr-acc);
+  font-weight: 600;
+}
+.vr-alone .vr-tip > .vr-ico:first-child {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: none;
+}
+.vr-pop {
+  box-sizing: border-box;
+  max-width: min(20rem, calc(100vw - 24px));
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--vr-acc);
+  border-radius: 8px;
+  background: var(--s-raised);
+  color: var(--s-text);
+  font: 13.5px/1.4 var(--s-font-ui);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--s-text) 18%, transparent);
+}
+@supports (position-area: bottom) {
+  .vr-pop {
+    inset: auto;
+    margin: 6px 12px 0 0;
+    position-area: bottom span-right;
+    position-try-fallbacks: flip-inline, flip-block, flip-block flip-inline;
+  }
+}
+/* Without anchor positioning: a sheet at the bottom of the viewport. */
+@supports not (position-area: bottom) {
+  .vr-pop {
+    inset: auto 12px 12px;
+    margin-inline: auto;
+  }
+}
+
+.vr-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 0;
+  color: var(--s-text-2);
+  font-size: 13px;
+}
+.vr-key > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.vr-key i[class^="vr-k"] {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 26px;
+  height: 22px;
+}
+.vr-key .vr-ico {
+  width: 14px;
+  height: 14px;
+}
+.vr-kskill {
+  border: 1px solid var(--s-line-2);
+  border-left: 4px solid var(--vr-acc);
+  border-radius: 4px;
+  background: var(--s-raised);
+}
+.vr-kagent {
+  border: 1px solid var(--s-line-2);
+  border-radius: 999px;
+  background: var(--s-raised);
+  color: var(--vr-acc);
+}
+.vr-kkb {
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--vr-kb) 14%, transparent);
+  color: var(--vr-kb);
+}
+
+/* Gateway: an accent diamond with a check. */
+.vr-dia {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  background: var(--vr-acc);
+  color: var(--s-accent-ink, var(--s-bg));
+  rotate: 45deg;
+}
+.vr-dia .vr-ico {
+  width: 13px;
+  height: 13px;
+  stroke-width: 3;
+  rotate: -45deg;
+}
+.vr-key .vr-dia {
+  width: 15px;
+  height: 15px;
+  margin-inline: 4px;
+}
+.vr-key .vr-dia .vr-ico {
+  width: 10px;
+  height: 10px;
+}
+
+/* Grid: lanes as columns */
+.vr-map {
+  position: relative;
+  display: grid;
+  grid-template-columns: [you] minmax(5.5rem, 0.5fr) [skills] minmax(0, 1.3fr) [g1] 28px [g2] 28px [agents gend] minmax(0, 0.9fr);
+  grid-template-rows: [head] 36px repeat(var(--n), auto);
+}
+.vr-lane {
+  grid-row: 1 / -1;
+  margin-inline: 2px;
+  border-radius: var(--s-r-frame);
+  background: var(--vr-tint);
+}
+.vr-lane[data-lane="you"] {
+  grid-column: you;
+}
+.vr-lane[data-lane="skills"] {
+  grid-column: skills;
+  background: color-mix(in srgb, var(--s-text) 2%, transparent);
+}
+.vr-lane[data-lane="agents"] {
+  grid-column: agents;
+}
+.vr-lane > span {
+  display: block;
+  padding: 12px 12px 0;
+}
+.vr-lane[data-lane="skills"] > span {
+  padding-left: var(--vr-in);
+}
+
+.vr-c {
+  position: relative;
+  grid-row: calc(var(--r) + 2);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.vr-you {
+  grid-column: you;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: calc(var(--vr-y) - 10px) 0 10px 10px;
+  text-align: right;
+}
+.vr-skill {
+  grid-column: skills;
+  min-height: calc(var(--vr-y) * 2);
+  padding: 8px 10px 10px var(--vr-in);
+}
+.vr-agents {
+  grid-column: agents;
+  padding: 12px 10px 10px;
+}
+
+/* The main path: one segment per row, so it never runs through a gap. */
+.vr-skill::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--vr-x) - 1px);
+  width: 2px;
+  background: var(--vr-main);
+  transform-origin: top;
+}
+.vr-skill[data-kind="start"]::before {
+  top: calc(var(--vr-y) + 8px);
+}
+.vr-skill[data-kind="end"]::before {
+  bottom: calc(100% - var(--vr-y) + 8px);
+}
+.vr-skill[data-optional]::before {
+  background: repeating-linear-gradient(to bottom, var(--vr-main) 0 5px, transparent 5px 10px);
+}
+
+.vr-node,
+.vr-skill > .vr-dia {
+  position: absolute;
+  top: var(--vr-y);
+  left: var(--vr-x);
+  translate: -50% -50%;
+}
+.vr-node {
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--vr-main);
+}
+[data-optional] > .vr-node {
+  border: 2px dashed var(--vr-main);
+  background: var(--vr-ground);
+}
+/* BPMN events: a thin ring starts the run, a thick one ends it. */
+[data-kind="start"] > .vr-node,
+[data-kind="end"] > .vr-node {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--vr-main);
+  background: var(--vr-ground);
+}
+[data-kind="end"] > .vr-node {
+  border-width: 5px;
+}
+
+/* Who owns an event or gate: a dotted association from the developer lane to the path. */
+.vr-you:is([data-kind="gate"], [data-kind="start"], [data-kind="end"])::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 10px;
+  margin-top: 10px;
+  border-top: 1.5px dotted var(--vr-acc);
+}
+.vr-skill:is([data-kind="gate"], [data-kind="start"], [data-kind="end"])::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--vr-y) - 0.75px);
+  left: 0;
+  width: calc(var(--vr-x) - 13px);
+  border-top: 1.5px dotted var(--vr-acc);
+}
+.vr-gl {
+  color: var(--vr-acc);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.vr-ev {
+  color: var(--s-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* The design branch: dashed on the path, and a bypass for runs without UI work. */
+.vr-skip {
+  margin: auto 0;
+  padding-right: 38px;
+  color: var(--s-mute);
+  font-size: 13px;
+}
+.vr-you[data-optional]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: calc(-1 * var(--vr-x));
+  bottom: 0;
+  width: 32px;
+  border: 2px solid var(--vr-main);
+  border-right: 0;
+  border-radius: 14px 0 0 14px;
+}
+
+/* Stage cards: a name, nothing else; the fan card carries the parallel tracks. */
+.vr-card {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--s-line-2);
+  border-left: 4px solid var(--vr-acc);
+  border-radius: 6px;
+  background: var(--s-raised);
+}
+[data-optional] .vr-card {
+  border-style: dashed;
+  background: transparent;
+}
+.vr-card[data-fan] {
+  border-color: var(--vr-acc);
+  border-left-width: 4px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--vr-acc) 12%, transparent);
+}
+.vr-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  hyphens: manual;
+}
+
+/* The per-task fan: parallel tracks, task to review, each with its fix loop underneath. */
+.vr-fan {
+  display: grid;
+  gap: 6px;
+  justify-self: stretch;
+  margin-top: 10px;
+}
+.vr-fan ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vr-fan li {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(28px, 1fr) 30px;
+  align-items: center;
+  padding-bottom: 10px;
+}
+.vr-task {
+  padding: 4px 10px;
+  overflow: hidden;
+  border: 1.5px solid var(--vr-acc);
+  border-radius: 999px;
+  background: var(--s-raised);
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vr-rev {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--vr-acc);
+  border-radius: 50%;
+  background: var(--s-raised);
+  color: var(--vr-acc);
+}
+.vr-wire {
+  position: relative;
+  height: 2px;
+  margin-right: 4px;
+  background: var(--vr-acc);
+}
+.vr-wire::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  right: -3px;
+  border-block: 5px solid transparent;
+  border-left: 7px solid var(--vr-acc);
+}
+.vr-ftok {
+  position: absolute;
+  inset: -4px 0 auto;
+  height: 10px;
+  opacity: 0;
+}
+.vr-ftok::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--vr-acc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--vr-acc) 25%, transparent);
+  translate: -50% 0;
+}
+/* Fix loop: from the review back to the task. */
+.vr-fan li:not([data-more])::after {
+  content: "";
+  position: absolute;
+  right: 15px;
+  bottom: 0;
+  left: 24px;
+  height: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--vr-acc) 55%, transparent);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+.vr-fan li:not([data-more])::before {
+  content: "";
+  position: absolute;
+  bottom: 7px;
+  left: 19px;
+  border-inline: 5.5px solid transparent;
+  border-bottom: 8px solid color-mix(in srgb, var(--vr-acc) 70%, transparent);
+}
+.vr-fan li[data-more] {
+  display: block;
+  height: 10px;
+  margin: 0 30px 6px 24px;
+  padding: 0;
+  background: radial-gradient(circle, var(--s-line-2) 2px, transparent 2.5px) center / 14px 10px repeat-x;
+}
+.vr-fan li[data-more] > * {
+  display: none;
+}
+.vr-fix {
+  color: var(--s-text-2);
+  font-size: 13px;
+}
+.vr-glyph {
+  color: var(--vr-acc);
+  font-weight: 600;
+}
+
+/*
+ * Loops: one line each, from the source back to the plan, arrowhead at the plan. Down: out of the
+ * source's right side, up the gutter, into the plan card (--tw: how much of the top edge shows;
+ * the iterate loop starts at its gate diamond, so its top edge is clipped to the gutter).
+ */
+.vr-inline {
+  display: none;
+}
+.vr-loop {
+  --tw: 100%;
+  position: relative;
+  z-index: 0;
+  grid-column: g1;
+  grid-row: calc(var(--a) + 2) / calc(var(--b) + 2);
+  margin: calc(var(--vr-y) - 1px) 8px calc(-1 * var(--vr-y) - 1px) -10px;
+  border: 2px solid var(--vr-acc);
+  border-left: 0;
+  border-radius: 0 12px 12px 0;
+}
+.vr-loop[data-loop="iterate"] {
+  --tw: 62px;
+  grid-column: skills / gend;
+  margin-left: calc(var(--vr-x) + 14px);
+  margin-right: 4px;
+  clip-path: polygon(calc(100% - var(--tw)) -10px, calc(100% + 30px) -10px, calc(100% + 30px) calc(100% + 10px), 0 calc(100% + 10px), 0 14px, calc(100% - var(--tw)) 14px);
+}
+.vr-loop::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: calc(100% - var(--tw));
+  border-block: 5px solid transparent;
+  border-right: 9px solid var(--vr-acc);
+}
+.vr-loop > span {
+  position: absolute;
+  top: 6px;
+  right: -1px;
+  bottom: 6px;
+  height: fit-content;
+  margin-block: auto;
+  padding: 8px 0;
+  background: var(--vr-ground);
+  color: var(--vr-acc);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  translate: -50% 0;
+}
+.vr-c {
+  z-index: 1;
+}
+/* Tokens on a loop: one per segment, handed on in sequence (motion block below). */
+.vr-seg {
+  position: absolute;
+  display: block;
+  overflow: clip;
+  overflow-clip-margin: 8px;
+  pointer-events: none;
+}
+.vr-seg > b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.vr-seg > b::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--vr-acc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--vr-acc) 25%, transparent);
+  translate: -50% 0;
+}
+.vr-seg[data-s="1"] {
+  right: 0;
+  bottom: -6px;
+  left: 0;
+  height: 10px;
+}
+.vr-seg[data-s="2"] {
+  top: 0;
+  right: -6px;
+  bottom: 0;
+  width: 10px;
+}
+.vr-seg[data-s="2"] > b::before {
+  translate: 0 -50%;
+}
+.vr-seg[data-s="3"] {
+  top: -6px;
+  right: 0;
+  width: var(--tw);
+  height: 10px;
+}
+
+/* Agents: a round chip with the model mark; the kb-skills it loads as book tags under it. */
+.vr-agents > ul {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vr-agents > ul > li {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  max-width: 100%;
+}
+.vr-agents:has(ul)::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--vr-y) - 0.75px);
+  left: -66px;
+  width: 74px;
+  border-top: 1.5px dotted var(--s-line-2);
+}
+.vr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 3px 10px 3px 3px;
+  border: 1px solid var(--s-line-2);
+  border-radius: 999px;
+  background: var(--s-raised);
+}
+.vr-chip > .vr-ico {
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--vr-acc) 14%, transparent);
+  color: var(--vr-acc);
+}
+.vr-chip code {
+  overflow: hidden;
+  color: var(--s-text);
+  font-family: var(--s-font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+[data-agent="debugger"] > .vr-chip {
+  border-style: dashed;
+  border-color: var(--s-closed);
+}
+[data-agent="debugger"] .vr-chip > .vr-ico {
+  background: color-mix(in srgb, var(--s-closed) 14%, transparent);
+  color: var(--s-closed);
+}
+.vr-kb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+.vr-kb li {
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px 2px 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--vr-kb) 12%, transparent);
+  color: var(--s-text);
+  font-size: 13px;
+  line-height: 1.3;
+}
+.vr-kb .vr-ico {
+  width: 14px;
+  height: 14px;
+  color: var(--vr-kb);
+}
+
+/* Model mark: capability bars and cost coins, filled up to the model's tier. */
+.vr-tier {
+  display: inline-grid;
+  gap: 2px;
+  flex: none;
+}
+.vr-bars,
+.vr-coins {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.vr-bars > i {
+  width: 4px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--s-line-2);
+}
+.vr-bars > i:nth-child(2) {
+  height: 8px;
+}
+.vr-bars > i:nth-child(3) {
+  height: 11px;
+}
+.vr-bars > i[data-on] {
+  background: var(--vr-acc);
+}
+.vr-coins > i {
+  box-sizing: border-box;
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--s-mute);
+  border-radius: 50%;
+}
+.vr-coins > i[data-on] {
+  border-color: var(--s-text-2);
+  background: var(--s-text-2);
+}
+.vr-key .vr-bars > i {
+  width: 5px;
+}
+.vr-key .vr-coins > i {
+  width: 7px;
+  height: 7px;
+}
+
+/* Skills that also run alone: a skill chip, and the agent it runs as a round glyph. */
+.vr-alone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 14px;
+}
+.vr-alone > p {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+}
+.vr-alone li {
+  display: flex;
+  align-items: center;
+}
+.vr-runs {
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  margin-left: 12px;
+  border: 1px solid var(--s-line-2);
+  border-radius: 50%;
+  background: var(--s-raised);
+  color: var(--vr-acc);
+}
+.vr-runs::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 12px;
+  border-top: 1.5px dotted var(--s-mute);
+}
+.viz-run figcaption {
+  color: var(--s-text-2);
+}
+
+.vr-tok {
+  display: none;
+}
+
+/* One column: lanes folded into the path, agents under their card. */
+@container (width < 520px) {
+  .vr-guard {
+    padding: 12px 10px 14px;
+  }
+  .vr-card {
+    padding-inline: 10px;
+  }
+  .vr-fan li {
+    grid-template-columns: minmax(0, auto) minmax(18px, 1fr) 30px;
+  }
+  .vr-map {
+    grid-template-columns: [skills agents] minmax(0, 1fr) [g1] 16px [g2] 16px [gend];
+    grid-template-rows: none;
+  }
+  .vr-lane,
+  .vr-you {
+    display: none;
+  }
+  .vr-skill {
+    grid-row: calc(var(--r) * 2 + 1);
+    padding-right: 4px;
+  }
+  .vr-agents {
+    grid-row: calc(var(--r) * 2 + 2);
+    padding: 0 4px 12px var(--vr-in);
+  }
+  .vr-agents:empty {
+    padding: 0;
+  }
+  .vr-agents::before {
+    display: none;
+  }
+  .vr-agents > ul {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .vr-agents:not([data-kind="end"])::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--vr-x) - 1px);
+    width: 2px;
+    background: var(--vr-main);
+  }
+  .vr-agents[data-optional]::after {
+    background: repeating-linear-gradient(to bottom, var(--vr-main) 0 5px, transparent 5px 10px);
+  }
+  /* The bypass: a bracket beside the dashed design branch. */
+  .vr-skill[data-optional]::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(var(--vr-x) - 1px);
+    height: calc(100% + 42px);
+    box-sizing: border-box;
+    border: 2px solid var(--vr-main);
+    border-right: 0;
+    border-radius: 12px 0 0 12px;
+  }
+  .vr-skill:is([data-kind="gate"], [data-kind="start"], [data-kind="end"])::after {
+    display: none;
+  }
+  .vr-inline {
+    display: inline-block;
+    margin-top: calc(var(--vr-y) - 9px);
+    padding-right: 8px;
+    background: var(--vr-ground);
+  }
+  .vr-loop {
+    grid-row: calc(var(--a) * 2 + 1) / calc(var(--b) * 2 + 1);
+    margin-right: 5px;
+    margin-left: -4px;
+  }
+  .vr-loop[data-loop="iterate"] {
+    --tw: 31px;
+    margin-left: calc(var(--vr-x) + 14px);
+  }
+}
+
+/* Across: lanes as rows, one column per step, loops as brackets under the lanes. */
+@container (width >= 1100px) {
+  .vr-map {
+    --vr-y: 22px;
+    grid-template-columns: [label] 30px var(--tpl);
+    grid-template-rows: [you] auto [skills] auto [agents] auto [l1] 40px [l2] 40px [lend];
+  }
+  .vr-lane[data-lane] {
+    grid-column: 1 / -1;
+    position: relative;
+    margin: 2px 0;
+  }
+  .vr-lane[data-lane="you"] {
+    grid-row: you;
+  }
+  .vr-lane[data-lane="skills"] {
+    grid-row: skills;
+  }
+  .vr-lane[data-lane="agents"] {
+    grid-row: agents;
+  }
+  .vr-lane > span,
+  .vr-lane[data-lane="skills"] > span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: auto;
+    padding: 0;
+    rotate: 180deg;
+    writing-mode: vertical-rl;
+  }
+  .vr-c {
+    grid-column: calc(var(--r) + 2);
+  }
+  .vr-card {
+    padding: 10px 9px;
+  }
+  .vr-chip {
+    gap: 5px;
+    padding: 3px 8px 3px 3px;
+  }
+  .vr-name {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .vr-guard {
+    padding-inline: 10px;
+  }
+  .vr-you {
+    grid-row: you;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    min-height: 64px;
+    padding: 12px 6px 0;
+    text-align: center;
+  }
+  .vr-you:is([data-kind="gate"], [data-kind="start"], [data-kind="end"])::after {
+    width: 0;
+    height: 10px;
+    margin: 0;
+    border-top: 0;
+    border-left: 1.5px dotted var(--vr-acc);
+  }
+  .vr-skill {
+    grid-row: skills;
+    min-height: 0;
+    padding: calc(var(--vr-y) + 20px) 5px 14px;
+  }
+  .vr-skill::before {
+    top: calc(var(--vr-y) - 1px);
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: auto;
+    height: 2px;
+    transform-origin: left;
+  }
+  .vr-skill[data-kind="start"]::before {
+    top: calc(var(--vr-y) - 1px);
+    left: calc(50% + 8px);
+  }
+  .vr-skill[data-kind="end"]::before {
+    right: calc(50% + 8px);
+    bottom: auto;
+  }
+  .vr-skill[data-optional]::before {
+    background: repeating-linear-gradient(to right, var(--vr-main) 0 5px, transparent 5px 10px);
+  }
+  .vr-skill:not([data-kind="stage"]) > :is(.vr-node, .vr-dia) {
+    left: 50%;
+  }
+  .vr-skill[data-kind="stage"] > .vr-node {
+    left: 14px;
+  }
+  .vr-skill:is([data-kind="gate"], [data-kind="start"], [data-kind="end"])::after {
+    top: 0;
+    left: calc(50% - 0.75px);
+    width: 0;
+    height: calc(var(--vr-y) - 13px);
+    border-top: 0;
+    border-left: 1.5px dotted var(--vr-acc);
+  }
+  .vr-agents {
+    grid-row: agents;
+    padding: 12px 5px;
+  }
+  .vr-agents::before {
+    display: none;
+  }
+  .vr-inline {
+    display: none;
+  }
+  /* The bypass arches over the design card's column, from path to path. */
+  .vr-skip {
+    margin: 0 0 20px;
+    padding: 0;
+  }
+  .vr-you[data-optional]::before {
+    top: auto;
+    right: 12px;
+    bottom: calc(-1 * var(--vr-y));
+    left: 0;
+    width: auto;
+    height: calc(var(--vr-y) + 14px);
+    border: 2px solid var(--vr-main);
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
+  }
+  /* Across: down from the source on a column boundary, back under the lanes, up into the plan. */
+  .vr-loop,
+  .vr-loop[data-loop="iterate"] {
+    --tw: 100%;
+    grid-column: calc(var(--a) + 2) / calc(var(--b) + 3);
+    grid-row: skills / l2;
+    margin: calc(var(--vr-y) + 1px) -1px 0;
+    border: 2px solid var(--vr-acc);
+    border-top: 0;
+    border-radius: 0 0 14px 14px;
+    clip-path: none;
+  }
+  .vr-loop[data-loop="iterate"] {
+    grid-row: skills / lend;
+    margin-right: calc(var(--vr-gw) / 2 - 1px);
+  }
+  .vr-loop::before {
+    top: -9px;
+    left: -6px;
+    border-block: 0 9px;
+    border-inline: 5px solid transparent;
+    border-bottom: 9px solid var(--vr-acc);
+  }
+  .vr-loop > span {
+    top: auto;
+    right: auto;
+    bottom: 7px;
+    left: 50%;
+    height: auto;
+    padding: 0 6px;
+    background: none;
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+    rotate: none;
+    translate: -50% 0;
+  }
+  .vr-seg[data-s="1"] {
+    top: 0;
+    right: -6px;
+    bottom: 0;
+    left: auto;
+    width: 10px;
+    height: auto;
+  }
+  .vr-seg[data-s="1"] > b::before {
+    translate: 0 -50%;
+  }
+  .vr-seg[data-s="2"] {
+    top: auto;
+    right: 0;
+    bottom: -6px;
+    left: 0;
+    width: auto;
+    height: 10px;
+  }
+  .vr-seg[data-s="2"] > b::before {
+    translate: -50% 0;
+  }
+  .vr-seg[data-s="3"] {
+    top: 0;
+    right: auto;
+    bottom: 0;
+    left: -6px;
+    width: 10px;
+    height: auto;
+  }
+  .vr-seg[data-s="3"] > b::before {
+    translate: 0 -50%;
+  }
+}
+
+/*
+ * Motion, once, after reveal and never under reduced motion: the main path draws in behind a
+ * token, nodes pop, gates stamp their check as the token passes, tokens fan out through the
+ * tracks (one bounces back through its fix loop), then the loops and commands arrive.
+ * Without JS or with reduced motion everything shows in its final state.
+ */
+@keyframes vr-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+@keyframes vr-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vr-pop {
+  from {
+    scale: 0;
+  }
+}
+@keyframes vr-draw-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes vr-draw-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes vr-tok-y {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(100%);
+  }
+}
+@keyframes vr-tok-x {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+}
+@keyframes vr-fan {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+@keyframes vr-bounce {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  5% {
+    opacity: 1;
+  }
+  35% {
+    transform: translateX(100%);
+  }
+  60% {
+    transform: translateX(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+@keyframes vr-sx {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+}
+@keyframes vr-sxr {
+  from {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes vr-sy {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(100%);
+  }
+}
+@keyframes vr-syr {
+  from {
+    opacity: 1;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .vr-reveal[data-armed]:not([data-in]) :is(.vr-guard, .vr-alone) {
+    opacity: 0;
+  }
+  .vr-reveal[data-in] :is(.vr-hooks, .vr-lane, .vr-key),
+  .vr-reveal[data-in] .vr-guard::before {
+    animation: vr-fade 500ms ease-out backwards;
+  }
+  .vr-reveal[data-in] .vr-c {
+    --vr-at: calc(var(--vr-t0) + var(--r) * var(--vr-dt));
+  }
+  .vr-reveal[data-in] .vr-skill::before {
+    animation: vr-draw-y var(--vr-dt) linear backwards;
+    animation-delay: var(--vr-at);
+  }
+  .vr-reveal[data-in] :is(.vr-node, .vr-skill > .vr-dia) {
+    animation: vr-pop 300ms var(--ease-out-quart, ease-out) backwards;
+    animation-delay: var(--vr-at);
+  }
+  .vr-reveal[data-in] .vr-skill > .vr-dia .vr-ico {
+    animation: vr-pop 260ms cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+    animation-delay: calc(var(--vr-at) + var(--vr-dt));
+  }
+  .vr-reveal[data-in] :is(.vr-card, .vr-you > *, .vr-inline) {
+    animation: vr-in 380ms var(--ease-out-quart, ease-out) backwards;
+    animation-delay: var(--vr-at);
+  }
+  .vr-reveal[data-in] .vr-agents > ul {
+    animation: vr-in 380ms var(--ease-out-quart, ease-out) backwards;
+    animation-delay: calc(var(--vr-at) + 120ms);
+  }
+  .vr-reveal[data-in] .vr-ftok {
+    animation: vr-fan 700ms ease-in-out backwards;
+    animation-delay: calc(var(--vr-at) + 300ms + var(--k) * 110ms);
+  }
+  .vr-reveal[data-in] li:nth-child(2) > .vr-wire > .vr-ftok {
+    animation-name: vr-bounce;
+    animation-duration: 1500ms;
+  }
+  /* Loops: the line fades in, then a token runs it back to the plan, segment by segment. */
+  .vr-reveal[data-in] .vr-loop {
+    --vr-l: calc(var(--vr-t0) + var(--n) * var(--vr-dt) + var(--k) * 1500ms);
+    animation: vr-fade 400ms ease-out backwards;
+    animation-delay: calc(var(--vr-t0) + var(--n) * var(--vr-dt));
+  }
+  .vr-reveal[data-in] .vr-seg > b {
+    animation: vr-sx 450ms linear;
+    animation-delay: calc(var(--vr-l) + 400ms);
+  }
+  .vr-reveal[data-in] .vr-seg[data-s="2"] > b {
+    animation-name: vr-syr;
+    animation-duration: 550ms;
+    animation-delay: calc(var(--vr-l) + 850ms);
+  }
+  .vr-reveal[data-in] .vr-seg[data-s="3"] > b {
+    animation-name: vr-sxr;
+    animation-duration: 350ms;
+    animation-delay: calc(var(--vr-l) + 1400ms);
+  }
+  @container (width >= 1100px) {
+    .vr-reveal[data-in] .vr-seg[data-s="1"] > b {
+      animation-name: vr-sy;
+    }
+    .vr-reveal[data-in] .vr-seg[data-s="2"] > b {
+      animation-name: vr-sxr;
+    }
+    .vr-reveal[data-in] .vr-seg[data-s="3"] > b {
+      animation-name: vr-syr;
+    }
+  }
+  .vr-reveal[data-in] .vr-alone {
+    animation: vr-in 500ms var(--ease-out-quart, ease-out) backwards;
+    animation-delay: 600ms;
+  }
+  .vr-reveal[data-in] .vr-skill:not([data-kind="end"]) > .vr-tok {
+    position: absolute;
+    top: 0;
+    left: calc(var(--vr-x) - 5px);
+    display: block;
+    width: 10px;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    animation: vr-tok-y var(--vr-dt) linear;
+    animation-delay: var(--vr-at);
+  }
+  .vr-reveal[data-in] .vr-skill[data-kind="start"] > .vr-tok {
+    top: var(--vr-y);
+    height: calc(100% - var(--vr-y));
+  }
+  .vr-tok::before {
+    content: "";
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--vr-acc);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--vr-acc) 25%, transparent);
+    translate: 0 -50%;
+  }
+  @container (width < 520px) {
+    .vr-reveal[data-in] .vr-skill > .vr-tok {
+      display: none;
+    }
+  }
+  @container (width >= 1100px) {
+    .vr-reveal[data-in] .vr-skill::before {
+      animation-name: vr-draw-x;
+    }
+    .vr-reveal[data-in] .vr-skill:not([data-kind="end"]) > .vr-tok {
+      top: calc(var(--vr-y) - 5px);
+      left: 0;
+      width: 100%;
+      height: 10px;
+      animation-name: vr-tok-x;
+    }
+    .vr-reveal[data-in] .vr-skill[data-kind="start"] > .vr-tok {
+      left: 50%;
+      width: 50%;
+    }
+    .vr-tok::before {
+      translate: -50% 0;
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  .vr-skill::before,
+  .vr-agents::after,
+  .vr-node,
+  .vr-wire {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+  .vr-dia {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+  [data-kind="start"] > .vr-node,
+  [data-kind="end"] > .vr-node,
+  [data-optional] > .vr-node {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+  .vr-lane {
+    border: 1px solid CanvasText;
+  }
+  .vr-guard::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+    opacity: 1;
+  }
+  .vr-tok,
+  .vr-ftok,
+  .vr-seg {
+    display: none;
+  }
+}

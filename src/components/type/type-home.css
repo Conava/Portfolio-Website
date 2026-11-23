@@ -1,0 +1,686 @@
+/*
+ * Type homepage. Without JS (and before it) each facade is a full-height block above its
+ * room. `data-ty-mode` on <html> (set before the first paint) switches the layout:
+ * live   = the stage sticks for --fly viewports while the camera flies into the room;
+ * static = reduced motion: the stacked layout, the canvas only adds the long shadow.
+ */
+
+:root[data-design="type"] {
+  .ty-home {
+    position: relative;
+  }
+
+  /* ---- Facade ---- */
+  .ty-facade {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--ty-ground);
+    color: var(--ty-ink);
+  }
+  .ty-cv {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: none;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+  }
+  .ty-ann {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    align-content: center;
+    min-height: 100svh;
+    padding: calc(var(--hdr) + 16px) var(--pad) 40px;
+    transform-origin: 0 0;
+  }
+  .ty-word {
+    margin: max(0.22em, 30px) 0 0.36em;
+    font-family: var(--sans);
+    font-size: min(calc(var(--fd-w) * 1vw), calc(var(--fd-h) * 1svh));
+    font-weight: 780;
+    font-stretch: var(--fd-s);
+    line-height: 0.86;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--ty-ink);
+  }
+  @media (max-width: 699.98px) {
+    .ty-word {
+      margin-bottom: 0.26em;
+      font-size: min(calc(var(--fm-w) * 1vw), calc(var(--fm-h) * 1svh));
+      font-stretch: var(--fm-s);
+      white-space: normal;
+    }
+  }
+  /* What the room behind holds, pinned to the roof line; drawn by the stage script only. */
+  .ty-lbl {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font: 600 13px/1 var(--sans);
+    font-stretch: 100%;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+  .ty-lbl::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+  }
+
+  /* The hero's text in the facade's negative space: lede left, actions right. */
+  .ty-below {
+    display: grid;
+    gap: 24px;
+    align-items: end;
+  }
+  @media (min-width: 900px) {
+    .ty-below {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 48px;
+    }
+  }
+  .ty-cta {
+    gap: 10px;
+  }
+
+  /* Off screen or flown past: the paint goes, the real headings and controls stay in the tree. */
+  .ty-facade[data-off] {
+    pointer-events: none;
+  }
+  .ty-facade[data-off] :is(.ty-cv, .ty-lbl) {
+    visibility: hidden;
+  }
+
+  /* ---- Live: sticky stage, the facade over the room ---- */
+  &[data-ty-mode] .ty-cv {
+    display: block;
+  }
+  &[data-ty-mode] .ty-facade[data-ready] {
+    background: transparent;
+  }
+  &[data-ty-mode] .ty-facade[data-ready] .ty-word {
+    color: transparent;
+  }
+  &[data-ty-mode="live"] {
+    /* Scroll anchoring picks content below a panel inside the sticky stage, so opening it
+       pushed the reader up. Off: panels open downward from their button. */
+    .ty-home {
+      overflow-anchor: none;
+    }
+    /* The flight's scroll length (per room, `--fly-d`); a spacer, since sticky stays inside
+       the content box. */
+    .ty-fly {
+      --fly: var(--fly-d, 0.8);
+    }
+    /* Plus a short settle while the eased camera lands (SETTLE in the stage script). */
+    .ty-fly::after {
+      content: "";
+      display: block;
+      height: calc((var(--fly) + 0.15) * 100lvh);
+    }
+    .ty-fly[data-ty-rest]::after {
+      height: calc((var(--fly) + 0.6) * 100lvh);
+    }
+    /* The hero rests for the first scroll, so a nudge or the phone's address bar collapsing does
+       not start its flight. */
+    .ty-fly[data-ty-hold] {
+      --hold: 0.18;
+    }
+    .ty-fly[data-ty-hold]::after {
+      height: calc((var(--fly) + var(--hold) + 0.15) * 100lvh);
+    }
+    .ty-stage {
+      position: sticky;
+      top: 0;
+      min-height: 100lvh;
+      background: var(--ty-ground);
+    }
+    .ty-stage > .ty-facade {
+      position: absolute;
+      inset: 0 0 auto;
+      z-index: 2;
+      height: 100lvh;
+      /* The room is clickable wherever it shows through the window; the stage script stops
+         presses on the wall itself. The facade's own controls and text work until the flight starts. */
+      pointer-events: none;
+    }
+    .ty-stage > .ty-facade:not([data-thru]) :is(a, button, .ty-below) {
+      pointer-events: auto;
+    }
+    .ty-stage > .ty-facade > .ty-ann {
+      height: 100lvh;
+      min-height: 0;
+    }
+    .ty-stage > .ty-in {
+      min-height: 100lvh;
+      transform-origin: 0 0;
+    }
+  }
+  @media (max-width: 699.98px) {
+    &[data-ty-mode="live"] .ty-fly {
+      --fly: calc(var(--fly-d, 0.8) * 0.8);
+    }
+    &[data-ty-mode="live"] .ty-fly[data-ty-hold] {
+      --hold: 0.3;
+    }
+  }
+
+  /* ---- Rooms ---- */
+  .ty-in {
+    position: relative;
+    background: var(--ty-ground);
+    color: var(--s-text);
+    padding-block: clamp(88px, 14vh, 150px) clamp(96px, 16vh, 180px);
+  }
+  .ty-wrap {
+    max-width: var(--max);
+    margin-inline: auto;
+    padding-inline: var(--pad);
+  }
+  .ty-wrap > * + * {
+    margin-top: 40px;
+  }
+  .ty-h {
+    font-size: clamp(44px, 7vw, 104px);
+    font-weight: 780;
+    font-stretch: 125%;
+    line-height: 0.9;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+  }
+  .ty-statement {
+    display: grid;
+    gap: 0.5em;
+    max-width: 34ch;
+    font-size: clamp(24px, 2.7vw, 40px);
+    font-weight: 620;
+    font-stretch: 108%;
+    line-height: 1.14;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+  .ty-lede {
+    max-width: 44ch;
+    font-size: clamp(19px, 1.6vw, 24px);
+    font-weight: 450;
+    line-height: 1.42;
+    text-wrap: pretty;
+  }
+  .ty-wide {
+    max-width: 60ch;
+  }
+  .ty-lede code {
+    font-size: 0.82em;
+  }
+  .ty-status {
+    margin-top: 14px;
+    font-size: 16px;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .ty-timeline {
+    max-width: 880px;
+    margin-top: 48px;
+  }
+
+  /* Rows: jobs, schools, projects. Name and dates left, the rest right. */
+  .ty-rows {
+    padding: 0;
+    list-style: none;
+  }
+  .ty-row {
+    display: grid;
+    gap: 14px 48px;
+    padding-block: 32px 40px;
+    border-top: 1.5px solid currentColor;
+  }
+  .ty-row:last-child {
+    border-bottom: 1.5px solid currentColor;
+  }
+  @media (min-width: 900px) {
+    .ty-row {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+  }
+  .ty-row-run {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .ty-row-id,
+  .ty-row-body {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    min-width: 0;
+  }
+  .ty-row-body > .btn-row,
+  .ty-row-body > .dp-actions {
+    margin-top: 8px;
+  }
+  .ty-in h3 {
+    font-size: clamp(24px, 2.4vw, 34px);
+    font-weight: 720;
+    font-stretch: 112%;
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .ty-in h3 a {
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.14em;
+  }
+  .ty-in h3.ty-logo a {
+    display: inline-block;
+  }
+  .ty-plate {
+    width: fit-content;
+  }
+  .ty-role {
+    font-size: 19px;
+    font-weight: 620;
+    font-stretch: 106%;
+    line-height: 1.3;
+  }
+  .ty-prose {
+    max-width: 62ch;
+    color: var(--s-text-2);
+    text-wrap: pretty;
+  }
+  .ty-meta {
+    font-size: 15px;
+    color: var(--s-text-2);
+  }
+  .ty-row[data-feature] h3 {
+    font-size: clamp(32px, 4vw, 56px);
+    font-stretch: 125%;
+  }
+
+  .ty-diagram {
+    max-width: 980px;
+    padding: clamp(14px, 2vw, 28px);
+    background: var(--s-raised);
+  }
+  /* On a phone the diagram scrolls in its own box rather than shrinking its labels. */
+  @media (max-width: 699.98px) {
+    .ty-diagram {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+    }
+    .ty-diagram svg {
+      min-width: 640px;
+    }
+  }
+  /* ---- Work: bars on one year axis, each widening into its job's panel ---- */
+  .ty-jobs {
+    display: grid;
+    gap: 36px;
+    padding: 0;
+    list-style: none;
+  }
+  .ty-axis {
+    position: relative;
+    height: 30px;
+  }
+  .ty-axis::before {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 1px;
+    background: var(--s-line-2);
+  }
+  .ty-axis span {
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    padding-left: 6px;
+    border-left: 1px solid var(--s-line-2);
+    font-size: 13px;
+    line-height: 1;
+    color: var(--s-text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .ty-axis i {
+    position: absolute;
+    bottom: 0;
+    left: var(--l);
+    right: var(--r);
+    height: 12px;
+    background: var(--ty-ink);
+  }
+  .ty-job-panel {
+    display: grid;
+    gap: 20px 48px;
+    padding: clamp(24px, 3.4vw, 48px);
+    color: var(--s-text);
+    position: relative;
+    isolation: isolate;
+  }
+  .ty-job-panel::before,
+  .ty-pop-body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--s-bg);
+  }
+  @media (min-width: 900px) {
+    .ty-job-panel {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+  }
+  .ty-job-panel .ty-prose {
+    max-width: 56ch;
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* Only the backdrop grows out of the bar; the content stays at full size and fades in. */
+      .ty-job-panel::before {
+        transform-origin: var(--ox) 0;
+        animation: ty-widen linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 360px;
+      }
+      /* The Dux popouts open out of their tab the same way. */
+      .ty-pop-body::before {
+        transform-origin: 0 0;
+        border-radius: inherit;
+        animation: ty-pop linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 320px;
+      }
+      .ty-job-panel > *,
+      .ty-pop-body > * {
+        animation: ty-arrive linear both;
+        animation-timeline: view();
+        animation-range: entry 55% entry 100%;
+      }
+    }
+  }
+
+  /* ---- Education: the start year as outlined scenery above the plate ---- */
+  .ty-year {
+    font-size: clamp(64px, 9vw, 150px);
+    font-weight: 780;
+    font-stretch: 125%;
+    line-height: 0.8;
+    letter-spacing: -0.02em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--ty-ink);
+    font-variant-numeric: lining-nums;
+    margin-bottom: 8px;
+  }
+
+  /* ---- Dux: a shell bar, and popouts hanging from their tabs ---- */
+  .ty-row-dux > .ty-pops {
+    grid-column: 1 / -1;
+  }
+  .ty-pops {
+    display: grid;
+    gap: 40px;
+    color: var(--s-text);
+  }
+  .ty-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px 20px;
+    padding: 8px 8px 8px 20px;
+    border-radius: 16px;
+    background: var(--s-bg);
+    overflow-x: auto;
+  }
+  .ty-bar-name {
+    font-weight: 780;
+    font-stretch: 125%;
+  }
+  .ty-bar ul {
+    display: flex;
+    gap: 4px;
+    padding: 0;
+    list-style: none;
+  }
+  .ty-bar a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .ty-bar a:hover {
+    background: var(--s-raised);
+  }
+  .ty-pop {
+    scroll-margin-top: 64px;
+  }
+  .ty-in .ty-pop-tab {
+    position: relative;
+    display: inline-block;
+    padding: 16px 24px 12px;
+    border-radius: 16px 16px 0 0;
+    background: var(--s-bg);
+    font-size: clamp(22px, 2.2vw, 30px);
+  }
+  /* The concave fillet where the tab meets the popout. */
+  .ty-pop-tab::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 100%;
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle at 100% 0, transparent 15.5px, var(--s-bg) 16px);
+  }
+  .ty-pop-body {
+    display: grid;
+    gap: 28px 48px;
+    padding: clamp(20px, 3vw, 40px);
+    border-radius: 0 16px 16px 16px;
+    position: relative;
+    isolation: isolate;
+  }
+  @media (min-width: 1000px) {
+    .ty-pop-body {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+  }
+  /* The shared entry's bracket moves from the article onto its popout. */
+  .ty-pop[data-dux-shared] {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .ty-pop[data-dux-shared] .ty-pop-body::before {
+    box-shadow: inset 4px 0 0 var(--s-accent);
+  }
+  .ty-pop-body > div {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    min-width: 0;
+  }
+  .ty-shot {
+    margin-top: 12px;
+  }
+  .ty-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .ty-shot figcaption {
+    margin-top: 8px;
+  }
+
+  .ty-contact .ty-lede {
+    font-size: clamp(22px, 2.4vw, 34px);
+    font-weight: 560;
+    font-stretch: 106%;
+    line-height: 1.25;
+    max-width: 32ch;
+  }
+  .ty-ce {
+    flex-wrap: wrap;
+  }
+  .ty-ce .ce-btn {
+    padding-bottom: 0.06em;
+    border-bottom: 0.07em solid currentColor;
+    font-size: clamp(28px, 3.5vw, 60px);
+    font-weight: 780;
+    font-stretch: 125%;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+  @media (max-width: 699.98px) {
+    .ty-ce .ce-btn {
+      font-size: 8.4vw;
+      font-stretch: 75%;
+    }
+  }
+  .ty-ce .ce-status {
+    color: inherit;
+    font-size: 15px;
+  }
+  /* The closing name sits under the contact card in the same viewport. Live, it stays out of the
+     scaled room until the flight has landed (stage[data-landed]); its canvas would smear while scaled. */
+  .ty-in:has(> .ty-end) {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0;
+  }
+  .ty-end {
+    margin-top: auto;
+  }
+  .ty-end .ty-ann {
+    min-height: 0;
+    padding-block: 24px 44px;
+  }
+  .ty-end .ty-word {
+    margin: 0;
+  }
+  &[data-ty-mode="live"] .ty-end {
+    visibility: hidden;
+  }
+  &[data-ty-mode="live"] .ty-stage[data-landed] .ty-end {
+    visibility: visible;
+  }
+
+  /* ---- 404 ---- */
+  .ty-nf {
+    display: grid;
+    align-content: center;
+    gap: 20px;
+    min-height: 80svh;
+    padding: calc(var(--hdr) + 24px) var(--pad) 64px;
+  }
+  .ty-nf h1 {
+    margin: 0;
+    font-size: clamp(24px, 2.6vw, 36px);
+    font-weight: 650;
+    font-stretch: 108%;
+  }
+  .ty-nf p {
+    margin: 0;
+  }
+
+  /* ---- Lit rooms: one sun from the upper left, the same in every room ---- */
+  .ty-in {
+    overflow: clip;
+    isolation: isolate;
+  }
+  /* The patch is its own layer over the room's first screen: rastered once, never repainted
+     by the room scaling or the panels opening below it. */
+  .ty-in::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: -1;
+    height: min(100%, 100lvh);
+    background: radial-gradient(
+      110% 70% at 6% 0%,
+      color-mix(in srgb, #fff var(--sun), var(--ty-ground)),
+      transparent 72%
+    );
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  /* The running label: a vertical strip centred in the left margin, stuck while the room
+     scrolls; it takes no space in the flow. */
+  .ty-tag {
+    --tag-in: clamp(88px, 14vh, 150px);
+    position: sticky;
+    top: 24px;
+    z-index: 3;
+    height: 0;
+    margin-block: calc(24px - var(--tag-in)) calc(var(--tag-in) - 24px);
+    transition: opacity 260ms var(--ease-std);
+  }
+  .ty-tag span {
+    position: absolute;
+    top: 0;
+    left: calc(max(0px, (100% - var(--max)) / 2) + max(0px, (var(--pad) - 21px) / 2));
+    display: inline-flex;
+    gap: 10px;
+    padding: 9px 5px;
+    background: var(--ink);
+    color: var(--ty-ground);
+    font: 600 11px/1 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+  &[data-ty-mode="live"] .ty-stage:not([data-landed]) .ty-tag {
+    opacity: 0;
+  }
+
+  /* The next wall, faint at the far end of the room and cut by the floor. */
+  .ty-in:has(> .ty-far) {
+    padding-bottom: 0;
+  }
+  .ty-far {
+    margin: clamp(72px, 12vh, 140px) 0 -0.34em;
+    font-size: calc(var(--fd-w) * 1vw);
+    font-weight: 780;
+    font-stretch: var(--fd-s);
+    line-height: 0.86;
+    letter-spacing: -0.015em;
+    text-align: center;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--ty-ink) 8%, transparent);
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+/* Transform only, so the scroll timeline runs on the compositor (opacity measured slower). */
+@keyframes ty-widen {
+  from {
+    transform: scale(var(--sx), 0.04);
+  }
+}
+@keyframes ty-pop {
+  from {
+    transform: scale(0.3, 0.06);
+  }
+}
+@keyframes ty-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

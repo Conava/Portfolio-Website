@@ -1,25 +1,24 @@
 {
-  "bio": "Softwareentwickler aus Hamburg, aktuell im Abschlusssemester meines B.Sc. Wirtschaftsinformatik an der Universität Hamburg. Mein Schwerpunkt ist Backend-Entwicklung, vom Microservice bis zur Infrastruktur. Neue Technologien und Domänen reizen mich dabei besonders. Nach einem vollständigen Studienjahr an der San Diego State University bin ich nach Hamburg zurückgekehrt, um meine Bachelorarbeit zu schreiben und gleichzeitig als Werkstudent bei OTTO an der nächsten Generation der Produktdaten-Onboarding-Plattform mitzuwirken.",
-  "skills": [
+  "name": "Marlon Kranz",
+  "lede": "Softwareentwickler in Hamburg. Bei Adobe baue ich verteilte Cloud-Services im Enterprise-Maßstab in Java, daneben Open-Source-Projekte in Go und TypeScript.",
+  "statement": [
+    "Ich baue Backend-Services und Cloud-Architekturen. Mich begeistert es, Probleme zu lösen, Algorithmen zu entwickeln und Systeme zu entwerfen, die skalieren. Ich arbeite gern mit verteilten Systemen, und Programmiersprachen und Compiler interessieren mich sehr.",
+    "Bei Adobe betreue ich mit meinem Team vier Services in Produktion, die täglich Millionen Menschen nutzen. Die Migration einer produktiven Datenpipeline auf unsere Kubernetes-Plattform mit GitOps plane und verantworte ich selbst, und ins Tooling meines Teams stecke ich viel Arbeit, gerade rund um KI.",
+    "Außerhalb der Arbeit entwickle ich Software, die ich selbst jeden Tag nutze. Ich arbeite an Dux Shell mit, einer Wayland-Shell für Linux, und pflege mein eigenes Claude-Code-Plugin devline.",
+    "In meiner Bachelorarbeit an der Universität Hamburg habe ich BPMNscript entwickelt, eine Programmiersprache für ausführbare Geschäftsprozessmodelle nach dem Standard BPMN 2.0. Meinen B.Sc. in Wirtschaftsinformatik, mit einem Auslandsjahr an der San Diego State University, schließe ich im Dezember 2026 ab. Im Januar 2027 beginne ich berufsbegleitend einen M.S. in Computer Science am Georgia Institute of Technology."
+  ],
+  "links": [
     {
-      "category": "Sprachen",
-      "items": ["Java", "Kotlin", "Python", "C#", "Rust", "Go", "TypeScript / JavaScript", "Bash", "SQL"]
+      "label": "GitHub",
+      "href": "https://github.com/conava"
     },
     {
-      "category": "Backend & Infrastruktur",
-      "items": ["Spring Boot", "Kafka", "MongoDB", "PostgreSQL", "Hibernate", "Flyway", "REST APIs", "AWS", "S3", "Lambda", "ECS", "Docker", "Terraform"]
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/in/marlon-kranz"
     },
     {
-      "category": "Frontend & Desktop",
-      "items": ["React", "Next.js", "JavaFX", "HTML / CSS"]
-    },
-    {
-      "category": "Werkzeuge",
-      "items": ["Git", "Linux", "Gradle", "Maven", "GitHub Actions", "DSL-Design", "ANTLR4"]
-    },
-    {
-      "category": "Sprachkenntnisse",
-      "items": ["🇩🇪 Deutsch (Muttersprache)", "🇺🇸 Englisch (C2)", "🇫🇷 Französisch (Grundkenntnisse)"]
+      "label": "Lebenslauf",
+      "href": "/resume.pdf"
     }
   ]
 }

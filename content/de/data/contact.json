@@ -1,0 +1,9 @@
+{
+  "intro": "Erreichbar bin ich per E-Mail und über LinkedIn.",
+  "email": "kontakt@marlonkranz.com",
+  "links": [
+    { "label": "GitHub", "href": "https://github.com/conava" },
+    { "label": "LinkedIn", "href": "https://linkedin.com/in/marlon-kranz" },
+    { "label": "Lebenslauf", "href": "/resume.pdf" }
+  ]
+}

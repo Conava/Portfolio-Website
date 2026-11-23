@@ -1,63 +1,78 @@
-[
-  {
-    "id": "bsc-uhh",
-    "institution": "Universität Hamburg",
-    "degree": "B.Sc.",
-    "field": "Wirtschaftsinformatik",
-    "period": "2022 – Heute",
-    "status": "in-progress",
-    "summary": "Interdisziplinärer Studiengang, der Informatik, Wirtschaftsinformatik und Betriebswirtschaft verbindet, aktuell im 8. und letzten Semester.",
-    "details": [
-      "Schwerpunkte in Software Engineering, Datenbanken, Algorithmen und verteilten Systemen",
-      "Aktuell: Bachelorarbeit über eine domänenspezifische Sprache (DSL) für BPMN-Prozessmodellierung",
-      "Die Abschlussarbeit wird als Open Source veröffentlicht und generiert ausführbare .bpmn-Dateien für Camunda und Operaton",
-      "8. Semester, Abschlussphase, angestrebte Graduierung 2026"
-    ],
-    "thesis": {
-      "title": "Eine domänenspezifische Sprache für ausführbares BPMN",
-      "summary": "Entwicklung einer DSL, mit der Entwickler Geschäftsprozesse in einer kompakten, code-orientierten Notation beschreiben und zu ausführbaren BPMN-Dateien für Camunda und Operaton kompilieren können. Das Projekt wird als Open Source veröffentlicht.",
-      "projectSlug": "bachelor-thesis",
-      "githubUrl": "https://github.com/conava/bpmn-dsl"
+{
+  "schools": [
+    {
+      "id": "gatech",
+      "brief": "Masterstudent in Computer Science am Georgia Institute of Technology",
+      "name": "Georgia Institute of Technology",
+      "url": "https://www.gatech.edu",
+      "logo": {
+        "src": "/images/logos/gatech.svg",
+        "alt": "Georgia Institute of Technology",
+        "width": 720,
+        "height": 162
+      },
+      "degree": "M.S.",
+      "short": "M.S. CS",
+      "field": "Informatik",
+      "start": "2027-01",
+      "end": null,
+      "status": "upcoming",
+      "note": "Online und berufsbegleitend, Zulassung erhalten.",
+      "panel": {
+        "did": [
+          "Ich bin für den berufsbegleitenden Online-Master in Computer Science zugelassen. Er beginnt im Januar 2027."
+        ]
+      }
+    },
+    {
+      "id": "uhh",
+      "name": "Universität Hamburg",
+      "url": "https://www.uni-hamburg.de",
+      "logo": {
+        "src": "/images/logos/uhh.svg",
+        "alt": "Universität Hamburg",
+        "width": 392,
+        "height": 127
+      },
+      "degree": "B.Sc.",
+      "field": "Wirtschaftsinformatik",
+      "start": "2022-10",
+      "end": "2026-12",
+      "status": "in-progress",
+      "note": "Bachelorarbeit im Oktober 2026 abgegeben, Abschluss voraussichtlich im Dezember 2026.",
+      "panel": {
+        "did": [
+          "Bisheriger Notenschnitt 1,97. Den Abschluss erwarte ich im Dezember 2026.",
+          "Bachelorarbeit: BPMNscript, eine domänenspezifische Sprache mit Compiler für BPMN 2.0. Der Code ist Open Source, die Arbeit steht auf dieser Website.",
+          "Tutor in Software Engineering II von April bis Juli 2026."
+        ]
+      }
+    },
+    {
+      "id": "sdsu",
+      "name": "San Diego State University",
+      "url": "https://www.sdsu.edu",
+      "logo": {
+        "src": "/images/logos/sdsu.svg",
+        "alt": "San Diego State University",
+        "width": 254,
+        "height": 42
+      },
+      "degree": "Auslandsjahr",
+      "field": "Informatik",
+      "start": "2024-08",
+      "end": "2025-05",
+      "status": "completed",
+      "gpa": {
+        "value": "3.87",
+        "scale": "4.00"
+      },
+      "note": "San Diego, Kalifornien.",
+      "panel": {
+        "did": [
+          "Auslandsjahr in Computer Science von August 2024 bis Mai 2025, GPA 3,87 auf der US-Skala, bei der 4,0 die beste Note ist."
+        ]
+      }
     }
-  },
-  {
-    "id": "sdsu-exchange",
-    "institution": "San Diego State University",
-    "degree": "Auslandsjahr",
-    "field": "Informatik (B.Sc.)",
-    "period": "2024 – 2025",
-    "status": "completed",
-    "summary": "Vollständiges Studienjahr in San Diego, Kalifornien als Teil meines B.Sc.-Studiums, mit Fokus auf Informatiktheorie, Algorithmen und fortgeschrittene Programmierkonzepte.",
-    "details": [
-      "Lehrveranstaltungen in Algorithmen & Datenstrukturen, Programmiersprachen und Softwaresystemen",
-      "Vertiefung formaler Sprachtheorie, Typsysteme und Compilerbau",
-      "Internationales Hochschulumfeld, breiter Einblick in unterschiedliche Ingenieursansätze und Wissenschaftskulturen"
-    ]
-  },
-  {
-    "id": "btg-oldenburg",
-    "institution": "Bildungszentrum für Technik und Gestaltung, Oldenburg",
-    "degree": "Abitur",
-    "field": "Technisches Gymnasium, Schwerpunkt Informationstechnologie",
-    "period": "2019 – 2022",
-    "status": "completed",
-    "summary": "Allgemeine Hochschulreife an einem technischen Gymnasium mit IT-Schwerpunkt. Abiturnote: 1,3.",
-    "details": [
-      "Leistungskurse: Informationstechnologie, Mathematik, Englisch",
-      "IT-Inhalte: grafische Programmierung in C#, Mikrocontroller-Entwicklung, Rechnergrundlagen, Binärlogik und Elektrotechnik",
-      "Weitere Abiturfächer: Informationsverarbeitung, Wirtschaft",
-      "Abiturnote: 1,3"
-    ]
-  },
-  {
-    "id": "msc-uhh",
-    "institution": "Universität Hamburg",
-    "degree": "M.Sc.",
-    "field": "Wirtschaftsinformatik",
-    "period": "2026 – Heute",
-    "status": "upcoming",
-    "summary": "Geplantes Masterstudium in Wirtschaftsinformatik, beginnt nach Abschluss des Bachelorstudiums.",
-    "details": [],
-    "hidden": true
-  }
-]
+  ]
+}

@@ -1,0 +1,24 @@
+/* /dux: contributions with their PR rows, own projects, the PR overview. */
+
+/* Live-only blocks (the PR timeline) leave an empty wrapper without GitHub data. */
+.duxa-media:empty {
+  display: none;
+}
+/* Galleries and the timeline may use the figure width; text keeps its measure. */
+:root[data-design] .pj-body > .duxa-media {
+  max-width: 880px;
+}
+@media (min-width: 900px) {
+  :root[data-design="keynote"] .pj-body > .duxa-media {
+    grid-column: 4 / -1;
+  }
+}
+
+.pj-body .duxa-name a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+.pj-body > .duxa-facts {
+  margin-top: 0.4em;
+}

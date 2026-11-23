@@ -1,0 +1,345 @@
+/*
+ * Type (config key `type`): tokens, alias layer and base elements, scoped to
+ * :root[data-design="type"]; dark mode is the `.dark` class from next-themes.
+ * Two grounds and one ink per mode. Every element that sets `data-ground`
+ * re-points the aliases, so shared components (panels, viz, PR lists) follow
+ * the ground they sit on. Canvas colors (--ty-*) are plain hex: the facade
+ * canvas reads them as fill styles.
+ */
+
+:root[data-design="type"] {
+  color-scheme: light;
+  --paper: #e7e6e1;
+  --paper-2: #f1f0ec;
+  --paper-shade: #c7c5bf;
+  --alt: #f0532b;
+  --alt-2: #f26a46;
+  --alt-shade: #bb4121;
+  --ink: #151514;
+  --ink-2: #46443f;
+  --rim: rgb(20 10 0 / 0.26);
+  --open: #17702f;
+  --merged: #6b3fc4;
+  --closed: #b3202a;
+  --plate: #ffffff;
+
+  --sans: var(--font-archivo), system-ui, sans-serif;
+  --mono: var(--font-spline-mono), ui-monospace, monospace;
+  --hdr: 64px;
+  --focus-offset: 3px;
+  --pad: clamp(20px, 6vw, 96px);
+  --max: 1320px;
+
+  --shadow-window: 0 24px 48px -24px rgb(20 20 18 / 0.3);
+  /* The sun's share in a room's light patch; low in dark mode so the ink keeps its contrast. */
+  --sun: 22%;
+}
+:root[data-design="type"].dark {
+  color-scheme: dark;
+  --paper: #1c1c1a;
+  --paper-2: #262624;
+  --paper-shade: #0c0c0b;
+  --alt: #a8361a;
+  --alt-2: #ad3f23;
+  --alt-shade: #6a200d;
+  --ink: #eceae3;
+  --ink-2: #a9a79f;
+  --rim: rgb(0 0 0 / 0.35);
+  --open: #3fb950;
+  --merged: #a371f7;
+  --closed: #ff7b72;
+  --plate: #f4f4f1;
+  --shadow-window: 0 24px 48px -24px rgb(0 0 0 / 0.6);
+  --sun: 6%;
+}
+
+/* ---- Grounds: each re-points the aliases ---- */
+:root[data-design="type"],
+:root[data-design="type"] [data-ground="paper"] {
+  --ty-ground: var(--paper);
+  --ty-ink: var(--ink);
+  --ty-shade: var(--paper-shade);
+  --ty-rim: var(--rim);
+  --s-bg: var(--paper);
+  --s-bg-alt: var(--paper-2);
+  --s-raised: var(--paper-2);
+  --s-text-2: var(--ink-2);
+  --s-mute: var(--ink-2);
+  --s-line: color-mix(in srgb, var(--ink) 18%, var(--paper));
+  --s-line-2: color-mix(in srgb, var(--ink) 40%, var(--paper));
+}
+:root[data-design="type"] [data-ground="alt"] {
+  --ty-ground: var(--alt);
+  --ty-ink: var(--ink);
+  --ty-shade: var(--alt-shade);
+  --ty-rim: var(--rim);
+  --s-bg: var(--alt);
+  --s-bg-alt: var(--alt-2);
+  --s-raised: var(--alt-2);
+  /* On the alt ground every text runs in the ink: a lighter tone falls under 4.5:1. */
+  --s-text-2: var(--ink);
+  --s-mute: var(--ink);
+  --s-line: color-mix(in srgb, var(--ink) 30%, var(--alt));
+  --s-line-2: color-mix(in srgb, var(--ink) 60%, var(--alt));
+}
+:root[data-design="type"],
+:root[data-design="type"] [data-ground] {
+  --s-text: var(--ink);
+  --s-accent: var(--ink);
+  --s-accent-ink: var(--ty-ground);
+  --s-open: var(--open);
+  --s-merged: var(--merged);
+  --s-closed: var(--closed);
+  --s-plate: var(--plate);
+  --s-focus: var(--ink);
+  --s-font-ui: var(--sans);
+  --s-font-prose: var(--sans);
+  --s-font-display: var(--sans);
+  --s-font-mono: var(--mono);
+  --s-r-tag: 0px;
+  --s-r-btn: 0px;
+  --s-r-frame: 0px;
+
+  --color-bg: var(--s-bg);
+  --color-text: var(--s-text);
+  --color-text-muted: var(--s-text-2);
+  --color-border: var(--s-line);
+  --color-accent: var(--s-accent);
+  --color-bg-card: var(--s-bg-alt);
+  --color-bg-card-hover: color-mix(in oklab, var(--s-bg-alt), var(--s-text) 6%);
+  --font-sans: var(--s-font-ui);
+  --font-mono: var(--s-font-mono);
+}
+/* The ink ground: panels inside a room (work bars, Dux popouts) turn the palette over. */
+:root[data-design="type"] [data-ground="ink"] {
+  --ty-ground: var(--ink);
+  --ty-ink: var(--paper);
+  --s-bg: var(--ink);
+  --s-bg-alt: color-mix(in srgb, var(--paper) 10%, var(--ink));
+  --s-raised: color-mix(in srgb, var(--paper) 10%, var(--ink));
+  --s-text: var(--paper);
+  --s-text-2: color-mix(in srgb, var(--paper) 80%, var(--ink));
+  --s-mute: color-mix(in srgb, var(--paper) 80%, var(--ink));
+  --s-line: color-mix(in srgb, var(--paper) 22%, var(--ink));
+  --s-line-2: color-mix(in srgb, var(--paper) 45%, var(--ink));
+  --s-accent: var(--paper);
+  --s-accent-ink: var(--ink);
+  --s-focus: var(--paper);
+  --s-open: var(--paper);
+  --s-merged: var(--paper);
+  --s-closed: var(--paper);
+}
+/* PR state icons stay in the ink on the alt ground: the state colors fall under 3:1 there. */
+:root[data-design="type"] [data-ground="alt"] {
+  --s-open: var(--ink);
+  --s-merged: var(--ink);
+  --s-closed: var(--ink);
+}
+@media (forced-colors: active) {
+  :root[data-design="type"] [data-ground] {
+    --s-line: CanvasText;
+    --s-line-2: CanvasText;
+  }
+}
+
+@layer base {
+  :root[data-design="type"] body {
+    font-size: 17px;
+    line-height: 1.5;
+    font-variant-numeric: lining-nums;
+  }
+  :root[data-design="type"] :is(.num, .ty-meta, time, table) {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  :root[data-design="type"] :is(code, kbd, .data) {
+    font-family: var(--mono);
+    font-size: 0.86em;
+  }
+
+  /* Text links: ink, underlined; the underline thickens on hover. */
+  :where(:root[data-design="type"]) a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition-property: text-decoration-thickness;
+    transition-duration: var(--dur-hover);
+    transition-timing-function: var(--ease-std);
+  }
+  @media (hover: hover) {
+    :where(:root[data-design="type"]) a:hover {
+      text-decoration-thickness: 2px;
+    }
+  }
+
+  /* Buttons: square, ink outline; the primary one is solid ink. */
+  :root[data-design="type"] .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 16px;
+    border: 1.5px solid var(--s-text);
+    border-radius: 0;
+    background: transparent;
+    color: var(--s-text);
+    font: 600 15px/1.2 var(--sans);
+    font-stretch: 106%;
+    text-decoration: none;
+    cursor: pointer;
+    transition-property: background-color, color, transform;
+    transition-duration: var(--dur-hover), var(--dur-hover), var(--dur-press);
+    transition-timing-function: var(--ease-std);
+  }
+  :root[data-design="type"] .btn-primary {
+    background: var(--s-text);
+    color: var(--s-bg);
+  }
+  :root[data-design="type"] .btn:active {
+    transform: scale(0.97);
+  }
+  @media (hover: hover) {
+    :root[data-design="type"] .btn:hover {
+      background: var(--s-text);
+      color: var(--s-bg);
+    }
+  }
+}
+
+/*
+ * Read mode (project pages, articles): the shared article markup on the paper ground.
+ * Titles take the facade face (heavy, expanded); running text stays at 17px and 64ch.
+ */
+:root[data-design="type"] {
+  .wrap {
+    max-width: var(--max);
+    margin-inline: auto;
+    padding-inline: var(--pad);
+  }
+  .lede {
+    font-size: clamp(19px, 1.6vw, 23px);
+    line-height: 1.42;
+    text-wrap: pretty;
+  }
+  .meta {
+    font-size: 15px;
+    color: var(--s-text-2);
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .pj,
+  .ar-article {
+    padding-top: calc(var(--hdr) + clamp(32px, 7vh, 88px));
+    padding-bottom: clamp(88px, 12vw, 150px);
+  }
+  .pj-title {
+    margin-top: 24px;
+    font-size: clamp(40px, 6.4vw, 96px);
+    font-weight: 780;
+    font-stretch: 112%;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+  .pj-title .pj-sub {
+    margin-top: 0.2em;
+    font-size: 0.4em;
+    font-weight: 560;
+    font-stretch: 100%;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+  .pj-head .lede {
+    margin-top: 28px;
+    max-width: 52ch;
+  }
+  .pj-meta {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 28px;
+  }
+  .pj-head {
+    padding-bottom: 40px;
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .pj-body {
+    margin-top: 64px;
+    font-size: 17px;
+  }
+  .pj-body > * {
+    max-width: 64ch;
+  }
+  .pj-body > :is(div:not([data-size]):has(> svg), .pj-table, .pj-fig:not([data-size])) {
+    max-width: 880px;
+  }
+  .pj-body > pre {
+    width: max-content;
+    min-width: min(100%, 40rem);
+    max-width: min(100%, 880px);
+  }
+  .pj-body h2 {
+    font-size: clamp(28px, 3.2vw, 44px);
+    font-weight: 760;
+    font-stretch: 118%;
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+  }
+  .pj-body h3 {
+    font-size: 21px;
+    font-weight: 680;
+    font-stretch: 106%;
+    line-height: 1.2;
+  }
+  .ar-body > .ar-sec {
+    margin-top: 96px;
+  }
+  .ar-toc {
+    margin-top: 32px;
+  }
+  .ar-toc a {
+    color: var(--s-text-2);
+    font: 500 15px/1.3 var(--sans);
+  }
+  .ar-toc a[aria-current] {
+    color: var(--s-text);
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+  }
+  @media (min-width: 1180px) {
+    .ar-toc {
+      position: fixed;
+      top: calc(var(--hdr) + 40px);
+      left: calc(
+        (100vw - min(100vw, var(--max))) / 2 + min(100vw, var(--max)) -
+          var(--pad) - 220px
+      );
+      z-index: var(--z-rail);
+      width: 220px;
+      margin: 0;
+    }
+    .ar-toc ol {
+      display: block;
+    }
+  }
+  .pj-index .pj-title {
+    margin-bottom: 48px;
+  }
+  .pj-row {
+    padding: 28px 0;
+    border-top: 1.5px solid var(--ink);
+    gap: 8px 40px;
+  }
+  .pj-row h2 {
+    font-size: clamp(22px, 2.4vw, 32px);
+    font-weight: 720;
+    font-stretch: 112%;
+    line-height: 1.08;
+  }
+  @media (min-width: 960px) {
+    .pj-row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    }
+    .pj-row h2 {
+      grid-row: 1 / span 2;
+    }
+  }
+}

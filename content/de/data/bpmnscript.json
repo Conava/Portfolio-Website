@@ -1,0 +1,48 @@
+{
+  "repo": "BPMNscript/bpmnscript",
+  "intro": "Der Compiler übersetzt BPMNscript in BPMN-XML, das Operaton direkt ausführt, und der Importer macht aus vorhandenem BPMN-XML wieder Code. Entwickler arbeiten dabei mit den Werkzeugen, die sie von Code kennen: Diffs Zeile für Zeile, Autovervollständigung und Fehler schon beim Tippen. Kann der Importer ein Modell nicht abbilden, lehnt er es ab oder warnt. So ändert sich kein Prozess unbemerkt.",
+  "sample": "process invoice-approval {\n  start ReviewStart { form { amount: number \"Invoice amount\" } }\n  user ReviewInvoice(assignee: \"demo\")\n  if (amount > 1000) {\n    user SeniorApproval(assignee: \"manager\")\n  } else {\n    service AutoApprove(class: \"com.example.invoice.AutoApproveDelegate\")\n  }\n  end Done\n}",
+  "proof": {
+    "sentence": "3.858 der 4.946 akzeptierten Modelle (78,0 %) kommen als derselbe Prozess zurück, das sind 63,7 % aller 6.060 deployten Modelle. Bei kleinen Modellen klappt das am besten: Von denen mit bis zu 10 Elementen kommen 77,3 % äquivalent zurück, von denen mit mehr als 50 nur 5,9 %.",
+    "steps": [
+      {
+        "label": "Von Operaton deployt",
+        "value": 6060
+      },
+      {
+        "label": "Vom Importer akzeptiert",
+        "value": 4946
+      },
+      {
+        "label": "Nach dem Round-Trip äquivalent",
+        "value": 3858
+      }
+    ]
+  },
+  "links": [
+    {
+      "label": "Playground",
+      "href": "/playground"
+    },
+    {
+      "label": "Artikel lesen",
+      "href": "/bpmnscript"
+    },
+    {
+      "label": "Bachelorarbeit (PDF)",
+      "href": "/thesis.pdf"
+    },
+    {
+      "label": "GitHub",
+      "href": "https://github.com/BPMNscript/bpmnscript"
+    }
+  ],
+  "panel": {
+    "did": [
+      "Für meine Bachelorarbeit habe ich die Sprache entworfen und Compiler und Importer in TypeScript mit Langium geschrieben. Der Compiler macht aus strukturierten Blöcken BPMN-2.0-XML, der Importer bringt beliebige Prozessgraphen mit einer Dominatoranalyse zurück in Blockform.",
+      "Ein Language Server für VS Code und ein Kommandozeilentool entstehen aus derselben Codebasis.",
+      "Den Round-Trip habe ich in einer reproduzierbaren Pipeline evaluiert: 2.000 per Fuzzing erzeugte Programme in jeweils drei Element-Reihenfolgen und über 6.000 reale Modelle aus öffentlichen Repositories, jedes in Operaton unter Docker deployt."
+    ],
+    "significant": "Von den 6.060 gesammelten Modellen, die Operaton deployt, akzeptiert der Importer 4.946 und lehnt 1.114 ab. 78,0 % der akzeptierten kommen nach dem Round-Trip äquivalent zurück."
+  }
+}

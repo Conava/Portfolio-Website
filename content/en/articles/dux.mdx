@@ -1,0 +1,81 @@
+<Section id="shell">
+
+[Dux Shell](https://duxlabs.dev) is a desktop shell for niri, Hyprland, Sway and other Wayland compositors. It replaces the separate tools such a desktop is usually assembled from (bar, launcher, notifications, lock screen) with one program, written in Go and QML on Quickshell. Until version 2.0 in October 2026 it was called DankMaterialShell, which is why older pull requests and the `dms` command still use that name.
+
+I started contributing in August 2026 with two theming changes. Since then I've built config profiles, the reworked system monitor, the network connection editor and wallpaper folders, and fixed bugs across the shell. Profiles, the system monitor and the network editor each have a Go part in the backend and a QML part in the interface, and I wrote the docs pages for profiles and the system monitor.
+
+</Section>
+
+<Section id="contributions">
+
+<Contribution id="profiles">
+
+This is the feature I like most. A profile covers the groups the user picks (theme, wallpaper, bar, dock, fonts and more), and switching only changes those. Sync saves changes into the active profile shortly after they are made, and Compare lists what differs from the current settings. That lets you apply single groups. Profiles show as a gallery under Wallpaper & colors, with a Control Center tile to switch, and `dms profile` commands to list, export and import them. Where profiles sit in Settings came out of a design discussion on the Dux Discord.
+
+Settings that belong to the machine or the user, such as input, power and the display configuration, are not included. Imports are treated as untrusted, since profiles are meant to be shared: plugin settings and the dock's custom trash command are dropped, values that reach a shell or a compositor config are checked, and the archive is unpacked with size limits. Every settings key is either in a group or marked as not included, and a test I wrote fails when a new key is neither. Each future setting has to get that decision.
+
+</Contribution>
+
+<Contribution id="sysmon">
+
+The rework had two halves. In dux-gop, the Go library that collects the system data, I added GPU, disk and network use per process, sensors, memory modules and a detail view per process. Reading each `/proc` file once instead of through several library calls cut the CPU time of one process list poll from 375 ms to 22 ms on my machine (about 600 processes). In the shell I rebuilt the window from the same parts as Settings (grouped list rows, chart cards, the standard dialogs) and moved the tabs to a rail on the left.
+
+A disk card shows the drive's health and SMART values, and a sleeping hard drive is not woken up for it. For bug reports, the System page copies a short summary, or a full report in Markdown, both without the host name, user name or network names. After the merge I added pausing a process and changing its priority, rows that expand into the processes behind them, and a series of fixes for process names, icons and GPU names.
+
+</Contribution>
+
+<Contribution id="network">
+
+I wanted to set up eduroam for my university without reaching for nmcli or nm-connection-editor, and kept going until the network settings covered most of what NetworkManager offers. The same pull request adds a hotspot page with a QR code to join it, a Tailscale page for accounts and exit nodes, and a button to log in to captive portals.
+
+When I reworked the pull request, I removed editing for bond, bridge, VLAN, DSL and CDMA profiles again: those options are outdated or not meant for desktop use, and they added maintenance and translation work for settings almost no one would use. Settings still lists such profiles and opens them in nm-connection-editor or nmtui. A later fix logs in to VPN plugins without their own support in the shell (OpenConnect with AnyConnect or Pulse, vpnc, gpclient) before connecting, since they failed with "no valid VPN secrets" before.
+
+</Contribution>
+
+<Contribution id="wallpapers">
+
+The folders are part of a series of pull requests for a wallpaper library, planned to add collections, slideshows and wallpapers per display. The first one moved the wallpaper listing into the background process. That fixed automatic cycling for folder names with a quote and file names with a newline, and a KDE wallpaper package now counts as one wallpaper. The next step, still open, hides wallpapers that don't fit the display's shape or resolution.
+
+Separately, I made the wallpaper grid scroll freely, since I found jumping page by page annoying, and kept the old behavior as a Paged grid layout. Two fixes complete the list: keyboard focus after the file picker closes, and a new wallpaper that was not applied when the fill mode changed while it was still loading.
+
+</Contribution>
+
+<Contribution id="popouts">
+
+I like how connected mode looks but wanted to keep the island without the full frame. The option is off by default and respects the opacity, Goth corners and Custom radius settings. The maintainers were interested in this outside the island too, so it is also available in the normal bar, in the bar's appearance settings.
+
+</Contribution>
+
+<Contribution id="theming">
+
+The color scheme used to come from the color that covers most of the wallpaper, which is often a background such as the sky. The Source Color setting offers matugen's own options and Colorful, which I added: it weighs how much of the image a color covers against how colorful it is, inspired by caelestia-cli. Dominant stays the default and gives the same result as before.
+
+For Qt applications I added qtengine as a platform theme, since both existing Qt 6 options had problems. Terminals got background opacity and an option to tint their colors toward the wallpaper.
+
+</Contribution>
+
+</Section>
+
+<Section id="pull-requests">
+
+<Contribution id="fixes">
+
+Some examples: connected frame mode ignored some of the settings it overrides, several window rule options did nothing on Hyprland 0.56, and Unmute in a notification's menu deleted the app's whole notification rule.
+
+</Contribution>
+
+<DuxOverview />
+
+</Section>
+
+<Section id="projects">
+
+<DuxProject id="dux-player" />
+
+<Figure id="player-bars" />
+
+<DuxProject id="dux-plugins" />
+
+<DuxProject id="dux-cast" />
+
+</Section>

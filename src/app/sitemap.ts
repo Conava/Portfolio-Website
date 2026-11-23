@@ -1,59 +1,59 @@
+import matter from "gray-matter";
 import type { MetadataRoute } from "next";
-import { compileMDX } from "next-mdx-remote/rsc";
-import { getProjectSlugs, getProjectSource } from "@/lib/content";
-import type { ProjectFrontmatter } from "@/lib/types";
-import { siteConfig } from "@/lib/site-config";
+import { ARTICLE_SLUGS, getArticle, getProjectSlugs, getProjectSource } from "@/lib/content";
+import { localizedPath } from "@/lib/seo";
+import { articlesLive, germanLive, siteConfig } from "@/lib/site-config";
+import type { Locale, ProjectFrontmatter } from "@/lib/types";
+
+// Read per request: the ARTICLES and GERMAN switches are runtime env, so a build-time sitemap would miss them.
+export const dynamic = "force-dynamic";
 
 /**
- * Next.js metadata route handler that generates `/sitemap.xml`.
- *
- * Lists the home page (priority 1.0) plus all non-hidden project detail pages
- * (priority 0.7). Hidden projects (frontmatter `hidden: true`) are excluded
- * because they are not meaningful public pages and would mislead crawlers.
- *
- * Project slugs are derived from EN filenames via `getProjectSlugs()`; the EN
- * source is used to read frontmatter because slugs are always based on EN
- * filenames and the hidden flag is locale-independent.
- *
- * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
+ * One entry per path and locale, each listing both languages (and English as x-default) as `xhtml:link` alternates.
+ * `lastModified` is set only for articles, which carry a real date; project dates are years.
+ * The DE entry reuses the EN date: both locales are updated together. The playground is English only:
+ * one entry, no DE alternate. Without `GERMAN=on` every page is English only.
  */
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await getProjectSlugs();
-
-  // Load EN frontmatter for each slug and filter out hidden projects.
-  const visibleSlugs = (
-    await Promise.all(
-      slugs.map(async (slug) => {
-        try {
-          const source = await getProjectSource("en", slug);
-          const { frontmatter } = await compileMDX<ProjectFrontmatter>({
-            source,
-            options: { parseFrontmatter: true },
-          });
-          // Only `hidden` is checked — `hideFromPortfolio` projects remain in
-          // the sitemap because they are still accessible at their URL.
-          return frontmatter.hidden ? null : slug;
-        } catch {
-          return null;
-        }
-      })
-    )
-  ).filter((slug): slug is string => slug !== null);
-
-  const projectEntries: MetadataRoute.Sitemap = visibleSlugs.map((slug) => ({
-    url: `${siteConfig.url}/projects/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
-
-  return [
-    {
-      url: siteConfig.url,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1.0,
-    },
-    ...projectEntries,
+export function sitemapEntries(input: {
+  articles: { slug: string; updated: string }[];
+  projectSlugs: string[];
+}): MetadataRoute.Sitemap {
+  const pages: { path: string; lastModified?: string }[] = [
+    { path: "/" },
+    ...input.articles.map((a) => ({ path: `/${a.slug}`, lastModified: a.updated })),
+    { path: "/playground" },
+    { path: "/projects" },
+    ...input.projectSlugs.map((slug) => ({ path: `/projects/${slug}` })),
   ];
+  const all: Locale[] = germanLive() ? ["en", "de"] : ["en"];
+  const abs = (path: string, locale: Locale) => siteConfig.url + localizedPath(path, locale).replace(/^\/$/, "");
+  return pages.flatMap(({ path, lastModified }) => {
+    const locales = path === "/playground" ? (["en"] as const) : all;
+    const languages = Object.fromEntries([...locales.map((l) => [l, abs(path, l)]), ["x-default", abs(path, "en")]]);
+    return locales.map((locale) => ({
+      url: abs(path, locale),
+      ...(lastModified && { lastModified }),
+      alternates: { languages },
+    }));
+  });
+}
+
+/** Reads the real content: article dates and every non-hidden project. */
+export async function loadSitemapInput() {
+  const articles = await Promise.all(
+    (articlesLive() ? ARTICLE_SLUGS : []).map(async (slug) => ({ slug, updated: (await getArticle("en", slug)).data.meta.updated })),
+  );
+  const projectSlugs = (
+    await Promise.all(
+      (await getProjectSlugs()).map(async (slug) => {
+        const { data } = matter(await getProjectSource("en", slug));
+        return (data as ProjectFrontmatter).hidden ? null : slug;
+      }),
+    )
+  ).filter((s): s is string => s !== null);
+  return { articles, projectSlugs };
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  return sitemapEntries(await loadSitemapInput());
 }

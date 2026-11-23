@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# npm lockfile (project uses pnpm)
+# other package managers' lockfiles (project uses bun)
 package-lock.json
+pnpm-lock.yaml
+yarn.lock
 
 # env files (can opt-in for committing if needed)
 .env*
@@ -46,3 +48,10 @@ next-env.d.ts
 /.idea/
 /.claude/
 /.devline/
+
+# playground assets, built by `bun run playground:assets`
+/.cache/
+/public/playground/bpmnscript/
+/public/playground/presets/
+/public/playground/editor.worker.js
+/src/generated/

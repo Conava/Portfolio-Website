@@ -1,0 +1,256 @@
+/* Ink Dux Shell, and the Dux projects under projects (.dux-own). Columns at >= 900: names on 1-3, text and media from 4, figure caption on 10-12. */
+:root[data-design="keynote"] .dux {
+  padding-block: var(--section-lg);
+}
+:root[data-design="keynote"] .dux h2,
+:root[data-design="keynote"] :is(.dux, .dux-own) h3,
+:root[data-design="keynote"] .dux figure,
+:root[data-design="keynote"] .dux .lede,
+:root[data-design="keynote"] :is(.dux, .dux-own) .prose {
+  margin: 0;
+}
+:root[data-design="keynote"] :is(.dux, .dux-own) h3 a {
+  text-decoration-color: transparent;
+}
+@media (hover: hover) {
+  :root[data-design="keynote"] :is(.dux, .dux-own) h3 a:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* ---- Head ---- */
+:root[data-design="keynote"] .dux-head {
+  row-gap: var(--sp-5);
+}
+
+/* ---- Shell block ---- */
+:root[data-design="keynote"] .dux-block {
+  row-gap: var(--sp-5);
+  margin-top: var(--sp-8);
+}
+:root[data-design="keynote"] .dux-facts {
+  margin: var(--sp-2) 0 0;
+}
+:root[data-design="keynote"] .dux-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--s-r-frame);
+}
+:root[data-design="keynote"] .dux-shot figcaption {
+  margin-top: var(--sp-3);
+}
+:root[data-design="keynote"] .dux-prs {
+  margin-top: var(--sp-5);
+}
+/* The section is paper-2 already; the PR row hover tints one step further. */
+@media (hover: hover) {
+  :root[data-design="keynote"] .dux-prs .gh-row:hover {
+    background: color-mix(in oklab, var(--paper-2), var(--ink) 5%);
+  }
+}
+
+/* ---- Player band (full bleed, scene tone) ---- */
+:root[data-design="keynote"] .dux-player {
+  margin-top: var(--section-md);
+  padding-block: var(--section-md);
+}
+:root[data-design="keynote"] .dux-player .dux-row {
+  margin-bottom: var(--sp-7);
+}
+
+/* ---- Projects and links ---- */
+:root[data-design="keynote"] .dux-projects {
+  display: grid;
+  row-gap: var(--sp-8);
+  margin-top: var(--section-md);
+}
+:root[data-design="keynote"] .dux-row {
+  row-gap: var(--sp-3);
+}
+:root[data-design="keynote"] .dux-gallery {
+  min-width: 0;
+  margin-top: var(--sp-4);
+}
+:root[data-design="keynote"] .dux-links {
+  margin-top: var(--sp-8);
+}
+:root[data-design="keynote"] .dux-repo {
+  margin-top: var(--sp-4);
+}
+
+@media (min-width: 900px) {
+  :root[data-design="keynote"] .dux-head > * {
+    grid-column: 1 / -1;
+  }
+  :root[data-design="keynote"] .dux-head > .lede {
+    grid-column: 1 / 7;
+  }
+  :root[data-design="keynote"] .dux-name,
+  :root[data-design="keynote"] .dux-row > h3 {
+    grid-column: 1 / 4;
+  }
+  :root[data-design="keynote"] .dux-block > .dux-name {
+    grid-row: 1;
+  }
+  /* Image on 4-9, caption hanging at its foot on 10-12. */
+  :root[data-design="keynote"] .dux-shot {
+    grid-column: 4 / 13;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: end;
+  }
+  :root[data-design="keynote"] .dux-shot img {
+    grid-column: 1 / 7;
+  }
+  :root[data-design="keynote"] .dux-shot figcaption {
+    grid-column: 7 / 10;
+    margin: 0;
+  }
+  :root[data-design="keynote"] .dux-prs,
+  :root[data-design="keynote"] .dux-block > .dp-trigger,
+  :root[data-design="keynote"] .dux-block > .dp-actions,
+  :root[data-design="keynote"] .dux-block > .dp-region,
+  :root[data-design="keynote"] .dux-gallery,
+  :root[data-design="keynote"] .dux-links {
+    grid-column: 4 / -1;
+  }
+  :root[data-design="keynote"] .dux-text,
+  :root[data-design="keynote"] .dux-row > :is(.dp-trigger, .dp-actions, .dp-region) {
+    grid-column: 4 / 10;
+  }
+  /* The panel already starts at column 4: its prose runs from the panel's own edge, as wide as .dux-text. */
+  :root[data-design="keynote"] .dux-block .dp-body > * {
+    grid-column: 1 / 9;
+  }
+  :root[data-design="keynote"] .dux-block .dp-body > .dp-viz {
+    grid-column: 9 / 13;
+  }
+}
+
+/* ---- Dux bar: the PRs as tabs on a shell bar, the selected one a connected popout (dux-bar.tsx) ---- */
+:root[data-design="keynote"] .dxb[data-bar] {
+  --r: 14px;
+  position: relative;
+  overflow-x: clip; /* a full-width bar's fillet must not stick out */
+  & [data-ink-dark] {
+    --dxb-bg: var(--paper);
+  }
+  & .dxb-bar {
+    position: relative;
+    display: flex;
+    gap: 2px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 8px;
+    border-radius: var(--r);
+    background: var(--dxb-bg);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  & .dxb-hl {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 0;
+    width: var(--nw, 0);
+    translate: calc(var(--nx, 0px) + var(--ns, 0px)) 0; /* lives inside the scrolling bar */
+    border-radius: 9px;
+    background: color-mix(in oklab, var(--accent) 30%, var(--dxb-bg));
+    transition: translate 0.28s var(--ease-std), width 0.28s var(--ease-std);
+  }
+  & .dxb-tab {
+    position: relative;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 9px;
+    background: none;
+    color: var(--ink-2);
+    font: 500 13px/1 var(--mono);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--dur-hover) var(--ease-std);
+  }
+  & .dxb-tab[aria-selected="true"],
+  & .dxb-tab:hover {
+    color: var(--ink);
+  }
+  & .dxb-tab:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: -2px;
+  }
+  /* Bar and popout are one card: they join flush on the left, and a single concave fillet closes
+     the notch where the bar ends (--bw) above the wider popout. */
+  & .dxb-bar {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  & .dxb-tab { flex: none; }
+  & .dxb-neck {
+    position: absolute;
+    left: var(--bw, 0px);
+    height: 0;
+  }
+  & .dxb-neck::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: var(--r);
+    height: var(--r);
+    background: radial-gradient(circle at 100% 0, transparent var(--r), var(--dxb-bg) calc(var(--r) + 0.5px));
+  }
+  & .dxb-pop {
+    padding: var(--sp-5) var(--sp-6);
+    border-radius: 0 var(--r) var(--r) var(--r);
+    background: var(--dxb-bg);
+    color: var(--ink);
+  }
+  /* All rows share one cell, so the popout keeps the tallest row's height and nothing below moves. */
+  & .gh-list {
+    display: grid;
+  }
+  & .gh-row {
+    grid-area: 1 / 1;
+    padding: 0;
+    border: 0;
+    visibility: hidden;
+    background: none;
+  }
+  & .gh-row[data-active] {
+    visibility: visible;
+  }
+  & .gh-title {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+  & .gh-blurb {
+    margin-top: var(--sp-3);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  & .gh-sync {
+    margin-top: var(--sp-4);
+  }
+}
+:root[data-design="keynote"].dark .dxb[data-bar] [data-ink-dark] {
+  --dxb-bg: var(--raised);
+}
+/* Opening: the popout grows down and out from under its tab. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-design="keynote"] .dxb[data-bar] .gh-row[data-active] {
+    animation: dxb-open 0.36s var(--ease-std);
+  }
+}
+@keyframes dxb-open {
+  from {
+    clip-path: inset(0 max(0px, calc(100% - var(--nx) - var(--nw) + var(--sp-6))) 100% max(0px, calc(var(--nx) - var(--sp-6))));
+    opacity: 0.4;
+  }
+  to {
+    clip-path: inset(0);
+  }
+}

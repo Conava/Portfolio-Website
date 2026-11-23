@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "title": "devline",
+    "description": "devline ist mein Plugin für Claude Code: Es plant eine Änderung testgetrieben, setzt sie in parallelen Git-Worktrees mit einem Review pro Task um und holt sich zweimal meine Freigabe.",
+    "lede": "Mein Plugin für Claude Code, das aus einer Idee mergefertigen Code macht. Spec und Plan gebe ich frei, Implementierung, Reviews und Dokumentation laufen ohne Rückfragen.",
+    "published": "2026-11-11",
+    "updated": "2026-11-11",
+    "ogImage": {
+      "src": "/images/og/devline.jpg",
+      "alt": "Die devline-Pipeline: sieben Stufen nebeneinander, die Implementierung als drei parallele Spuren",
+      "width": 1200,
+      "height": 630
+    },
+    "sections": [
+      { "id": "what", "title": "Was devline ist" },
+      { "id": "pipeline", "title": "Pipeline" },
+      { "id": "agents", "title": "Agents" },
+      { "id": "skills", "title": "Skills" },
+      { "id": "hooks", "title": "Hooks" },
+      { "id": "install", "title": "Installation" }
+    ],
+    "links": [
+      { "label": "devline auf GitHub", "href": "https://github.com/Conava/claude-devline" },
+      { "label": "Releases", "href": "https://github.com/Conava/claude-devline/releases" }
+    ]
+  },
+  "figures": [],
+  "numbers": [],
+  "repo": "Conava/claude-devline",
+  "stages": [
+    {
+      "id": "brainstorm",
+      "label": "Brainstorm",
+      "summary": "Ein paar Fragen zu Umfang und Verhalten, dann die Spec. Größere Features werden hier in Phasen aufgeteilt.",
+      "agents": [],
+      "approval": true
+    },
+    {
+      "id": "design",
+      "label": "Designsystem",
+      "summary": "Nur bei Änderungen an der UI: Designrichtungen als HTML-Vorschau. Die Richtung, die ich auswähle, wird zum Designsystem.",
+      "agents": ["frontend-planner"]
+    },
+    {
+      "id": "plan",
+      "label": "Plan",
+      "summary": "Tasks, jeder mit seinen eigenen Dateien, Tests und Akzeptanzkriterien, in Wellen geordnet.",
+      "agents": ["planner"],
+      "approval": true
+    },
+    {
+      "id": "implement",
+      "label": "Implementierung",
+      "summary": "Ein Agent pro Task, jeder in seinem eigenen Git-Worktree, Tests zuerst. Jeder Task bekommt ein Review. Blockierende Findings gehen zurück an den Implementer, kleinere werden nach der letzten Welle gesammelt behoben.",
+      "agents": ["implementer", "reviewer"],
+      "parallel": 3
+    },
+    {
+      "id": "docs",
+      "label": "Dokumentation",
+      "summary": "README, CLAUDE.md und der docs-Ordner werden mit dem Diff abgeglichen und dort aktualisiert, wo sie veraltet sind.",
+      "agents": ["docs-keeper"]
+    },
+    {
+      "id": "deep-review",
+      "label": "Deep Review",
+      "summary": "Der ganze Branch wird gebaut, getestet und auf das geprüft, was ein Review pro Task nicht sieht: Probleme zwischen Tasks, Regressionen, Credentials. Jedes Finding wird vor dem Merge behoben.",
+      "agents": ["reviewer"]
+    },
+    {
+      "id": "gate",
+      "label": "Merge oder neue Runde",
+      "summary": "Ich merge den Branch oder schicke ihn mit meinen Änderungswünschen zurück in die Planung.",
+      "agents": [],
+      "approval": true
+    }
+  ],
+  "agents": [
+    {
+      "id": "planner",
+      "role": "Liest den Code, verfolgt, was eine Änderung betrifft, und schreibt den Plan. Fragt nach, wenn eine Entscheidung noch offen ist.",
+      "model": "Opus"
+    },
+    {
+      "id": "implementer",
+      "role": "Setzt einen Task im eigenen Worktree um, Tests zuerst, auch Tasks zu Build, CI, Docker und Infrastruktur. Committet nur die Dateien, die er geändert hat.",
+      "model": "Sonnet"
+    },
+    {
+      "id": "reviewer",
+      "role": "Prüft jeden Task auf Korrektheit, Security, Performance und darauf, ob er dem Plan folgt, und führt die Tests aus. Auf Opus macht er das abschließende Review des ganzen Branches.",
+      "model": "Sonnet"
+    },
+    {
+      "id": "debugger",
+      "role": "Findet die Ursache eines Bugs: reproduziert ihn, sammelt Belege, prüft zwei oder drei priorisierte Hypothesen, behebt ihn dann und ergänzt einen Regressionstest.",
+      "model": "Opus"
+    },
+    {
+      "id": "frontend-planner",
+      "role": "Schlägt Designrichtungen als HTML-Vorschau vor, auf Basis einer kuratierten Designdatenbank, und schreibt das Designsystem.",
+      "model": "Sonnet"
+    },
+    {
+      "id": "docs-keeper",
+      "role": "Gleicht die Dokumentation mit dem Diff ab und korrigiert, was veraltet ist, auch Links und Codebeispiele.",
+      "model": "Sonnet"
+    },
+    {
+      "id": "dependency",
+      "role": "Patcht CVEs und migriert Major-Versionen in einem Repository, prüft danach Build und Tests und committet erst dann. Migrationen laufen auf Opus.",
+      "model": "Sonnet"
+    }
+  ],
+  "skills": [
+    { "id": "devline", "summary": "Die komplette Pipeline vom Brainstorm bis zum Deep Review.", "group": "Befehle" },
+    { "id": "brainstorm", "summary": "Macht aus einer Idee eine Feature-Spezifikation.", "group": "Befehle" },
+    { "id": "plan", "summary": "Schreibt aus einer Spezifikation einen testgetriebenen Umsetzungsplan.", "group": "Befehle" },
+    { "id": "implement", "summary": "Setzt die Tasks eines vorhandenen Plans um.", "group": "Befehle" },
+    { "id": "quick", "summary": "Der schnelle Weg für kleine Änderungen: umsetzen, reviewen, committen.", "group": "Befehle" },
+    { "id": "review", "summary": "Reviewt die letzten Änderungen.", "group": "Befehle" },
+    { "id": "debug", "summary": "Ursachenanalyse für einen Bug.", "group": "Befehle" },
+    { "id": "deep-review", "summary": "Das abschließende Review eines Branches vor dem Merge.", "group": "Befehle" },
+    { "id": "deps", "summary": "Patcht CVEs oder migriert eine Major-Version.", "group": "Befehle" },
+    { "id": "design", "summary": "Entwirft eine einzelne Komponente oder ein Theme.", "group": "Befehle" },
+    { "id": "setup", "summary": "Legt die CLAUDE.md und die Pipeline-Einstellungen für ein Projekt an.", "group": "Befehle" },
+    { "id": "writing", "summary": "Entfernt KI-Muster aus einem Entwurf und markiert Fehler, bei wissenschaftlichen Texten mit strenger Quellenprüfung.", "group": "Befehle" },
+    { "id": "brand", "summary": "Tonalität, visuelle Identität und Kernbotschaften.", "group": "Befehle" },
+    { "id": "graphic-design", "summary": "Logos, Icons, Banner, Folien und Corporate Identity.", "group": "Befehle" },
+    { "id": "kb-tdd-workflow", "summary": "Testebenen und der Red-Green-Refactor-Zyklus, für Implementer und Debugger.", "group": "Wissensbasen" },
+    { "id": "kb-blast-radius", "summary": "Findet heraus, was eine Änderung an einer Datei kaputtmachen kann, für Planner und Reviewer.", "group": "Wissensbasen" },
+    { "id": "kb-design", "summary": "Die durchsuchbare Designdatenbank hinter dem Frontend-Planner.", "group": "Wissensbasen" },
+    { "id": "kb-dependency-management", "summary": "Erkennt den Package Manager und kennt die Update-Schritte, für den Dependency-Agent.", "group": "Wissensbasen" },
+    { "id": "find-docs", "summary": "Aktuelle Doku zu Libraries über Context7, für alle Agents.", "group": "Wissensbasen" }
+  ],
+  "hooks": [
+    {
+      "id": "validate-bash.sh",
+      "event": "PreToolUse",
+      "summary": "Prüft jeden Shell-Befehl, bevor er läuft. Blockiert destruktive Befehle und alles, was Credentials offenlegt, und fragt vorher nach, wenn ein Request auf einem anderen Host etwas ändert."
+    },
+    {
+      "id": "validate-write.sh",
+      "event": "PreToolUse",
+      "summary": "Prüft Lese-, Schreib- und Bearbeitungszugriffe. Blockiert das Lesen privater Schlüssel und von .env-Dateien und das Schreiben hardcodierter Secrets in den Code."
+    },
+    {
+      "id": "pre-compact.sh",
+      "event": "PreCompact",
+      "summary": "Holt den Pipeline-State zurück in den Kontext, wenn Claude Code die Unterhaltung compactet. So macht ein Lauf dort weiter, wo er aufgehört hat."
+    },
+    {
+      "id": "subagent-stop.sh",
+      "event": "SubagentStop",
+      "summary": "Protokolliert jeden fertigen Agent, damit der Orchestrator nach dem Kompaktieren die Laufzeiten rekonstruieren kann."
+    }
+  ],
+  "install": [
+    {
+      "label": "Schnellinstallation (Linux, macOS, WSL)",
+      "command": "curl -fsSL https://raw.githubusercontent.com/Conava/claude-devline/main/install.sh | bash"
+    },
+    {
+      "label": "Über den Marketplace",
+      "command": "claude plugin marketplace add Conava/claude-devline\nclaude plugin install devline@devline"
+    },
+    {
+      "label": "Aus dem Quellcode",
+      "command": "git clone https://github.com/Conava/claude-devline.git\nclaude --plugin-dir ./claude-devline"
+    }
+  ]
+}

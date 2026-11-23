@@ -1,25 +1,24 @@
 {
-  "bio": "Software engineer based in Hamburg, currently finishing my B.Sc. in Wirtschaftsinformatik (Business Informatics) at the University of Hamburg. My focus is backend development, from microservices to infrastructure. I particularly enjoy picking up new technologies and domains. After a full academic year at San Diego State University, I returned to Hamburg to write my bachelor thesis while working as a student engineer at OTTO, helping build the next-generation product data onboarding platform.",
-  "skills": [
+  "name": "Marlon Kranz",
+  "lede": "Software engineer in Hamburg. I build distributed, enterprise-scale cloud services in Java at Adobe, and open-source projects in Go and TypeScript.",
+  "statement": [
+    "I build backend services and cloud architecture. I'm passionate about solving problems, building algorithms and designing systems that scale. I enjoy working with distributed systems, and I have a strong interest in programming languages and compilers.",
+    "At Adobe my team and I maintain four production services that millions of people use every day. I own and plan the migration of a production data pipeline on our GitOps-based Kubernetes platform, and I'm heavily invested in my team's (AI) tooling.",
+    "Beyond work I build or contribute to software I use daily. I'm a contributor to Dux Shell, a Linux Wayland shell, and I also maintain devline, my own Claude Code plugin.",
+    "As my bachelor thesis at the University of Hamburg I built BPMNscript, a programming language for executable business process models in the BPMN 2.0 standard. The B.Sc. in Information Systems at the University of Hamburg, with an exchange year at San Diego State University, will be completed in December 2026, and in January 2027 I start a part-time M.S. in Computer Science at the Georgia Institute of Technology."
+  ],
+  "links": [
     {
-      "category": "Languages",
-      "items": ["Java", "Kotlin", "Python", "C#", "Rust", "Go", "TypeScript / JavaScript", "Bash", "SQL"]
+      "label": "GitHub",
+      "href": "https://github.com/conava"
     },
     {
-      "category": "Backend & Infra",
-      "items": ["Spring Boot", "Kafka", "MongoDB", "PostgreSQL", "Hibernate", "Flyway", "REST APIs", "AWS", "S3", "Lambda", "ECS", "Docker", "Terraform"]
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/in/marlon-kranz"
     },
     {
-      "category": "Frontend & Desktop",
-      "items": ["React", "Next.js", "JavaFX", "HTML / CSS"]
-    },
-    {
-      "category": "Tooling",
-      "items": ["Git", "Linux", "Gradle", "Maven", "GitHub Actions", "DSL Design", "ANTLR4"]
-    },
-    {
-      "category": "Spoken Languages",
-      "items": ["🇩🇪 German (Native)", "🇺🇸 English (C2)", "🇫🇷 French (Basic)"]
+      "label": "Resume",
+      "href": "/resume.pdf"
     }
   ]
 }

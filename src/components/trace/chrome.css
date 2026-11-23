@@ -1,0 +1,217 @@
+/* Trace chrome: header, crumb, rail, footer, skip link. */
+
+/* ---- Skip link: hidden until focused, then a primary button above the header ---- */
+:root[data-design="thread"] .skip:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: var(--z-tip);
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-2);
+  background: var(--fg);
+  color: var(--bg);
+  font: 500 14px/1 var(--sans);
+  text-decoration: none;
+}
+
+/* ---- Header ---- */
+:root[data-design="thread"] .t-hdr {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  height: var(--hdr);
+  background: var(--bg);
+}
+:root[data-design="thread"] .t-hdr-in {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: var(--max);
+  height: 100%;
+  margin-inline: auto;
+  /* The brand pad sits on the trace's x (--pad). */
+  padding: 0 12px 0 calc(var(--pad) - 5.5px);
+}
+:root[data-design="thread"] .t-brand {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  color: var(--fg);
+  font: 600 15px/1 var(--sans);
+  font-stretch: 108%;
+  text-decoration: none;
+}
+:root[data-design="thread"] .t-brand-pad {
+  width: 11px;
+  height: 11px;
+  border-radius: 1px;
+  background: var(--fg);
+}
+/* Narrow phones: the pad alone is the brand, so the crumb keeps its full word. */
+@media (max-width: 419.98px) {
+  :root[data-design="thread"] .t-brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  /* 40px wide target around the 11px pad without pushing the crumb away. */
+  :root[data-design="thread"] .t-brand {
+    position: relative;
+  }
+  :root[data-design="thread"] .t-brand::before {
+    content: "";
+    position: absolute;
+    inset: 0 -15px;
+  }
+}
+@media (max-width: 419.98px) and (pointer: coarse) {
+  :root[data-design="thread"] .t-brand::before {
+    inset: 0 -17px;
+  }
+}
+@media (pointer: coarse) {
+  :root[data-design="thread"] .t-brand {
+    min-height: 44px;
+  }
+}
+:root[data-design="thread"] .t-crumb {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+  color: var(--fg);
+  font: 400 14px/1.2 var(--sans);
+  white-space: nowrap;
+}
+:root[data-design="thread"] .t-crumb > [aria-hidden] {
+  color: var(--fg-3);
+}
+:root[data-design="thread"] .t-crumb > :last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+:root[data-design="thread"] .t-crumb-fade {
+  animation: t-crumb-in 160ms var(--ease-std);
+}
+@keyframes t-crumb-in {
+  from {
+    opacity: 0;
+  }
+}
+:root[data-design="thread"] .t-utils {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* ---- Rail (>= 1180, homepage only): replaces the crumb ---- */
+:root[data-design="thread"] .t-rail {
+  display: none;
+}
+@media (min-width: 1180px) {
+  :root[data-design="thread"] .t-hdr[data-home] .t-crumb {
+    display: none;
+  }
+  :root[data-design="thread"] .t-rail {
+    position: fixed;
+    top: calc(var(--hdr) + 40px);
+    right: max(0px, calc((100vw - var(--max)) / 2));
+    z-index: var(--z-rail);
+    display: block;
+    width: var(--pr);
+    padding-left: 28px;
+  }
+}
+:root[data-design="thread"] .t-rail ol {
+  margin: 0;
+  padding: 0 0 0 16px;
+  list-style: none;
+}
+:root[data-design="thread"] .t-rail-line {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 28px;
+  width: 1px;
+  background: var(--line-2);
+}
+:root[data-design="thread"] .t-rail-line > span {
+  position: absolute;
+  inset: 0;
+  background: var(--acc);
+  transform: scaleY(0);
+  transform-origin: top;
+}
+@media (scripting: none) {
+  :root[data-design="thread"] .t-rail-line > span {
+    display: none;
+  }
+}
+:root[data-design="thread"] .t-rail a {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  color: var(--fg-3);
+  font: 400 14px/1.2 var(--sans);
+  text-decoration: none;
+  transition-property: color;
+}
+:root[data-design="thread"] .t-rail a[aria-current] {
+  color: var(--fg);
+}
+@media (hover: hover) {
+  :root[data-design="thread"] .t-rail a:hover {
+    color: var(--fg);
+  }
+}
+
+/* ---- Footer ---- */
+:root[data-design="thread"] .t-ftr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 28px;
+  padding-block: 40px 48px;
+  color: var(--fg-3);
+}
+:root[data-design="thread"] .t-ftr p {
+  margin-block: 0;
+}
+:root[data-design="thread"] .t-keys {
+  display: none;
+  margin-left: auto;
+}
+/* The keys need JS, a keyboard and the homepage's stations. */
+@media (pointer: fine) and (scripting: enabled) {
+  :root[data-design="thread"]:has(.pad[data-kind="section"]) .t-keys {
+    display: block;
+  }
+}
+
+/* ---- Resume button: always in the header; phones get the short label without the icon ---- */
+:root[data-design="thread"] .btn.hdr-resume {
+  margin-right: 6px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+:root[data-design="thread"] .hdr-resume-short {
+  display: none;
+}
+@media (max-width: 479.98px) {
+  :root[data-design="thread"] .hdr-resume-long,
+  :root[data-design="thread"] .hdr-resume svg {
+    display: none;
+  }
+  :root[data-design="thread"] .hdr-resume-short {
+    display: inline;
+  }
+}

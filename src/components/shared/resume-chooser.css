@@ -1,0 +1,58 @@
+.resume-chooser {
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--s-line);
+  border-radius: var(--s-r-frame);
+  background: var(--s-raised, var(--s-bg));
+  color: var(--s-text);
+  font-family: var(--s-font-ui);
+  width: min(24rem, calc(100vw - 32px));
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.25);
+}
+.resume-chooser::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+.resume-chooser[open] {
+  animation: rc-in 160ms ease-out;
+}
+@keyframes rc-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resume-chooser[open] { animation: none; }
+}
+.rc-body {
+  position: relative;
+  padding: 1.25rem;
+}
+.rc-title {
+  margin: 0 2rem 1rem 0;
+  font-family: var(--s-font-display);
+  font-size: 1.25rem;
+}
+.rc-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rc-option {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.rc-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  background: none;
+  color: var(--s-mute);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.rc-close:hover { color: var(--s-text); }
+.resume-chooser :focus-visible { outline: 2px solid var(--s-focus); outline-offset: 2px; }

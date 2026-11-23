@@ -1,0 +1,20 @@
+{
+  "schools": [
+    {
+      "id": "s1",
+      "name": "U",
+      "url": "https://u.test",
+      "logo": {
+        "src": "/images/logos/u.svg",
+        "alt": "U",
+        "width": 10,
+        "height": 10
+      },
+      "degree": "BSc",
+      "field": "CS",
+      "start": "2015-10",
+      "end": "2019-06",
+      "status": "completed"
+    }
+  ]
+}

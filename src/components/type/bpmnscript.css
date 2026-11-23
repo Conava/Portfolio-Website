@@ -1,0 +1,79 @@
+/* Type BPMNscript room: the explainer in the room's heavy rules. */
+.ty-bs-what {
+  max-width: 1120px;
+}
+/* The diagram leads at full width, the code that compiles to it right below. */
+.ty-bs-what .bs-what-pair {
+  grid-template-columns: none;
+  max-width: none;
+}
+.ty-bs-what .bs-what-dg .bpmn-diagram {
+  max-width: 900px;
+}
+.ty-bs-what .bpmn-src {
+  font-size: clamp(12px, 1.1vw, 15px);
+}
+.ty-bs-what .bs-what-pane {
+  border: 1.5px solid currentColor;
+  border-radius: 0;
+}
+.ty-bs-what .bs-what-terms {
+  padding-top: 16px;
+  border-top: 1.5px solid currentColor;
+}
+/* The evaluation as a supporting strip: three counts in one row, smaller than the language above. */
+.ty-bs-eval {
+  max-width: 880px;
+  margin: 72px 0 0;
+  padding-top: 20px;
+  border-top: 1.5px solid currentColor;
+}
+:root[data-design="type"] .ty-in h3.ty-bs-eval-h {
+  margin: 0 0 20px;
+  font-size: clamp(18px, 1.6vw, 22px);
+  font-stretch: 125%;
+}
+.ty-bs-counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ty-bs-counts li {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+.ty-bs-n {
+  font-size: clamp(32px, 3.2vw, 48px);
+  font-weight: 780;
+  font-stretch: 125%;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.ty-bs-l {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.ty-bs-eval-cap {
+  margin-top: 20px;
+  max-width: 64ch;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--s-mute);
+}
+:root[data-design="type"] .ty-in h3.bs-rt-head {
+  font-size: clamp(18px, 1.6vw, 22px);
+  font-stretch: 125%;
+}
+.ty-in .bs-rt-n {
+  border: 1.5px solid currentColor;
+  border-radius: 0;
+  color: inherit;
+}
+.ty-in .bs-rt-steps li:not(:last-child)::before {
+  border-left: 1.5px solid currentColor;
+}

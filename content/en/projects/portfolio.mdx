@@ -1,76 +1,52 @@
 ---
 title: "Portfolio Website"
-date: "2026 – Present"
-summary: "The site you're on right now. Built from scratch with four switchable design themes (each with dark/light variants), full EN/DE internationalization, MDX project pages, and self-hosted on my own Linux server."
-tech: ["Next.js 16", "TypeScript", "React 19", "Tailwind CSS v4", "Framer Motion", "next-intl", "next-themes", "MDX", "Docker", "Traefik"]
+date: "2026–Present"
+summary: "The site you are on: four designs over one set of content, from a WebGL ink fluid to a three.js scene built from the content, and a BPMNscript playground that runs the language server and compiler in the browser."
+tech: ["Next.js 16", "TypeScript", "React 19", "Tailwind CSS v4", "next-intl", "next-themes", "MDX", "Monaco", "three.js", "Docker", "Traefik"]
 githubUrl: "https://github.com/Conava/Portfolio-Website"
 thumbnail: "/images/projects/portfolio/cover.jpg"
-featured: false
+featured: true
 status: "active"
 ---
 
 ## Overview
 
-This is the site you're looking at right now. I built it from scratch because I wanted full control over design, content, and hosting rather than working within the constraints of a template or a managed platform. It has four visual themes, bilingual content, responsive layouts, and runs on my own server.
+I built this site myself to control its design, content and hosting instead of fitting a template. It has four designs, English and German, project pages written in MDX, a playground for my language BPMNscript, and GitHub figures that come from live data. Unit and end-to-end tests cover it.
 
-## Design system
+## Designs
 
-The theming works in two independent layers:
+Two choices are independent of each other: the design, and light or dark mode. `next-themes` sets the mode as a class on `<html>`. Ink, Trace and Type have both modes. Flow is dark only. The icon in the header steps through the four designs.
 
-**Dark/light mode** is handled by `next-themes` and stored as a class on `<html>`. Every design theme has both a dark and a light variant.
+- **Ink** is a page written in pen on paper. The hero is ink that follows the cursor.
+- **Trace** is the page as a process diagram: one line from my name to my email, with side lanes computed from the dates in the content files. A lane appears where two entries overlap in time.
+- **Flow** is a dark page around a three.js scene: 640 metal tokens take a new form for each section and move into the next one as you scroll.
+- **Type** sets the page in large Archivo letters on paper. Scrolling flies through the counter of a letter into the next section.
 
-**Design themes** are four visual palettes, each with its own typography, colors, and hero animation:
+The server picks the design on every request: a valid `design` cookie first, then the `DESIGN` environment variable, then the default. The first HTML byte therefore already carries the right `data-design` on `<html>`, with no flash and no client script. A link with `?design=thread` sets the cookie and redirects to the same URL without that parameter.
 
-- **Atelier** *(default)* — editorial luxury. Gold rules, Cormorant Garamond headings, lots of whitespace. Draws from high-end print design.
-- **Iris** — dreamscape. Glowing concentric rings, gradient name treatment, soft constellation dots. Quieter and more ambient.
-- **Manifesto** — acid editorial. High contrast, compressed type, a marquee strip, outlined vs. filled name contrast. Loud on purpose.
-- **Cobalt** — mission control. Monospace font, dot-grid background, scanlines, a HUD metrics panel. Meant to feel like a developer dashboard.
+## Content and languages
 
-An inline script in `<head>` reads the stored theme from localStorage before React hydrates, so there's no flash of wrong colors on load. All component styling goes through CSS custom properties that each theme overrides, which means components don't need conditional theme logic.
+Facts live in JSON files under `content/{locale}/data/`, and the project pages are MDX files with frontmatter, parsed with `gray-matter` and rendered through `next-mdx-remote`. Project slugs come from the English filenames. If a German MDX file is missing, the English one is used.
 
-Themes can be changed easily on the fly with the theme switcher:
-![Theme Switcher|sm](/images/projects/portfolio/theme-switcher.jpg)
+English pages are at `/…` and German pages at `/de/…`, handled by `next-intl`. The URL alone decides the language: there is no cookie and no `Accept-Language` detection. UI strings are in `messages/{locale}.json`.
 
-## Hero animations
+A test compares the fact fields (ids, dates, URLs, numbers, status) of the English and German files and reports the path of the first mismatch. Change a fact in one language only and the test fails.
 
-Each theme has its own hero section with a distinct entrance animation: sliding gold rules and a name reveal for Atelier, ring pulses and a star constellation fade for Iris, clip-path name reveal with a marquee strip for Manifesto, typewriter cursor with a scanline overlay for Cobalt. Switching themes remounts the section via a `key` prop, so the animation replays cleanly.
+## Live GitHub data
 
-<Video src="/images/projects/portfolio/hero-themes.mp4" caption="All four hero themes in action" />
+Repository stars, releases, the state of the pull requests I feature, and my pull request totals in the Dux organization come from a single GraphQL request, cached for one hour. If a request fails, the last good result stays in use. Without a result, the pages show no numbers, and none are filled in by hand.
 
-## Architecture
+## Playground
 
-The site runs on **Next.js 16 App Router** with all routes under `[locale]/`. Invalid locales return a 404.
+The [playground](/playground) runs the BPMNscript language server and compiler in a web worker in the browser, with Monaco as the editor and bpmn-js for the diagram. The worker is not committed to this repository. A script builds `@bpmn-script/web` from the BPMNscript repository at a pinned version before the dev server, the build and the tests run.
 
-Content lives in `content/{locale}/` and comes in two forms:
-- **JSON** for structured data (experience, education, certificates, publications, about)
-- **MDX** for project pages like this one, parsed with `gray-matter` and rendered via `next-mdx-remote`
+## Analytics
 
-Project slugs come from the English filenames. If no German MDX file exists for a project, the loader falls back to the English version, so only content that actually differs needs a separate file.
-
-Sections like Certificates and Publications hide themselves (page and navbar) when all their entries are marked hidden. Section numbers use Roman numerals and recompute dynamically.
-
-## Internationalization
-
-UI strings (`messages/{locale}.json`) go through `next-intl`. Content (bios, job descriptions, project writeups) lives in locale-specific JSON and MDX files. The two can be translated independently. Currently supported: English and German.
-
-## Typography
-
-Six font families load at build time via `next/font/google`. Each theme switches `--font-sans` and `--font-display` to pick its own typefaces:
-
-- **Atelier**: Jost + Cormorant Garamond
-- **Cobalt**: Plus Jakarta Sans
-- **Iris**: Sora
-- **Manifesto**: DM Mono + Fraunces
-
-JetBrains Mono is the monospace font across all themes.
-
-## Mobile
-
-Every section adapts to small screens. Hero layouts reflow to a single column, stat panels stack, project cards use fluid grids, and typography scales with `clamp()`. The navbar collapses to a mobile menu with appropriately sized touch targets.
+Analytics is a self-hosted Umami. The script loads only when the Umami site ID and URL are configured. Events are declared in one typed list: section views with a dwell bucket, scroll depth, outbound clicks, resume downloads, and the switches for design, language and color mode.
 
 ## Deployment
 
-The portfolio is self-hosted on my home server as a Docker container. Traefik handles TLS and routing. Pushing to `main` triggers a GitHub Actions workflow that builds the image, pushes it to GHCR, and deploys it to the server automatically.
+A GitHub Actions workflow runs the type check and the unit tests on every push and pull request. On `main`, it also builds the Docker image, pushes it to GHCR, and runs `docker compose pull` and `up -d` on my server over SSH. Traefik handles TLS and routing.
 
 ## Stack
 
@@ -79,10 +55,12 @@ The portfolio is self-hosted on my home server as a Docker container. Traefik ha
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
 | UI | React 19 |
-| Styling | Tailwind CSS v4 |
-| Animations | Framer Motion |
-| Content | MDX + gray-matter + next-mdx-remote |
+| Styling | Tailwind CSS v4 and CSS custom properties per design |
+| Content | JSON and MDX (`gray-matter`, `next-mdx-remote`) |
 | i18n | next-intl |
-| Theming | next-themes + custom CSS variable system |
-| Fonts | next/font/google (6 families) |
-| Deployment | Docker + Traefik (self-hosted) |
+| Theming | next-themes |
+| Playground | Monaco, monaco-languageclient, bpmn-js |
+| 3D | three.js (Flow) |
+| Fonts | Bricolage Grotesque, Source Serif 4, Spline Sans Mono, Mona Sans, Instrument Serif, Geist, Archivo (`next/font/google`), Geist Mono vendored (`next/font/local`) |
+| Tooling | Bun for install, scripts and tests, Node 24 at runtime |
+| Deployment | Docker, GHCR, Traefik (self-hosted) |

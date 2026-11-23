@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "title": "T de", "description": "D de", "lede": "L de", "published": "2026-01-01", "updated": "2026-01-02",
+    "ogImage": { "src": "/og.jpg", "alt": "x de", "width": 1200, "height": 630 },
+    "sections": [{ "id": "intro", "title": "Einleitung" }, { "id": "result", "title": "Ergebnis" }],
+    "links": [{ "label": "Repo", "href": "https://example.test" }]
+  },
+  "figures": [{ "id": "fig-a", "src": "/a.svg", "alt": "a de", "width": 10, "height": 10, "plate": true }],
+  "numbers": [{ "id": "n-a", "value": 3 }, { "id": "n-b", "value": 4 }],
+  "repo": "o/bpmn",
+  "funnel": [{ "label": "Alle", "value": 4 }]
+}

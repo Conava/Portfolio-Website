@@ -1,0 +1,112 @@
+/*
+ * The ink behind the Ink homepage (ink-bg.tsx); these caps are its body palette.
+ *
+ * Legibility budget: --mute on paper-2 (4.86:1 bare, light) is the tightest pair on the page.
+ * Darkening the paper costs contrast fast, so in light mode the ink is a pale pen blue that
+ * shifts hue more than lightness (#a8c2ff, at most 19 %: 4.53:1); in dark mode and on the scene
+ * bands it is the muted pen blue (#384e9e, at most 14 %: 5.32:1 dark paper-2, 5.20:1 light-mode
+ * scene). The static blooms below use the same colours and caps.
+ */
+
+/* Live: the one ink field, hero included; viewport-fixed, above the tone grounds (z -2, chrome.css), below all content. */
+.ink-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+:root:not([data-ink-ambient="live"]) .ink-ambient {
+  display: none;
+}
+
+/*
+ * Static (reduced motion, no WebGL2): pre-rendered blooms in the margins of the paper sections,
+ * never on a scene band. Under reduced motion each block paints its own ground, which would hide
+ * a viewport layer, so each host is a stacking context and its ::before (z -1) sits between its
+ * ground and its content.
+ */
+:root[data-design="keynote"] {
+  --wash-c: #a8c2ff;
+  --wash: 0.19;
+  /* scripts/ink-bg-prerender.ts: white with alpha, coloured here. */
+  --bloom-1: url("/images/ink/bg/bloom-1.webp");
+  --bloom-2: url("/images/ink/bg/bloom-2.webp");
+  --bloom-3: url("/images/ink/bg/bloom-3.webp");
+}
+:root[data-design="keynote"].dark {
+  --wash-c: #384e9e;
+  --wash: 0.14;
+}
+/* With motion the ground is one layer for the whole viewport; it carries the scene palette. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-design="keynote"][data-tone-ink] {
+    --wash-c: #384e9e;
+    --wash: 0.14;
+  }
+}
+:root[data-design="keynote"][data-ink-ambient="static"] {
+  & :is(#about, #work, #education, .ink-bs-intro, .ink-bs-proof, #dux, #projects) {
+    position: relative;
+    isolation: isolate;
+  }
+  & :is(#about, #work, #education, .ink-bs-intro, .ink-bs-proof, #dux, #projects)::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    /* Full viewport width from inside the centred .wrap; body's overflow-x: clip stops overflow. */
+    left: calc(50% - 50vw);
+    width: 100vw;
+    pointer-events: none;
+    background-color: var(--wash-c);
+    opacity: var(--wash);
+    mask-repeat: no-repeat;
+    mask-size: clamp(300px, 34vw, 520px);
+  }
+  & #about::before {
+    mask-image: var(--bloom-1), var(--bloom-3);
+    mask-position: left max(-60px, calc(50% - 760px)) top 20px, right -140px bottom -40px;
+    mask-size: clamp(300px, 34vw, 520px), clamp(220px, 22vw, 340px);
+  }
+  & #work::before {
+    mask-image: var(--bloom-2);
+    mask-position: right -160px top 46%;
+  }
+  & #education::before {
+    mask-image: var(--bloom-3);
+    mask-position: left max(-80px, calc(50% - 780px)) top 40px;
+  }
+  & .ink-bs-intro::before {
+    mask-image: var(--bloom-1);
+    mask-position: right max(-100px, calc(50% - 740px)) top -30px;
+    mask-size: clamp(260px, 28vw, 440px);
+  }
+  & .ink-bs-proof::before {
+    mask-image: var(--bloom-2);
+    mask-position: left -180px bottom 0;
+    mask-size: clamp(240px, 26vw, 400px);
+  }
+  /* Dux holds the Player scene band: the bloom stays at the heading. */
+  & #dux::before {
+    bottom: auto;
+    height: 900px;
+    mask-image: var(--bloom-2);
+    mask-position: right max(-120px, calc(50% - 760px)) top 30px;
+  }
+  & #projects::before {
+    mask-image: var(--bloom-1), var(--bloom-3);
+    mask-position: left max(-60px, calc(50% - 760px)) top 40px, right -120px bottom 10%;
+    mask-size: clamp(300px, 34vw, 520px), clamp(220px, 24vw, 360px);
+  }
+}
+
+/* High contrast and forced colours: plain grounds. */
+@media (prefers-contrast: more), (forced-colors: active) {
+  .ink-ambient,
+  :root[data-design="keynote"][data-ink-ambient] :is(#about, #work, #education, .ink-bs-intro, .ink-bs-proof, #dux, #projects)::before {
+    display: none;
+  }
+}

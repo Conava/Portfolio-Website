@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "title": "devline",
+    "description": "devline is my Claude Code plugin: it plans a change test first, implements it in parallel git worktrees with a review per task, and asks for approval twice.",
+    "lede": "A Claude Code plugin I built that takes an idea to merge-ready code. I approve the spec and the plan, and implementation, reviews and documentation run without prompts.",
+    "published": "2026-11-11",
+    "updated": "2026-11-11",
+    "ogImage": {
+      "src": "/images/og/devline.jpg",
+      "alt": "The devline pipeline: seven stages in a row, the implementation stage drawn as three parallel lanes",
+      "width": 1200,
+      "height": 630
+    },
+    "sections": [
+      { "id": "what", "title": "What devline is" },
+      { "id": "pipeline", "title": "Pipeline" },
+      { "id": "agents", "title": "Agents" },
+      { "id": "skills", "title": "Skills" },
+      { "id": "hooks", "title": "Hooks" },
+      { "id": "install", "title": "Installation" }
+    ],
+    "links": [
+      { "label": "devline on GitHub", "href": "https://github.com/Conava/claude-devline" },
+      { "label": "Releases", "href": "https://github.com/Conava/claude-devline/releases" }
+    ]
+  },
+  "figures": [],
+  "numbers": [],
+  "repo": "Conava/claude-devline",
+  "stages": [
+    {
+      "id": "brainstorm",
+      "label": "Brainstorm",
+      "summary": "A few questions about scope and behavior, then the spec. A larger feature is split into phases here.",
+      "agents": [],
+      "approval": true
+    },
+    {
+      "id": "design",
+      "label": "Design system",
+      "summary": "Only for changes to the UI: design directions as HTML previews, and the one I pick becomes the design system.",
+      "agents": ["frontend-planner"]
+    },
+    {
+      "id": "plan",
+      "label": "Plan",
+      "summary": "Tasks with the files each one owns, its tests and acceptance criteria, ordered in waves.",
+      "agents": ["planner"],
+      "approval": true
+    },
+    {
+      "id": "implement",
+      "label": "Implement",
+      "summary": "One agent per task, each in its own git worktree, test first. Every task gets a review. Blocking findings go back to the implementer, and minor ones are fixed together after the last wave.",
+      "agents": ["implementer", "reviewer"],
+      "parallel": 3
+    },
+    {
+      "id": "docs",
+      "label": "Documentation",
+      "summary": "README, CLAUDE.md and the docs folder checked against the diff and updated where they are out of date.",
+      "agents": ["docs-keeper"]
+    },
+    {
+      "id": "deep-review",
+      "label": "Deep review",
+      "summary": "The whole branch built, tested and reviewed for what a single task's review can't see: problems between tasks, regressions, credentials. Every finding is fixed before the merge.",
+      "agents": ["reviewer"]
+    },
+    {
+      "id": "gate",
+      "label": "Merge or iterate",
+      "summary": "I merge the branch, or send it back to the plan with what I want changed.",
+      "agents": [],
+      "approval": true
+    }
+  ],
+  "agents": [
+    {
+      "id": "planner",
+      "role": "Reads the code, traces what a change affects and writes the plan. Asks when a decision is still open.",
+      "model": "Opus"
+    },
+    {
+      "id": "implementer",
+      "role": "Implements one task in its own worktree, test first, including build, CI, Docker and infrastructure tasks. Commits only the files it changed.",
+      "model": "Sonnet"
+    },
+    {
+      "id": "reviewer",
+      "role": "Checks each task for correctness, security, performance and whether it follows the plan, and runs the tests. On Opus it gives the final review of the whole branch.",
+      "model": "Sonnet"
+    },
+    {
+      "id": "debugger",
+      "role": "Finds the root cause of a bug: reproduces it, gathers evidence, tests two or three ranked hypotheses, then fixes it and adds a regression test.",
+      "model": "Opus"
+    },
+    {
+      "id": "frontend-planner",
+      "role": "Proposes design directions as HTML previews, drawn from a curated design database, and writes the design system.",
+      "model": "Sonnet"
+    },
+    {
+      "id": "docs-keeper",
+      "role": "Compares the documentation with the diff and fixes what is out of date, including links and code examples.",
+      "model": "Sonnet"
+    },
+    {
+      "id": "dependency",
+      "role": "Patches CVEs and migrates major versions in one repository, then verifies the build and tests before it commits. Migrations run on Opus.",
+      "model": "Sonnet"
+    }
+  ],
+  "skills": [
+    { "id": "devline", "summary": "The full pipeline, from brainstorm to deep review.", "group": "Commands" },
+    { "id": "brainstorm", "summary": "Turns an idea into a feature spec.", "group": "Commands" },
+    { "id": "plan", "summary": "Writes a test-driven implementation plan from a spec.", "group": "Commands" },
+    { "id": "implement", "summary": "Implements the tasks of an existing plan.", "group": "Commands" },
+    { "id": "quick", "summary": "The fast lane for a small change: implement, review, commit.", "group": "Commands" },
+    { "id": "review", "summary": "Reviews the recent changes.", "group": "Commands" },
+    { "id": "debug", "summary": "Root cause analysis for an error.", "group": "Commands" },
+    { "id": "deep-review", "summary": "The final merge-readiness review of a branch.", "group": "Commands" },
+    { "id": "deps", "summary": "Patches CVEs or migrates a major version.", "group": "Commands" },
+    { "id": "design", "summary": "Designs a single component or a theme.", "group": "Commands" },
+    { "id": "setup", "summary": "Creates the CLAUDE.md and the pipeline settings for a project.", "group": "Commands" },
+    { "id": "writing", "summary": "Cleans AI patterns out of a draft and flags mistakes, with strict citations for scientific text.", "group": "Commands" },
+    { "id": "brand", "summary": "Brand voice, visual identity and messaging.", "group": "Commands" },
+    { "id": "graphic-design", "summary": "Logos, icons, banners, slides and corporate identity.", "group": "Commands" },
+    { "id": "kb-tdd-workflow", "summary": "Test levels and the red-green-refactor cycle, for the implementer and the debugger.", "group": "Knowledge bases" },
+    { "id": "kb-blast-radius", "summary": "Finds what a change to a file can break, for the planner and the reviewer.", "group": "Knowledge bases" },
+    { "id": "kb-design", "summary": "The searchable design database behind the frontend planner.", "group": "Knowledge bases" },
+    { "id": "kb-dependency-management", "summary": "Package manager detection and update steps, for the dependency agent.", "group": "Knowledge bases" },
+    { "id": "find-docs", "summary": "Current library documentation through Context7, for every agent.", "group": "Knowledge bases" }
+  ],
+  "hooks": [
+    {
+      "id": "validate-bash.sh",
+      "event": "PreToolUse",
+      "summary": "Checks every shell command before it runs. Blocks destructive commands and anything that exposes credentials, and asks first before a request that changes something on another host."
+    },
+    {
+      "id": "validate-write.sh",
+      "event": "PreToolUse",
+      "summary": "Checks reads, writes and edits. Blocks reading private keys and .env files, and writing hardcoded secrets into code."
+    },
+    {
+      "id": "pre-compact.sh",
+      "event": "PreCompact",
+      "summary": "Puts the pipeline state back into context when Claude Code compacts the conversation, so a run continues where it stopped."
+    },
+    {
+      "id": "subagent-stop.sh",
+      "event": "SubagentStop",
+      "summary": "Logs every finished agent, so the orchestrator can rebuild the timing after a compaction."
+    }
+  ],
+  "install": [
+    {
+      "label": "Quick install (Linux, macOS, WSL)",
+      "command": "curl -fsSL https://raw.githubusercontent.com/Conava/claude-devline/main/install.sh | bash"
+    },
+    {
+      "label": "From the marketplace",
+      "command": "claude plugin marketplace add Conava/claude-devline\nclaude plugin install devline@devline"
+    },
+    {
+      "label": "From source",
+      "command": "git clone https://github.com/Conava/claude-devline.git\nclaude --plugin-dir ./claude-devline"
+    }
+  ]
+}

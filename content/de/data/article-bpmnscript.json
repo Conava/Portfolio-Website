@@ -1,0 +1,271 @@
+{
+  "meta": {
+    "title": "BPMNscript",
+    "description": "Eine Textsprache für ausführbare BPMN-2.0-Prozesse: wie Compiler und Importer funktionieren und was der Round-Trip mit öffentlichen Modellen ergeben hat.",
+    "lede": "BPMN ist die Standardnotation, mit der man Geschäftsprozesse als Diagramm zeichnet, und Engines wie Operaton führen diese Diagramme aus. Mit BPMNscript schreiben Entwickler solche Prozesse als Code. Für meine Bachelorarbeit an der Universität Hamburg habe ich dazu einen Compiler gebaut, der BPMN-XML für Operaton erzeugt, einen Importer, der BPMN-XML zurück in Quelltext übersetzt, und einen Language Server für den Editor.",
+    "published": "2026-11-11",
+    "updated": "2026-11-11",
+    "ogImage": {
+      "src": "/images/og/bpmnscript.jpg",
+      "alt": "Diagramm der Rechnungsfreigabe, kompiliert mit BPMNscript, auf hellem Hintergrund",
+      "width": 1200,
+      "height": 630
+    },
+    "sections": [
+      {
+        "id": "overview",
+        "title": "Überblick"
+      },
+      {
+        "id": "why-text",
+        "title": "Warum eine Textnotation"
+      },
+      {
+        "id": "compiler",
+        "title": "Compiler"
+      },
+      {
+        "id": "import",
+        "title": "Import"
+      },
+      {
+        "id": "evaluation",
+        "title": "Evaluation"
+      },
+      {
+        "id": "editor",
+        "title": "Editor-Support"
+      },
+      {
+        "id": "limits",
+        "title": "Grenzen"
+      }
+    ],
+    "links": [
+      {
+        "label": "BPMNscript auf GitHub",
+        "href": "https://github.com/BPMNscript/bpmnscript"
+      },
+      {
+        "label": "Bachelorarbeit (PDF)",
+        "href": "/thesis.pdf"
+      },
+      {
+        "label": "Playground",
+        "href": "/playground"
+      },
+      {
+        "label": "Architecture Decision Records auf GitHub",
+        "href": "https://github.com/BPMNscript/bpmnscript/tree/main/docs/decisions"
+      },
+      {
+        "label": "Evaluations-Repository auf GitHub",
+        "href": "https://github.com/BPMNscript/validation/tree/v1.1.0"
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "expense-claim",
+      "src": "/images/bpmnscript/expense-claim.svg",
+      "alt": "Spesenabrechnung als BPMN-Diagramm: ein Service Task, eine Schleife zurück zu Revise the claim, eine exklusive Verzweigung zwischen Approve the claim und Approve automatically und zwei parallele Service Tasks vor dem Endereignis",
+      "width": 1546,
+      "height": 230,
+      "caption": "Das zweite Beispiel, die Spesenabrechnung, nach dem Kompilieren: Gateways für die while-Schleife, das if und den parallel-Block, Layout von bpmn-auto-layout. Aus der Bachelorarbeit.",
+      "plate": true
+    },
+    {
+      "id": "running-instance",
+      "src": "/images/bpmnscript/running-instance.webp",
+      "alt": "BPMN-Diagramm der Rechnungsfreigabe, der Task Review Invoice ist als aktiv hervorgehoben",
+      "width": 1600,
+      "height": 498,
+      "caption": "Die kompilierte Rechnungsfreigabe auf Operaton: Die Instanz wartet bei Review Invoice. Aus dem Kolloquium."
+    },
+    {
+      "id": "editor-missing-binding",
+      "src": "/images/bpmnscript/editor-missing-binding.webp",
+      "alt": "VS Code mit dem Quelltext der Rechnungsfreigabe, in dem AutoApprove unterstrichen ist und ein Popup meldet: service task 'AutoApprove' has no 'class', 'expression', 'delegate', 'topic', or 'type' setting",
+      "width": 1600,
+      "height": 398,
+      "caption": "Die Rechnungsfreigabe in VS Code, nachdem das Binding von AutoApprove entfernt wurde: Der Editor nennt die fehlende Einstellung. Aus dem Kolloquium."
+    },
+    {
+      "id": "editor-diagnostic",
+      "src": "/images/bpmnscript/editor-diagnostic.webp",
+      "alt": "VS-Code-Zeile goto Paymnt, das Sprungziel ist unterstrichen, Meldung: no step named 'Paymnt' in this process",
+      "width": 970,
+      "height": 146,
+      "caption": "Fehlermeldung zu einem vertippten Sprungziel im Beispiel order-handling. Aus der Bachelorarbeit."
+    },
+    {
+      "id": "editor-completion-target",
+      "src": "/images/bpmnscript/editor-completion-target.webp",
+      "alt": "VS-Code-Vervollständigung unter goto Paymnt mit den Anweisungen, deren Namen passen",
+      "width": 1113,
+      "height": 117,
+      "caption": "Am vertippten Ziel schlägt die Autovervollständigung die passenden Anweisungen vor. Aus der Bachelorarbeit."
+    },
+    {
+      "id": "editor-hover",
+      "src": "/images/bpmnscript/editor-hover.webp",
+      "alt": "VS-Code-Hover über PAYMENT_DECLINED mit der Art des Codes und der Meldung aus seiner Deklaration",
+      "width": 937,
+      "height": 97,
+      "caption": "Hover über einem Fehlercode: seine Art und die Meldung aus der Deklaration. Aus der Bachelorarbeit."
+    }
+  ],
+  "numbers": [
+    {
+      "id": "deployed",
+      "value": 6060
+    },
+    {
+      "id": "accepted",
+      "value": 4946
+    },
+    {
+      "id": "refused",
+      "value": 1114
+    },
+    {
+      "id": "equivalent",
+      "value": 3858
+    },
+    {
+      "id": "divergent",
+      "value": 921
+    },
+    {
+      "id": "toolError",
+      "value": 167
+    },
+    {
+      "id": "httl",
+      "value": 3803
+    },
+    {
+      "id": "unwarned",
+      "value": 134
+    },
+    {
+      "id": "screened",
+      "value": 6492
+    },
+    {
+      "id": "band1",
+      "value": 4237
+    },
+    {
+      "id": "band1Eq",
+      "value": 3276
+    },
+    {
+      "id": "band2",
+      "value": 1280
+    },
+    {
+      "id": "band2Eq",
+      "value": 501
+    },
+    {
+      "id": "band3",
+      "value": 441
+    },
+    {
+      "id": "band3Eq",
+      "value": 75
+    },
+    {
+      "id": "band4",
+      "value": 102
+    },
+    {
+      "id": "band4Eq",
+      "value": 6
+    },
+    {
+      "id": "officialAccepted",
+      "value": 2151
+    },
+    {
+      "id": "officialEq",
+      "value": 2015
+    },
+    {
+      "id": "generatedValid",
+      "value": 1996
+    },
+    {
+      "id": "generatedSeeds",
+      "value": 2000
+    },
+    {
+      "id": "elementTypes",
+      "value": 19
+    },
+    {
+      "id": "coveredTypes",
+      "value": 17
+    },
+    {
+      "id": "connector",
+      "value": 371
+    },
+    {
+      "id": "multiProcess",
+      "value": 144
+    },
+    {
+      "id": "editLines",
+      "value": 3
+    },
+    {
+      "id": "editXmlAdded",
+      "value": 23
+    },
+    {
+      "id": "editXmlRemoved",
+      "value": 3
+    },
+    {
+      "id": "refusedTop",
+      "value": 952
+    },
+    {
+      "id": "messageNoName",
+      "value": 119
+    },
+    {
+      "id": "compensation",
+      "value": 115
+    },
+    {
+      "id": "externalScript",
+      "value": 76
+    },
+    {
+      "id": "cmmn",
+      "value": 64
+    },
+    {
+      "id": "conditionLanguage",
+      "value": 63
+    }
+  ],
+  "repo": "BPMNscript/bpmnscript",
+  "funnel": [
+    {
+      "label": "Von Operaton deployt",
+      "value": 6060
+    },
+    {
+      "label": "Vom Importer akzeptiert",
+      "value": 4946
+    },
+    {
+      "label": "Nach dem Round-Trip äquivalent",
+      "value": 3858
+    }
+  ]
+}
