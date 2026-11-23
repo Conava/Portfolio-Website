@@ -21,6 +21,13 @@
   --pg-select: rgb(36 86 211 / 0.12);
   --pg-status-bg: #2456d3;
   --pg-status-fg: #ffffff; /* 5.9:1 */
+  /* Syntax colors, each 5:1 or more on panel and bg. */
+  --pg-syn-keyword: #7c3aed;
+  --pg-syn-string: #0a6b34;
+  --pg-syn-template: #a14a00;
+  --pg-syn-script: #0b5d80;
+  --pg-syn-number: #1f55c7;
+  --pg-syn-name: #9c2a6b;
   --pg-font-ui: var(--font-mona), system-ui, sans-serif;
   --pg-font-mono: var(--font-spline-mono), ui-monospace, monospace;
   --pg-r-0: 0;
@@ -48,4 +55,10 @@
   --pg-select: rgb(122 162 255 / 0.16);
   --pg-status-bg: #1d3f9e;
   --pg-status-fg: #ffffff; /* 8.9:1 */
+  --pg-syn-keyword: #c79bff;
+  --pg-syn-string: #8fd694;
+  --pg-syn-template: #f2a65a;
+  --pg-syn-script: #7cc7e8;
+  --pg-syn-number: #8fb4ff;
+  --pg-syn-name: #f08cc0;
 }

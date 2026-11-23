@@ -1,6 +1,7 @@
 import { freshness, type GithubData } from "@/lib/github";
 import type { Locale, Viz as VizData } from "@/lib/types";
 import { CourseMap } from "./course-map";
+import { DevlineRun } from "./devline-run/devline-run";
 import { Funnel } from "./funnel";
 import { Pipeline } from "./pipeline";
 import { PipelineCompare } from "./pipeline-compare";
@@ -24,6 +25,8 @@ export async function Viz({ viz, github, locale }: { viz: VizData; github: Githu
       return <Pipeline stages={viz.stages} hooks={viz.hooks} standalone={viz.standalone} caption={viz.caption} locale={locale} />;
     case "pipeline-compare":
       return <PipelineCompare before={viz.before} after={viz.after} caption={viz.caption} />;
+    case "devline-run":
+      return <DevlineRun viz={viz} />;
     case "course-map":
       return <CourseMap groups={viz.groups} caption={viz.caption} locale={locale} />;
   }

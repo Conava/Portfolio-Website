@@ -171,7 +171,7 @@
     justify-content: center;
   }
   .pg-home-text,
-  .pg-btn-label {
+  .pg-hdr .pg-btn-label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -179,8 +179,7 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .pg-home-sep,
-  .pg-chev {
+  .pg-home-sep {
     display: none;
   }
   .pg-hdr {
@@ -190,10 +189,10 @@
   .pg-crumb {
     gap: 4px;
   }
-  .pg-btn {
+  .pg-hdr .pg-btn:not(.pg-compile) {
     padding: 0;
   }
-  .pg-btn[data-tip]::after {
+  .pg-hdr .pg-btn[data-tip]::after {
     display: block;
   }
 }
@@ -208,19 +207,18 @@
   .pg-tools {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(4, auto);
+    grid-template-columns: repeat(3, auto);
     justify-content: space-between;
     border-top: 1px solid var(--pg-line);
     padding-top: 4px;
   }
-  .pg-tools .pg-menu-root,
   .pg-tools .pg-share {
     position: static;
   }
   .pg-tools .pg-btn {
     padding: 0 8px;
   }
-  .pg-btn-label {
+  .pg-hdr .pg-btn-label {
     position: static;
     width: auto;
     height: auto;
@@ -228,15 +226,35 @@
     clip-path: none;
     text-overflow: ellipsis;
   }
-  .pg-btn[data-tip]::after {
+  .pg-hdr .pg-btn[data-tip]::after {
     display: none;
   }
-  .pg-tools .pg-menu[data-align] {
-    left: 4px;
-    right: 4px;
-    max-width: none;
-    transform-origin: top center;
+}
+
+/* Compile: the one filled button, so the main action is found first. */
+.pg-btn.pg-compile {
+  margin-right: 6px;
+  padding: 0 12px;
+  background: var(--pg-status-bg);
+  color: var(--pg-status-fg);
+  font-weight: 600;
+}
+.pg-compile:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pg-compile:focus-visible {
+  outline: 2px solid var(--pg-text);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .pg-btn.pg-compile:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--pg-status-bg) 85%, var(--pg-text));
+    color: var(--pg-status-fg);
   }
+}
+.pg-help {
+  margin-left: 4px;
 }
 
 /* ---------- Menus (preset, export) ---------- */
@@ -715,6 +733,22 @@ button.pg-row {
   width: 28px;
   height: 28px;
 }
+.pg-xexamples {
+  padding: 0 8px 8px;
+  border-bottom: 1px solid var(--pg-line);
+  margin-bottom: 4px;
+}
+.pg-xexamples .pg-btn {
+  width: 100%;
+  justify-content: flex-start;
+  border: 1px solid var(--pg-line-2);
+  background: var(--pg-panel);
+  font-size: 13px;
+}
+.pg-xexamples .pg-btn-label {
+  flex: 1;
+  text-align: start;
+}
 .pg-xclose {
   display: none;
 }
@@ -864,6 +898,19 @@ button.pg-row {
   .pg-xclose {
     display: inline-grid;
   }
+  /* In the drawer the export menu spans it instead of running off the screen. */
+  .pg-xhead {
+    position: relative;
+  }
+  .pg-xhead .pg-menu-root {
+    position: static;
+  }
+  .pg-xhead .pg-menu[data-align] {
+    left: 8px;
+    right: 8px;
+    max-width: none;
+    transform-origin: top center;
+  }
 }
 
 /* ---------- Editor tabs ---------- */
@@ -997,24 +1044,31 @@ button.pg-row {
   font-size: 16px;
   font-weight: 600;
 }
-.pg-nofile dl {
+.pg-nofile .pg-keylist {
+  margin: 16px 0 8px;
+}
+.pg-nofile .pg-keylist dt {
+  justify-self: end;
+}
+
+/* ---------- Keyboard shortcuts ---------- */
+
+.pg-keylist {
   display: grid;
   grid-template-columns: auto auto;
   gap: 6px 16px;
-  margin: 16px 0 0;
+  margin: 0;
   text-align: start;
 }
-.pg-nofile dl > div {
+.pg-keylist > div {
   display: contents;
 }
-.pg-nofile dt {
-  justify-self: end;
-}
-.pg-nofile dd {
+.pg-keylist dd {
   margin: 0;
   color: var(--pg-text-2);
+  white-space: nowrap;
 }
-.pg-nofile kbd {
+.pg-keys kbd {
   padding: 1px 5px;
   border: 1px solid var(--pg-line-2);
   border-bottom-width: 2px;
@@ -1024,8 +1078,61 @@ button.pg-row {
   font: 400 12px/1.4 var(--pg-font-mono);
 }
 
+.pg-dialog {
+  margin: auto;
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100dvh - 64px);
+  padding: 0;
+  border: 1px solid var(--pg-line-2);
+  border-radius: var(--pg-r-2);
+  background: var(--pg-raised);
+  color: var(--pg-text);
+  box-shadow: var(--pg-shadow-menu);
+  font: 400 13px/1.4 var(--pg-font-ui);
+}
+.pg-dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+.pg-dialog-body {
+  padding: 8px 20px 20px;
+}
+.pg-dialog-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  background: var(--pg-raised);
+}
+.pg-dialog h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.pg-dialog h3 {
+  margin: 8px 0 10px;
+  color: var(--pg-mute);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.pg-dialog-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 8px 32px;
+}
+.pg-dialog .pg-keylist {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.pg-keys-or {
+  color: var(--pg-mute);
+}
+
 @media (forced-colors: active) {
   .pg-menu,
+  .pg-dialog,
   .pg-share-note {
     border: 1px solid CanvasText;
   }

@@ -28,6 +28,13 @@
 .pg-app[data-explorer="closed"] .pg-side {
   display: none;
 }
+/* Above the editor and the diagram: the explorer's menus open over them. */
+@media (min-width: 900px) {
+  .pg-side {
+    position: relative;
+    z-index: 2;
+  }
+}
 .pg-scrim {
   display: none;
 }

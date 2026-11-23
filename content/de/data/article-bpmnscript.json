@@ -1,13 +1,13 @@
 {
   "meta": {
     "title": "BPMNscript",
-    "description": "Eine Textsprache für ausführbare BPMN-2.0-Prozesse: wie Compiler und Importer arbeiten und was der Round-Trip mit öffentlichen Modellen gemessen hat.",
-    "lede": "BPMN ist die Standardnotation für Geschäftsprozesse als Diagramm, und Engines wie Operaton führen sie aus. Mit BPMNscript lassen sich diese Prozesse als Code schreiben. Entstanden ist BPMNscript in meiner Bachelorarbeit an der Universität Hamburg: ein Compiler, der BPMN-XML für Operaton schreibt, ein Importer, der BPMN-XML zurück in Quelltext liest, und ein Language Server für den Editor.",
+    "description": "Eine Textsprache für ausführbare BPMN-2.0-Prozesse: wie Compiler und Importer funktionieren und was der Round-Trip mit öffentlichen Modellen ergeben hat.",
+    "lede": "BPMN ist die Standardnotation, mit der man Geschäftsprozesse als Diagramm zeichnet, und Engines wie Operaton führen diese Diagramme aus. Mit BPMNscript schreiben Entwickler solche Prozesse als Code. Für meine Bachelorarbeit an der Universität Hamburg habe ich dazu einen Compiler gebaut, der BPMN-XML für Operaton erzeugt, einen Importer, der BPMN-XML zurück in Quelltext übersetzt, und einen Language Server für den Editor.",
     "published": "2026-11-11",
     "updated": "2026-11-11",
     "ogImage": {
       "src": "/images/og/bpmnscript.jpg",
-      "alt": "Diagramm der Rechnungsfreigabe, von BPMNscript kompiliert, auf hellem Grund",
+      "alt": "Diagramm der Rechnungsfreigabe, kompiliert mit BPMNscript, auf hellem Hintergrund",
       "width": 1200,
       "height": 630
     },
@@ -34,7 +34,7 @@
       },
       {
         "id": "editor",
-        "title": "Editorunterstützung"
+        "title": "Editor-Support"
       },
       {
         "id": "limits",
@@ -71,7 +71,7 @@
       "alt": "Spesenabrechnung als BPMN-Diagramm: ein Service Task, eine Schleife zurück zu Revise the claim, eine exklusive Verzweigung zwischen Approve the claim und Approve automatically und zwei parallele Service Tasks vor dem Endereignis",
       "width": 1546,
       "height": 230,
-      "caption": "Zweites Beispiel, die Spesenabrechnung nach dem Kompilieren: Gateways für die while-Schleife, das if und den parallel-Block, Layout von bpmn-auto-layout. Abbildung aus der Bachelorarbeit.",
+      "caption": "Das zweite Beispiel, die Spesenabrechnung, nach dem Kompilieren: Gateways für die while-Schleife, das if und den parallel-Block, Layout von bpmn-auto-layout. Aus der Bachelorarbeit.",
       "plate": true
     },
     {
@@ -80,7 +80,7 @@
       "alt": "BPMN-Diagramm der Rechnungsfreigabe, der Task Review Invoice ist als aktiv hervorgehoben",
       "width": 1600,
       "height": 498,
-      "caption": "Die kompilierte Rechnungsfreigabe auf Operaton: Die Instanz wartet bei Review Invoice. Aus dem Verteidigungsvortrag."
+      "caption": "Die kompilierte Rechnungsfreigabe auf Operaton: Die Instanz wartet bei Review Invoice. Aus dem Kolloquium."
     },
     {
       "id": "editor-missing-binding",
@@ -88,7 +88,7 @@
       "alt": "VS Code mit dem Quelltext der Rechnungsfreigabe, in dem AutoApprove unterstrichen ist und ein Popup meldet: service task 'AutoApprove' has no 'class', 'expression', 'delegate', 'topic', or 'type' setting",
       "width": 1600,
       "height": 398,
-      "caption": "Die Rechnungsfreigabe in VS Code, das Binding von AutoApprove ist entfernt: Der Editor nennt die fehlende Einstellung. Aus dem Verteidigungsvortrag."
+      "caption": "Die Rechnungsfreigabe in VS Code, nachdem das Binding von AutoApprove entfernt wurde: Der Editor nennt die fehlende Einstellung. Aus dem Kolloquium."
     },
     {
       "id": "editor-diagnostic",
@@ -96,7 +96,7 @@
       "alt": "VS-Code-Zeile goto Paymnt, das Sprungziel ist unterstrichen, Meldung: no step named 'Paymnt' in this process",
       "width": 970,
       "height": 146,
-      "caption": "Diagnose zu einem falsch geschriebenen Sprungziel im Beispiel order-handling. Abbildung aus der Bachelorarbeit."
+      "caption": "Fehlermeldung zu einem vertippten Sprungziel im Beispiel order-handling. Aus der Bachelorarbeit."
     },
     {
       "id": "editor-completion-target",
@@ -104,7 +104,7 @@
       "alt": "VS-Code-Vervollständigung unter goto Paymnt mit den Anweisungen, deren Namen passen",
       "width": 1113,
       "height": 117,
-      "caption": "Die Vervollständigung am falsch geschriebenen Ziel bietet die passenden Anweisungen an. Abbildung aus der Bachelorarbeit."
+      "caption": "Am vertippten Ziel schlägt die Autovervollständigung die passenden Anweisungen vor. Aus der Bachelorarbeit."
     },
     {
       "id": "editor-hover",
@@ -112,7 +112,7 @@
       "alt": "VS-Code-Hover über PAYMENT_DECLINED mit der Art des Codes und der Meldung aus seiner Deklaration",
       "width": 937,
       "height": 97,
-      "caption": "Hover über einem Fehlercode: seine Art und die Meldung aus der Deklaration. Abbildung aus der Bachelorarbeit."
+      "caption": "Hover über einem Fehlercode: seine Art und die Meldung aus der Deklaration. Aus der Bachelorarbeit."
     }
   ],
   "numbers": [
@@ -264,7 +264,7 @@
       "value": 4946
     },
     {
-      "label": "Round-Trip zu äquivalentem Prozess",
+      "label": "Nach dem Round-Trip äquivalent",
       "value": 3858
     }
   ]

@@ -16,12 +16,13 @@ import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
-import type { FlowSceneData } from "./scene-data";
+import type { DuxPart, FlowSceneData } from "./scene-data";
 
 type V3 = THREE.Vector3;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Slot = { p: V3; s: V3; q?: THREE.Quaternion } & Record<string, any>;
-interface Out { p: V3; q: THREE.Quaternion; s: V3; g: number; c: THREE.Color; b: THREE.Color }
+/** `u`: a stream token's place along its stream (0..1). */
+interface Out { p: V3; q: THREE.Quaternion; s: V3; g: number; c: THREE.Color; b: THREE.Color; u: number }
 /** `labels`: where the page's label for each text item stands on the form (group space). */
 interface Layout { slots: Slot[]; live?: (sl: Slot, t: number, o: Out) => void; labels?: Map<number, V3> }
 type Curve = (u: number, t: number, o: V3) => V3;
@@ -44,8 +45,10 @@ const AMBER = new THREE.Color("#ff9838");
 const WHITE = new THREE.Color("#ffe6c4");
 const MODERN = new THREE.Color("#34353a");
 const LEGACY = new THREE.Color("#5b4a3b");
+const WALL = new THREE.Color("#141519");
+const PANE = new THREE.Color("#5a5b63");
 const P = V(), P2 = V(), T = V(), Nn = V();
-const out = (): Out => ({ p: V(), q: new THREE.Quaternion(), s: V(), g: 0, c: new THREE.Color(), b: new THREE.Color() });
+const out = (): Out => ({ p: V(), q: new THREE.Quaternion(), s: V(), g: 0, c: new THREE.Color(), b: new THREE.Color(), u: 0 });
 
 /* ---------- slot builders ---------- */
 function block(arr: Slot[], nx: number, ny: number, nz: number, sp: number, c: V3, tsz: number, extra: Record<string, unknown> = {}) {
@@ -78,10 +81,10 @@ function spares(arr: Slot[], anchors: V3[]) {
   while (arr.length < N) arr.push({ p: anchors[i++ % anchors.length].clone(), s: V(), spare: true });
   return arr.slice(0, N);
 }
-function stream(arr: Slot[], lanes: number, per: number, curve: Curve, o: { speed: number; laneW: number; sz: number; hide?: (x: number) => number; twist?: number; ev?: number; packets?: (x: number, t: number) => number; reveal?: number }) {
+function stream(arr: Slot[], lanes: number, per: number, curve: Curve, o: { speed: number; laneW: number; sz: number; hide?: (x: number) => number; twist?: number; ev?: number; packets?: (x: number, t: number) => number; reveal?: number; shape?: [number, number, number]; extra?: Record<string, unknown> }) {
   for (let lane = 0; lane < lanes; lane++)
     for (let k = 0; k < per; k++)
-      arr.push({ s: V(), p: V(), stream: true, lane, lanes, k, per, curve, speed: o.speed, laneW: o.laneW, sz: o.sz, hide: o.hide, twist: o.twist || 0, ev: o.ev ?? 0.14, packets: o.packets, reveal: o.reveal });
+      arr.push({ s: V(), p: V(), stream: true, lane, lanes, k, per, curve, speed: o.speed, laneW: o.laneW, sz: o.sz, hide: o.hide, twist: o.twist || 0, ev: o.ev ?? 0.14, packets: o.packets, reveal: o.reveal, shape: o.shape ?? [2.2, 1, 1], ...o.extra });
 }
 function liveStream(sl: Slot, t: number, o: Out) {
   const u = fract(sl.k / sl.per + t * sl.speed);
@@ -98,7 +101,8 @@ function liveStream(sl: Slot, t: number, o: Out) {
   if (sl.hide) vis *= sl.hide(o.p.x);
   // opening: the stream pours in from its far end (u = 1) over `reveal` seconds
   if (sl.reveal && !measure.ext) vis *= smooth(1.06 - (t / sl.reveal) * 1.2, 1.14 - (t / sl.reveal) * 1.2, u);
-  o.s.set(sl.sz * 2.2, sl.sz, sl.sz).multiplyScalar(vis);
+  o.s.set(sl.sz * sl.shape[0], sl.sz * sl.shape[1], sl.sz * sl.shape[2]).multiplyScalar(vis);
+  o.u = u;
   o.g = isEvent(sl.k, sl.lane, sl.ev) ? 0.7 : 0;
   if (sl.packets) o.g = Math.max(o.g, sl.packets(o.p.x, t));
   o.c.copy(AMBER);
@@ -127,10 +131,11 @@ const packetsAt = (x0: number, x1: number, speed: number, count: number) => (x: 
 const measure = { ext: false };
 /** The hero stream's path in camera space: far end, control point, near end. */
 const HERO = { far: V(10, 6.5, -18), ctl: V(-6.5, 0.4, -3), near: V(4.2, -3, 8) };
-/** Right end of the projects pipeline: where its output pours into the closing ring. */
-let exitX = 3.35;
 /** `focus[k]`: the text item of beat k being read, or -1. */
-function buildLayouts(data: FlowSceneData, codeCursor: { cur: number }, focus: number[], focusAt: number[], focusPrev: number[]): Layout[] {
+/** `runState`: the stage the page's devline run figure shows, eased (`rp`, -1 before the figure, n after it), and whether it is pinned. */
+/** `view`: the camera plane's size in world units, and the contact ring's ellipse in it (forms laid out in camera space). */
+type View = { vw: number; vh: number; ring: { cx: number; cy: number; rx: number; ry: number } };
+function buildLayouts(data: FlowSceneData, codeCursor: { cur: number }, focus: number[], runState: { rp: number; pinned: boolean }, view: View): Layout[] {
   const L: Layout[] = [];
 
   // 0 hero: the open event stream, ten lanes, rising out of the depth past the name; it pours in from
@@ -165,118 +170,226 @@ function buildLayouts(data: FlowSceneData, codeCursor: { cur: number }, focus: n
     });
   }
 
-  // 2 earlier work, one row per job as the text lists them: the lead job's legacy monolith is split into
-  // services fed by Kafka; every other job is a slab as long as the job lasted
+  // 2 earlier work, one row per job as the text lists them. Item 0, the lead job's data onboarding: streams
+  // in many formats come in over two channels each to the intake applications; each application keeps a
+  // ledger of what came in on which connection (so an update lands exactly where it belongs), everything is
+  // translated into one internal format and goes on into the distributed platform and down to the legacy
+  // system. An update walks that whole path every few seconds. Every other job: a slab as long as it lasted.
   {
-    const SVC = [-0.2, 1.7, 3.6];
-    const a: Slot[] = [];
-    block(a, 4, 5, 3, 0.3, V(-3.1, 0, 0), 0.27, { legacy: true, mono: true, item: 0 });
-    SVC.forEach((x, i) => block(a, 4, 4, 4, 0.3, V(x, 0, 0), 0.26, { svc: i + 1 }));
-    stream(a, 4, 62, (u, t, o) => o.set(lerp(-2.2, 5.6, u), 0, 0), { speed: 0.035, laneW: 0.22, sz: 0.1, ev: 0.08, hide: hideIn(SVC.map((x) => [x - 0.6, x + 0.6])), packets: packetsAt(-2.2, 5.6, 0.11, 2) });
+    const nA = data.intake, nS = nA * 2, appY = (i: number) => ((nA - 1) / 2 - i) * 1.05;
+    const AX = -2.3, LX = -1.45, TX = 0.75, PX = 3.55, PY = 1.15, GY = -1.5;
+    // the formats: bars, cubes, upright sheets, long lines, flat tiles
+    const FORMATS: [number, number, number][] = [[2.2, 1, 1], [1, 1, 1], [0.5, 1.7, 1.3], [3.4, 0.5, 0.5], [1.3, 0.45, 1.3]];
+    const a: Slot[] = [], labels = new Map<number, V3>();
+    for (let s = 0; s < nS; s++) {
+      const y0 = ((nS - 1) / 2 - s) * 0.6, y1 = appY(s >> 1) + (s & 1 ? -0.16 : 0.16);
+      stream(a, 1, 22, (u, _t, o) => o.set(lerp(-6.4, AX - 0.42, u), lerp(y0, y1, smooth(0.2, 0.95, u)), 0), {
+        speed: 0.045 + 0.012 * (s % 3), laneW: 0, sz: 0.085, ev: 0.11, shape: FORMATS[s % FORMATS.length], extra: { src: s },
+      });
+    }
+    for (let i = 0; i < nA; i++) {
+      block(a, 3, 3, 2, 0.2, V(AX, appY(i), 0), 0.18, { intake: i, item: 0 });
+      for (let j = 0; j < 4; j++) a.push({ p: V(LX + j * 0.2, appY(i), 0), s: V(0.15, 0.15, 0.15), ledger: i, rec: j });
+      stream(a, 1, 9, (u, _t, o) => o.set(lerp(LX + 0.85, TX - 0.5, u), lerp(appY(i), appY(i) * 0.25, smooth(0, 1, u)), 0), { speed: 0.09, laneW: 0, sz: 0.075, ev: 0.2, shape: [1, 1, 1], extra: { inner: i } });
+    }
+    block(a, 4, 4, 3, 0.21, V(TX, 0, 0), 0.19, { core: true, item: 0 });
+    // into the platform (up) and to the legacy system (down), both in the internal format
+    const out = (y1: number) => (u: number, _t: number, o: V3) => o.set(lerp(TX + 0.55, PX - 1.05, u), lerp(0, y1, smooth(0.1, 0.9, u)), 0);
+    stream(a, 2, 12, out(PY), { speed: 0.07, laneW: 0.17, sz: 0.075, ev: 0.2, shape: [1, 1, 1], extra: { toPlat: true } });
+    stream(a, 2, 12, out(GY), { speed: 0.07, laneW: 0.17, sz: 0.075, ev: 0.2, shape: [1, 1, 1], extra: { toLegacy: true } });
+    for (let d = 0; d < 2; d++) for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) a.push({ p: V(PX + (c - 1.5) * 0.42, PY + (r - 1) * 0.42, (d - 0.5) * 0.42), s: V(0.26, 0.26, 0.26), plat: c + r * 4 + d * 12 });
+    block(a, 5, 3, 3, 0.26, V(PX, GY, 0), 0.24, { legacy: true, legacySys: true });
+    // each label on the part it names: the incoming streams, the intake applications (under the lowest),
+    // the translator, the platform and the legacy system (above them)
+    labels.set(0, V(-6.3, (nS / 2) * 0.6 + 0.2, 0));
+    labels.set(1, V(AX - 0.3, appY(nA - 1) - 0.95, 0));
+    labels.set(2, V(TX - 0.55, 0.8, 0));
+    labels.set(3, V(PX - 0.75, PY + 0.75, 0));
+    labels.set(4, V(PX - 0.7, GY + 0.62, 0));
+    const rowY = Math.min(-(nS / 2) * 0.6, GY - 0.6) - 0.85;
     data.jobs.slice(1, 4).forEach((j, i) => {
       const nx = Math.max(2, Math.min(16, Math.round(j.months / 1.5)));
-      block(a, nx, 2, 2, 0.3, V(-3.55 + (nx - 1) * 0.15, -1.6 - i * 0.8, 0), 0.26, { item: i + 1 });
+      block(a, nx, 2, 2, 0.3, V(-6.2 + (nx - 1) * 0.15, rowY - i * 0.8, 0), 0.26, { item: i + 1 });
     });
+    // the update: one stream after another, through its application, ledger, the core, out to one record
+    const CYC = 2.8;
+    const upd = (t: number) => ({ s: Math.floor(t / CYC) % nS, n: Math.floor(t / CYC), ph: fract(t / CYC) });
     L.push({
-      slots: spares(a, SVC.map((x) => V(x, 0, 0))),
+      slots: spares(a, [V(TX, 0, 0)]),
+      labels,
       live(sl, t, o) {
-        if (sl.mono && sl.lx === 3) o.p.x += 0.18 + 0.14 * Math.sin(t * 1.2 + sl.ly); // the last slice keeps peeling away
-        if (sl.svc && sl.surf) {
-          const px = lerp(-2.2, 5.6, fract(t * 0.11)), px2 = lerp(-2.2, 5.6, fract(t * 0.11 + 0.5)), bx = SVC[sl.svc - 1];
-          o.g = Math.abs(px - bx) < 0.65 || Math.abs(px2 - bx) < 0.65 ? 0.55 : 0;
-        }
+        const { s, n, ph } = upd(t);
+        const at = (a0: number, a1: number) => smooth(a0, a0 + 0.04, ph) * smooth(a1 + 0.04, a1, ph);
+        if (sl.src !== undefined && sl.src === s && ph < 0.42) o.g = Math.max(o.g, 1.5 * Math.exp(-((o.u - ph / 0.4) ** 2) * 300));
+        else if (sl.intake !== undefined) o.g = sl.intake === s >> 1 ? (sl.surf ? 0.75 * at(0.38, 0.55) : 0) : 0;
+        else if (sl.ledger !== undefined) {
+          // the record of this connection lights, and stays a little lit
+          const mine = sl.ledger === s >> 1 && sl.rec === (n >> 1) % 4;
+          o.g = mine ? 0.15 + 1.1 * at(0.48, 0.9) : 0.06;
+        } else if (sl.inner !== undefined) o.g = sl.inner === s >> 1 && ph > 0.55 && ph < 0.75 ? Math.max(o.g, 1.3 * Math.exp(-((o.u - (ph - 0.55) / 0.2) ** 2) * 60)) : o.g * 0.5;
+        else if (sl.core) o.g = sl.surf ? 0.08 + 0.6 * at(0.72, 0.84) : 0;
+        else if (sl.toPlat || sl.toLegacy) o.g = ph > 0.82 ? Math.max(o.g * 0.5, 1.3 * Math.exp(-((o.u - (ph - 0.82) / 0.16) ** 2) * 50)) : o.g * 0.5;
+        else if (sl.plat !== undefined) o.g = sl.plat === (n * 7 + s) % 24 ? 0.12 + 1.2 * smooth(0.93, 0.98, ph) : 0.04;
+        else if (sl.legacySys) o.g = sl.surf ? 0.05 + 0.45 * smooth(0.93, 0.98, ph) : 0;
       },
     });
   }
 
-  // 3 current work: the services the text counts, on one event stream; a packet lights each service as it passes
+  // 3 current work, at the scale it runs: services in layers, from the features users see (top) down to the
+  // storage layer over the database (bottom), each in a container on a Kubernetes cluster (the plate behind),
+  // the same stack in several regions (three drawn: "several", not a count). Git holds the deployed state:
+  // a new commit syncs to one region after another, which rolls its containers. Requests travel down the
+  // layers; the services the text counts are the team's own (centre region).
   {
-    const n = data.services, SVC = Array.from({ length: n }, (_, i) => (i - (n - 1) / 2) * 2), half = n + 1.5;
-    const a: Slot[] = [];
-    SVC.forEach((x, i) => block(a, 4, 4, 4, 0.29, V(x, 0, 0), 0.25, { svc: i + 1 }));
-    stream(a, 4, 60, (u, t, o) => o.set((u - 0.5) * 2 * half, 0, 0), {
-      speed: 0.032, laneW: 0.2, sz: 0.1, ev: 0.08, packets: packetsAt(-half, half, 0.08, 2),
-      hide: (x) => hideIn(SVC.map((s) => [s - 0.58, s + 0.58]))(x) * smooth(half - 0.1, half - 1.3, Math.abs(x)),
+    const RXS = [-3.7, 0, 3.7], NL = [6, 5, 4, 2], LY = [2.25, 1.1, -0.05, -1.2], DBY = -2.1, RW = 2.7, GITY = 3.55;
+    const nodeX = (l: number, i: number) => (i - (NL[l] - 1) / 2) * (RW / NL[l]);
+    const next = (l: number, i: number) => Math.round((i * (NL[l + 1] - 1)) / Math.max(1, NL[l] - 1));
+    // the team's own services, picked from the storage layer up
+    const ORDER: [number, number][] = [[3, 0], [2, 1], [1, 2], [2, 3], [1, 0], [3, 1]];
+    const own = new Set(ORDER.slice(0, data.services).map(([l, i]) => l * 10 + i));
+    const a: Slot[] = [], labels = new Map<number, V3>();
+    RXS.forEach((cx, r) => {
+      // the cluster: a dotted frame around the region's stack
+      const fx = RW / 2 + 0.25, fy0 = DBY - 0.5, fy1 = LY[0] + 0.5, fw = fx * 2, fh = fy1 - fy0, per = 2 * (fw + fh), nF = Math.round(per / 0.36);
+      for (let j = 0; j < nF; j++) {
+        let d = (j / nF) * per;
+        const pt = d < fw ? V(cx - fx + d, fy1) : (d -= fw) < fh ? V(cx + fx, fy1 - d) : (d -= fh) < fw ? V(cx + fx - d, fy0) : V(cx - fx, fy0 + d - fw);
+        a.push({ p: pt.setZ(-0.3), s: V(0.12, 0.12, 0.06), cluster: r, cy: clamp01((fy1 - pt.y) / fh) });
+      }
+      NL.forEach((n, l) => {
+        for (let i = 0; i < n; i++) {
+          const mine = r === 1 && own.has(l * 10 + i), p = V(cx + nodeX(l, i), LY[l], 0);
+          const sz = mine ? 0.4 : 0.32;
+          a.push({ p, s: V(sz, sz, sz), node: true, region: r, l, i, own: mine });
+          if (l + 1 < NL.length) {
+            line(a, p, V(cx + nodeX(l + 1, next(l, i)), LY[l + 1], 0), 0.2, 0.07, { edge: true });
+            if (i % 2 === 1 && next(l, i) + 1 < NL[l + 1]) line(a, p, V(cx + nodeX(l + 1, next(l, i) + 1), LY[l + 1], 0), 0.2, 0.07, { edge: true });
+          } else line(a, p, V(cx + nodeX(l, i), DBY + 0.2, 0), 0.2, 0.07, { edge: true });
+        }
+      });
+      block(a, 6, 1, 2, 0.4, V(cx, DBY, 0), 0.36, { db: r });
+      // the sync from Git to this region's cluster
+      line(a, V(cx * 0.35, GITY - 0.25, 0), V(cx, LY[0] + 0.55, 0), 0.26, 0.05, { sync: r });
+      for (let p = 0; p < 4; p++) a.push({ p: V(cx, LY[0], 0), s: V(), req: p, region: r });
     });
+    for (let c = 0; c < 8; c++) a.push({ p: V((c - 3.5) * 0.36, GITY, 0), s: V(0.26, 0.26, 0.26), commit: c });
+    labels.set(0, V(RXS[0] - RW / 2 - 0.45, LY[0] - 0.12, 0));
+    labels.set(1, V(RXS[0] - RW / 2 - 0.45, LY[3] - 0.12, 0));
+    labels.set(2, V(-1.15, GITY + 0.3, 0));
+    // a request's way down: from a feature, along the edges, to the database
+    const path = (r: number, p: number, t: number, o: V3) => {
+      const T = 3.4, ph = fract(t / T + p / 4 + r * 0.13), seg = ph * 4, l = Math.min(3, Math.floor(seg)), f = ease(seg - l);
+      let i = (p * 2 + r + Math.floor(t / T + p / 4 + r * 0.13)) % NL[0];
+      for (let k = 0; k < l; k++) i = next(k, i);
+      const x0 = nodeX(l, i), y0 = LY[l], x1 = l < 3 ? nodeX(l + 1, next(l, i)) : x0, y1 = l < 3 ? LY[l + 1] : DBY + 0.2;
+      return o.set(RXS[r] + lerp(x0, x1, f), lerp(y0, y1, f), 0.22);
+    };
+    const pk = V(), SYNC = 6;
     L.push({
-      slots: spares(a, [V()]),
+      slots: spares(a, [V(0, 0, 0)]),
+      labels,
       live(sl, t, o) {
-        if (sl.svc && sl.surf) {
-          const bx = SVC[sl.svc - 1];
-          let g = 0;
-          for (let i = 0; i < 2; i++) g = Math.max(g, smooth(0.75, 0.2, Math.abs(lerp(-half, half, fract(t * 0.08 + i / 2)) - bx)));
-          o.g = g * 0.7;
-        }
-      },
-    });
-  }
-
-  // 4 migration, a pinned beat in two steps. Item 0: of the text's `total` apps, `moved` cross from the
-  // old platform (raised, upper left) down to Kubernetes (lower right); stacked diagonally so the form
-  // fits a column at a large size. Item 1: the stateful one's state is written to a
-  // changelog, a Kafka partition drawn as a commit log of records over the gap, which is replayed
-  // record by record into the app rebuilt on the new side.
-  {
-    const [moved, total] = data.migrate, cols = Math.ceil(total / 2), nx = Math.round(((cols - 1) * 0.82) / 0.47) + 2;
-    const M = { xL: 1.5 - nx * 0.235 - 0.35, yL: 1.25, xR: 1.5, py: -0.75, cx: 0.82, rz: 0.44 };
-    const appPos = (i: number) => V(M.xR + ((i % cols) - (cols - 1) / 2) * M.cx, M.py + 0.38, i < cols ? -M.rz : M.rz);
-    const STATEFUL = cols; // the first app of the front row, and the ones after it
-    const a: Slot[] = [];
-    for (let z = 0; z < 4; z++) for (let x = 0; x < nx; x++) a.push({ p: V(M.xR + (x - (nx - 1) / 2) * 0.47, M.py, (z - 1.5) * 0.47), s: V(0.43, 0.07, 0.43), plate: "new" });
-    for (let z = 0; z < 4; z++) for (let x = 0; x < 4; x++) a.push({ p: V(M.xL + (x - 1.5) * 0.47, M.yL, (z - 1.5) * 0.47), s: V(0.43, 0.07, 0.43), plate: "old", legacy: true });
-    const rebuilt = (i: number) => i >= STATEFUL && i < STATEFUL + total - moved;
-    for (let i = 0; i < total; i++) if (!rebuilt(i)) block(a, 3, 3, 3, 0.21, appPos(i), 0.18, { app: i, item: 0 });
-    block(a, 3, 3, 3, 0.21, V(M.xL, M.yL + 0.38, 0), 0.18, { legacy: true, oldApp: true, item: 1 });
-    for (let i = 0; i < total; i++) if (rebuilt(i)) block(a, 3, 3, 3, 0.21, appPos(i), 0.18, { rebuild: true, item: 1 });
-    // the changelog: one partition of records at rising offsets, from the old app down to the rebuilt one
-    const R = 16, l0 = V(M.xL + 0.75, M.yL + 0.75, 0), l1 = appPos(STATEFUL).add(V(0.1, 0.95, 0));
-    for (let r = 0; r < R; r++)
-      for (let lane = 0; lane < 2; lane++)
-        a.push({ p: l0.clone().lerp(l1, (r + 0.5) / R).add(V(0, 0, (lane - 0.5) * 0.3)), s: V(0.27, 0.09, 0.26), rec: r, recs: R, item: 1 });
-    // a work item crossing for each moved app, one after another, while the first step is read
-    const arcFrom = V(M.xL, M.yL + 0.6, 0);
-    for (let i = 0; i < 4; i++) a.push({ p: arcFrom.clone(), s: V(), courier: i });
-    const appXs = Array.from({ length: total }, (_, i) => i).filter((i) => !rebuilt(i)).map(appPos);
-    const cp = V();
-    L.push({
-      slots: spares(a, [appPos(2), appPos(cols + 2), appPos(3), appPos(cols + 3)]),
-      live(sl, t, o) {
-        const f = focus[4], since = t - focusAt[4];
-        // 1 while the changelog step is read, eased in and out
-        const logOn = measure.ext ? 1 : f === 1 ? smooth(0, 1.4, since) : f === 0 && since < 0.8 && focusPrev[4] === 1 ? 1 - smooth(0, 0.8, since) : 0;
-        if (sl.plate === "new") o.g = 0.1 + 0.25 * smooth(0.25, 0, Math.abs(fract(t * 0.2) - (sl.p.x - M.xR + nx * 0.235) / (nx * 0.47)));
-        if (sl.app !== undefined && sl.ly === 2) o.g = 0.25 + 0.35 * Math.max(0, Math.sin(t * 1.6 - sl.app * 0.7));
-        const cyc = fract(t / 5);
-        if (sl.rec !== undefined) {
-          // written one record after another, then read by a cursor that walks the offsets
-          const w = clamp01(logOn * (sl.recs + 4) - sl.rec);
-          o.s.multiplyScalar(w);
-          o.p.y += (1 - w) * 0.4;
-          const cur = smooth(0, 0.45, cyc) * (sl.recs + 1) - 0.5;
-          o.g = 0.12 + 0.95 * smooth(0.9, 0, Math.abs(cur - sl.rec)) * logOn;
-        }
-        if (sl.rebuild) {
-          // grows once the cursor has passed the last record; whole outside the changelog step
-          const v = logOn > 0.99 ? clamp01((cyc - 0.45) * 2.2 * 29 - sl.idx) : 1 - logOn;
-          o.s.multiplyScalar(v);
-          o.g = v > 0 && v < 1 ? 1 : sl.ly === 2 ? 0.35 : 0.08;
-        }
-        if (sl.oldApp) o.g = 0.08 + 0.25 * logOn + 0.1 * Math.max(0, Math.sin(t * 3));
-        if (sl.courier !== undefined) {
-          // the first step: packets keep crossing from the old platform to each moved app in turn
-          const ph = fract(t / 1.6 + sl.courier * 0.25), target = appXs[Math.floor(t / 1.6 + sl.courier * 0.25) % appXs.length];
-          const on = (f === 0 ? 1 : 0) * (1 - logOn);
-          cp.set((arcFrom.x + target.x) / 2 + 0.6, arcFrom.y + 0.9, 0);
-          const w = 1 - ph;
-          o.p.set(0, 0, 0).addScaledVector(arcFrom, w * w).addScaledVector(cp, 2 * w * ph).addScaledVector(target, ph * ph).setY(o.p.y + 0.2);
-          o.s.setScalar(0.15 * on * Math.sin(Math.PI * ph));
+        // a commit every SYNC seconds; region r receives it r * 0.7 s later and rolls its containers
+        const cyc = t / SYNC, ph = fract(cyc), roll = (r: number) => (ph - 0.18 - r * 0.12) / 0.35;
+        if (sl.commit !== undefined) o.g = sl.commit === Math.floor(cyc) % 8 ? 0.3 + 0.9 * smooth(0, 0.08, ph) : 0.06;
+        else if (sl.sync !== undefined) {
+          const d = (ph - 0.05 - sl.sync * 0.12) / 0.13;
+          o.g = d > 0 && d < 1 ? 1.2 : 0.04;
+        } else if (sl.cluster !== undefined) {
+          const w = roll(sl.cluster);
+          o.g = w > 0 && w < 1.2 ? 0.08 + 0.8 * smooth(0.2, 0, Math.abs(w - sl.cy)) : 0.06;
+        } else if (sl.req !== undefined) {
+          path(sl.region, sl.req, t, o.p);
+          o.s.setScalar(0.12);
           o.g = 1.4;
           o.c.copy(WHITE);
-        }
+        } else if (sl.node) {
+          // the rollout restarts each container in turn; a request passing lights it
+          const w = roll(sl.region) * 6 - (sl.l * 1.2 + sl.i * 0.2);
+          if (w > 0 && w < 1) o.s.multiplyScalar(0.35 + 0.65 * Math.abs(1 - 2 * w));
+          let g = sl.own ? 0.4 + 0.15 * Math.sin(t * 2 + sl.i) : 0.03;
+          for (let p = 0; p < 4; p++) g = Math.max(g, 0.8 * smooth(0.32, 0.05, path(sl.region, p, t, pk).setZ(0).distanceTo(sl.p)));
+          o.g = g;
+        } else if (sl.edge) o.g = 0.08;
+        else if (sl.db !== undefined) o.g = sl.surf ? 0.04 : 0;
       },
     });
   }
 
+  // 4 the migration I lead, a pinned beat in two steps: the old platform on the left, the new one on the
+  // right. Item 0: app by app, a copy starts on the new platform, both run side by side while traffic moves
+  // over, then the old one stops; traffic never stops. Item 1: the stateful app's state is written to a
+  // changelog, a Kafka partition drawn as a commit log of records, and replayed into the app on the new side.
+  {
+    const [, total] = data.migrate, cols = Math.ceil(total / 2), S = total - 1;
+    const ENV = [{ y: 0, z: 0 }], OX = -2.35, NX = 2.35, sp = 0.62;
+    const appPos = (e: number, side: number, i: number) => V(side + ((i % cols) - (cols - 1) / 2) * sp, ENV[e].y + 0.33, ENV[e].z + (i < cols ? -0.34 : 0.34));
+    const a: Slot[] = [], labels = new Map<number, V3>();
+    ENV.forEach((en, e) => {
+      for (const [side, old] of [[OX, true], [NX, false]] as const)
+        for (let z = 0; z < 3; z++) for (let x = 0; x < cols + 1; x++) a.push({ p: V(side + (x - cols / 2) * 0.6, en.y, en.z + (z - 1) * 0.55), s: V(0.55, 0.06, 0.5), plate: old ? "old" : "new", legacy: old, env: e });
+      for (let i = 0; i < total; i++) {
+        block(a, 2, 2, 2, 0.27, appPos(e, OX, i), 0.25, { app: i, env: e, old: true, legacy: true });
+        block(a, 2, 2, 2, 0.27, appPos(e, NX, i), 0.25, { app: i, env: e, old: false });
+      }
+      // traffic: in from the left to a router, then over to whichever side serves it
+      stream(a, 2, 9, (u, _t, o) => o.set(lerp(-5.7, OX - 1.6, u), en.y + 0.3, en.z), { speed: 0.1, laneW: 0.2, sz: 0.09, ev: 0.3, shape: [1.6, 1, 1], extra: { env: e } });
+      stream(a, 1, 14, (u, _t, o) => o.set(lerp(OX - 1.5, NX - 1.6, u), en.y + 0.3 + 0.95 * Math.sin(Math.PI * u), en.z), { speed: 0.07, laneW: 0, sz: 0.09, ev: 0.3, shape: [1.6, 1, 1], extra: { env: e, toNew: true } });
+    });
+    // under each platform, its name; above the changelog's arc, the changelog
+    labels.set(0, V(OX - 1.6, -0.75, 0.9));
+    labels.set(1, V(NX - 1.6, -0.75, 0.9));
+    // the changelog: records at rising offsets from the old stateful app over to the new one
+    const R = 14, l0 = appPos(0, OX, S).add(V(0.2, 0.55, 0)), l1 = appPos(0, NX, S).add(V(-0.2, 0.55, 0));
+    labels.set(2, V(-1.1, l0.y + 0.95, 0));
+    for (let r = 0; r < R; r++) a.push({ p: l0.clone().lerp(l1, (r + 0.5) / R).add(V(0, 0.55 * Math.sin((Math.PI * (r + 0.5)) / R), 0)), s: V(0.22, 0.09, 0.3), rec: r, recs: R, item: 1 });
+    // the migration's progress in apps; it keeps running, and holds at the stateful app while step 2 is read
+    const st = { m: -0.5, at: -1, log: 0 }, END = total + 2.5;
+    const sync = (t: number) => {
+      if (t === st.at) return;
+      const dt = st.at < 0 || t < st.at ? 0 : Math.min(0.1, t - st.at);
+      st.at = t;
+      if (measure.ext) {
+        st.m = S + 0.6;
+        st.log = 1;
+        return;
+      }
+      const hold = focus[4] === 1;
+      if (hold) st.m += (S + 0.6 - st.m) * (1 - Math.exp(-dt * 3));
+      else st.m = st.m + dt / 1.5 > END ? -0.5 : st.m + dt / 1.5;
+      st.log = clamp01(st.log + (hold ? dt : -dt * 2) / 1.2);
+    };
+    // 0..1: how far app i has come, and the end-of-loop reset
+    const phase = (_e: number, i: number) => st.m - i;
+    const reset = () => smooth(END - 1, END, st.m);
+    L.push({
+      slots: spares(a, [appPos(0, NX, 0), appPos(0, OX, 0)]),
+      labels,
+      live(sl, t, o) {
+        sync(t);
+        if (sl.app !== undefined) {
+          const p = phase(sl.env, sl.app), rs = reset();
+          let v = sl.old ? 1 - smooth(1.0, 1.35, p) : smooth(0, 0.35, p);
+          if (sl.old) v = Math.max(v, rs);
+          else v *= 1 - rs;
+          // the stateful app on the new side is rebuilt from the changelog while step 2 is read
+          if (!sl.old && sl.app === S && st.log > 0) v = Math.min(v, clamp01(st.log * 1.3 * 8 - sl.idx));
+          o.s.multiplyScalar(v);
+          // both copies run while traffic moves over: the old one drains, the new one takes load
+          const both = p > 0.35 && p < 1.0;
+          o.g = sl.surf && v > 0.05 ? (both ? 0.25 + 0.35 * Math.max(0, Math.sin(t * 5 + sl.app)) : sl.old ? 0.05 : 0.18) : 0;
+        } else if (sl.plate) o.g = sl.plate === "new" ? 0.02 + 0.08 * clamp01(phase(sl.env, total - 1) / 1.4) : 0.02;
+        else if (sl.toNew) o.s.multiplyScalar(clamp01(phase(sl.env, 0) * 2) * (1 - reset()));
+        else if (sl.rec !== undefined) {
+          const w = clamp01(st.log * (sl.recs + 4) - sl.rec);
+          o.s.multiplyScalar(w);
+          o.p.y += (1 - w) * 0.4;
+          const cur = smooth(0, 0.6, fract(t / 4)) * (sl.recs + 1) - 0.5;
+          o.g = 0.12 + 0.95 * smooth(0.9, 0, Math.abs(cur - sl.rec)) * st.log;
+        }
+      },
+    });
+  }
   // 5 education: one piece per school on a time axis, oldest on the left, each as long as the school
   // lasts: an exchange inside a degree sits on top of it, the school in progress glows, the upcoming
   // one is an open frame. Each piece carries its label from the page (logo and years, see labels).
@@ -374,112 +487,250 @@ function buildLayouts(data: FlowSceneData, codeCursor: { cur: number }, focus: n
     });
   }
 
-  // 7 Dux Shell: a desktop; one bar item per featured PR and a stack of windows, one per PR screenshot, as listed.
-  // The popout opens under the PR being read, or under one PR after another.
+  // 7 Dux Shell, built from small blocks: the wallpaper, the bar along the top with its pills, a popout
+  // connected to the bar, a Settings window (profiles with their menu, the network page) and the System
+  // Monitor (a live graph, the process list). Each featured PR lights the part of the shell it changed;
+  // with no PR being read, one part after another shows what it does.
   {
-    const cols = 13, rows = 7, sp = 0.42;
-    const barY = ((rows - 1) / 2) * sp + 0.42, barX = (i: number) => (i - (cols - 1) / 2) * sp;
-    const np = Math.max(1, Math.min(cols, data.prs)), nw = Math.min(4, data.shots);
-    const items = Array.from({ length: np }, (_, i) => Math.round(((i + 0.5) * cols) / np - 0.5));
-    const a: Slot[] = [];
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) a.push({ p: V(barX(c), ((rows - 1) / 2 - r) * sp, -0.2), s: V(0.38, 0.38, 0.05), screen: true, c });
-    for (let c = 0; c < cols; c++) {
-      const pr = items.indexOf(c);
-      a.push({ p: V(barX(c), barY, 0.95), s: V(0.36, 0.15, 0.12), bar: c, ...(pr >= 0 && data.prs ? { item: pr } : {}) });
+    const W = 9.6, Hh = 6, a: Slot[] = [];
+    const tile = (x: number, y: number, z: number, sx: number, sy: number, sz: number, extra: Record<string, unknown>) => a.push({ p: V(x, y, z), s: V(sx, sy, sz), ...extra });
+    // wallpaper
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 12; c++) tile((c - 5.5) * 0.8, (3 - r) * 0.84 - 0.2, -0.3, 0.76, 0.8, 0.04, { part: "wallpaper", wc: c, wr: r });
+    // the bar: a strip of small segments, pills on it: workspaces, the clock, the tray groups; the last group opens the popout
+    const BY = Hh / 2 - 0.05;
+    for (let i = 0; i < 32; i++) tile((i - 15.5) * 0.3, BY, 0, 0.28, 0.24, 0.06, { part: "bar", strip: true });
+    for (let i = 0; i < 5; i++) tile(-4.3 + i * 0.22 + (i > 1 ? 0.2 : 0), BY, 0.08, i === 1 ? 0.36 : 0.14, 0.12, 0.06, { part: "bar", ws: i });
+    for (let i = 0; i < 4; i++) tile(-0.33 + i * 0.22, BY, 0.08, 0.16, 0.12, 0.06, { part: "bar", clock: i });
+    const groups = [[1.4, 2], [2.05, 3], [2.95, 3], [3.95, 2]] as const;
+    groups.forEach(([x, n], g) => {
+      tile(x + ((n - 1) * 0.2) / 2, BY, 0.05, n * 0.2 + 0.08, 0.2, 0.04, { part: "bar", pill: g });
+      for (let i = 0; i < n; i++) tile(x + i * 0.2, BY, 0.1, 0.12, 0.12, 0.05, { part: "bar", icon: g });
+    });
+    // the popout, connected under the last pill groups: avatar and buttons, two sliders, toggle tiles
+    const PX0 = 1.75, PX1 = 4.55, PY0 = BY - 0.2, cx = (PX0 + PX1) / 2;
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 5; c++) tile(PX0 + 0.28 + c * 0.56, PY0 - 0.25 - r * 0.47, 0.12, 0.54, 0.45, 0.05, { part: "bar", pop: true, prow: r, pbg: true });
+    for (let i = 0; i < 8; i++) {
+      const an = (i / 8) * TAU;
+      tile(PX0 + 0.45 + Math.cos(an) * 0.17, PY0 - 0.45 + Math.sin(an) * 0.17, 0.2, 0.08, 0.08, 0.05, { part: "bar", pop: true, prow: 0 });
     }
-    // the windows overlap like a stack on the desktop, each one a step nearer and lower than the last
-    for (let w = 0; w < nw; w++)
-      for (let r = 0; r < 4; r++)
-        for (let c = 0; c < 5; c++)
-          a.push({ p: V((w - (nw - 1) / 2) * 1.1 + (c - 2) * 0.34, 0.8 - w * 0.48 - r * 0.34, 0.18 + w * 0.34), s: V(0.32, r === 0 ? 0.2 : 0.32, 0.07), win: w, title: r === 0, item: w });
-    for (let i = 0; i < 9; i++) a.push({ p: V(barX(items[0]) + ((i % 3) - 1) * 0.3, barY - 0.4 - Math.floor(i / 3) * 0.3, 1.0), s: V(0.27, 0.27, 0.07), pop: i });
+    for (let i = 0; i < 4; i++) tile(cx - 0.1 + i * 0.42, PY0 - 0.45, 0.2, 0.26, 0.26, 0.06, { part: "bar", pop: true, prow: 0 });
+    for (let s = 0; s < 2; s++) {
+      for (let i = 0; i < 10; i++) tile(PX0 + 0.75 + i * 0.18, PY0 - 1.0 - s * 0.42, 0.2, 0.16, 0.12, 0.05, { part: "bar", pop: true, prow: 1 + s, track: s, ti: i });
+      tile(PX0 + 0.35, PY0 - 1.0 - s * 0.42, 0.2, 0.16, 0.16, 0.06, { part: "bar", pop: true, prow: 1 + s });
+    }
+    for (let r = 0; r < 3; r++)
+      for (let c = 0; c < 2; c++) {
+        const x = PX0 + 0.35 + c * 1.3, y = PY0 - 1.9 - r * 0.47;
+        tile(x, y, 0.2, 0.22, 0.22, 0.06, { part: "bar", pop: true, prow: 3 + r, tog: r * 2 + c });
+        tile(x + 0.5, y + 0.05, 0.2, 0.6, 0.07, 0.04, { part: "bar", pop: true, prow: 3 + r });
+        tile(x + 0.4, y - 0.07, 0.2, 0.4, 0.05, 0.04, { part: "bar", pop: true, prow: 3 + r });
+      }
+    // Settings: title bar, sidebar, three profile cards with the menu of the one right-clicked, the network page
+    const SX0 = -4.35, SY0 = 2.15, sx = (c: number) => SX0 + 0.3 + c * 0.62;
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) tile(sx(c), SY0 - 0.3 - r * 0.62, 0.06, 0.6, 0.6, 0.05, { win: "settings", bg: true });
+    for (let c = 0; c < 7; c++) tile(sx(c), SY0, 0.1, 0.6, 0.12, 0.06, { win: "settings", title: true });
+    for (let r = 0; r < 8; r++) {
+      tile(SX0 + 0.25, SY0 - 0.4 - r * 0.42, 0.14, 0.14, 0.14, 0.05, { win: "settings", side: r });
+      tile(SX0 + 0.72, SY0 - 0.4 - r * 0.42, 0.14, 0.62, 0.07, 0.04, { win: "settings", side: r });
+    }
+    for (let i = 0; i < 3; i++)
+      for (let q = 0; q < 4; q++) tile(SX0 + 1.75 + i * 0.85 + (q % 2) * 0.32, SY0 - 0.55 - Math.floor(q / 2) * 0.3, 0.14, 0.3, 0.28, 0.05, { part: "profiles", card: i });
+    for (let r = 0; r < 4; r++) tile(SX0 + 3.0, SY0 - 0.85 - r * 0.2, 0.32, 0.7, 0.15, 0.05, { part: "profiles", menu: r });
+    for (let r = 0; r < 3; r++)
+      for (let c = 0; c < 3; c++) tile(SX0 + 1.75 + (c === 0 ? 0 : c === 1 ? 0.65 : 2.1), SY0 - 1.75 - r * 0.42, 0.14, c === 1 ? 1.0 : 0.18, c === 1 ? 0.08 : 0.18, 0.05, { part: "network", net: r, nc: c });
+    // System Monitor: title bar, a graph of recent load scrolling left, the process list
+    const MX0 = -0.4, MY0 = -0.55, mx = (c: number) => MX0 + 0.3 + c * 0.6;
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) tile(mx(c), MY0 - 0.3 - r * 0.58, 0.16, 0.58, 0.56, 0.05, { win: "monitor", bg: true });
+    for (let c = 0; c < 5; c++) tile(mx(c), MY0, 0.2, 0.58, 0.12, 0.06, { win: "monitor", title: true });
+    for (let c = 0; c < 14; c++) for (let h = 0; h < 5; h++) tile(MX0 + 0.25 + c * 0.18, MY0 - 1.15 + h * 0.15, 0.24, 0.14, 0.12, 0.05, { part: "monitor", gc: c, gh: h });
+    for (let r = 0; r < 3; r++)
+      for (let c = 0; c < 3; c++) tile(MX0 + 0.35 + (c === 0 ? 0 : c === 1 ? 0.75 : 2.3), MY0 - 1.55 - r * 0.32, 0.24, c === 1 ? 1.2 : 0.18, c === 1 ? 0.07 : 0.14, 0.05, { part: "monitor", proc: r });
+    const parts = data.duxParts;
+    const cycle = [...new Set(parts.filter((p): p is DuxPart => p !== null))];
     L.push({
       slots: spares(a, [V(0, 0, 0)]),
       live(sl, t, o) {
-        const f = focus[7], held = f >= 0 && f < np, k = held ? f : Math.floor(t / 3) % np, ph = held ? 0.5 : fract(t / 3);
-        const grow = smooth(0, 0.18, ph) * smooth(1, 0.82, ph);
-        if (sl.pop !== undefined) {
-          o.p.set(barX(items[k]) + ((sl.pop % 3) - 1) * 0.3, barY - 0.25 - (0.15 + Math.floor(sl.pop / 3) * 0.3) * grow, 1.0);
-          o.s.multiplyScalar(grow);
-          o.g = 0.18 + 0.2 * grow;
-        } else if (sl.bar !== undefined) o.g = sl.bar === items[k] ? 0.3 + 0.7 * grow : 0.1;
-        else if (sl.title) o.g = 0.2 + 0.15 * sl.win;
-        else if (sl.screen) o.g = 0.03;
+        const f = focus[7], held = f >= 0 && f < parts.length && parts[f] !== null;
+        const T = 3.6, cur = held ? parts[f] : cycle.length ? cycle[Math.floor(t / T) % cycle.length] : null, ph = fract(t / T);
+        const on = sl.part !== undefined && sl.part === cur;
+        if (sl.part === "wallpaper") {
+          // the wallpaper changes with a wipe from the left (folders feed the cycle)
+          const w = on ? smooth(0, 0.6, ph) * 12 - sl.wc : -1;
+          o.b.copy(WALL).lerp(LEGACY, smooth(2, 6, sl.wr) * 0.7);
+          if (w > 1) o.b.lerp(MODERN, 0.8 * smooth(1, 2.5, w) * smooth(1, 0.85, ph));
+          o.g = w > 0 && w < 1.2 ? 0.3 : 0;
+        } else if (sl.strip) o.g = 0.03;
+        else if (sl.ws !== undefined) o.g = sl.ws === 1 ? 0.6 : 0.12;
+        else if (sl.clock !== undefined) o.g = 0.3;
+        else if (sl.icon !== undefined || sl.pill !== undefined) o.g = sl.pill === 3 || sl.icon === 3 ? (on ? 0.9 : 0.25) : 0.06;
+        else if (sl.pop) {
+          // connected popout: it unfolds down from the bar, row by row
+          const open = on ? smooth(0, 0.08, ph) * 7 - sl.prow : 7;
+          o.s.multiplyScalar(clamp01(open));
+          if (sl.pbg) o.b.copy(PANE);
+          o.g = sl.track !== undefined ? (sl.ti < 6 - sl.track * 2 + 1.5 * Math.sin(t * 0.8 + sl.track) ? 0.45 : 0.03) : sl.tog !== undefined ? (sl.tog % 3 === 0 ? 0.5 : 0.04) : 0.02;
+        } else if (sl.card !== undefined) o.g = sl.card === 1 ? (on ? 0.6 : 0.14) : 0.04;
+        else if (sl.menu !== undefined) {
+          // the menu of the right-clicked profile, then Apply
+          const v = on ? smooth(0.1 + sl.menu * 0.04, 0.2 + sl.menu * 0.04, ph) * smooth(0.95, 0.85, ph) : 0;
+          o.s.multiplyScalar(v);
+          o.g = sl.menu === 0 && ph > 0.5 ? 0.9 : 0.12;
+        } else if (sl.net !== undefined) o.g = on ? (sl.net === Math.floor(ph * 3) ? 0.8 : 0.15) : sl.nc === 0 ? 0.08 : 0.02;
+        else if (sl.gc !== undefined) {
+          // a load graph scrolling left: column c shows the load a moment ago
+          const ld = 2.6 + 1.6 * Math.sin((t * 1.2 - sl.gc * 0.35) * 1.3) + Math.sin(t * 2.7 - sl.gc * 0.8);
+          o.s.multiplyScalar(sl.gh < ld ? 1 : 0);
+          o.g = on ? 0.35 + 0.1 * sl.gh : 0.12;
+        } else if (sl.proc !== undefined) o.g = on && sl.proc === Math.floor(t * 0.8) % 3 ? 0.6 : 0.03;
+        else if (sl.title) o.g = 0.12;
+        else if (sl.bg) o.b.copy(PANE);
+        else if (sl.side !== undefined) o.g = sl.side === 1 ? 0.35 : 0.03;
+        if (held && sl.part !== undefined && !on) o.g *= 0.3;
       },
     });
   }
 
-  // 8 projects: the featured pipeline, stage by stage, a parallel stage fanned out into its lanes (item 0);
-  // below it one block per other project, as listed (items 1..)
+  // 8 projects. Item 0, devline: the run as a route of stations, top to bottom, a ring at each approval gate;
+  // implement fans out into one lane per task. Beside each station, what it produces. Before the run figure is
+  // reached a work item walks the whole route; while it is pinned the route follows the stage shown (lit up to
+  // there, the stage's product built); after it, the whole run shows until it dissolves into the next form.
   {
-    const S = data.stages.length ? data.stages : [1], gap = 1.35, xs = S.map((_, i) => (i - (S.length - 1) / 2) * gap);
-    const ys = (n: number) => Array.from({ length: n }, (_, l) => ((n - 1) / 2 - l) * 1.0);
-    const laneY = (i: number, lane: number) => (S[i] > 1 ? ys(S[i])[lane % S[i]] : 0);
-    const a: Slot[] = [];
-    S.forEach((n, i) => ys(n).forEach((y, l) => block(a, 3, 3, 3, 0.22, V(xs[i], y, 0), 0.19, { st: i, lane: l, item: 0 })));
-    const st = 0.17, cs = 0.08;
-    for (let i = 0; i + 1 < S.length; i++) {
-      const m = (xs[i] + xs[i + 1]) / 2, A = ys(S[i]), B2 = ys(S[i + 1]), lo = Math.min(...A, ...B2), hi = Math.max(...A, ...B2);
-      A.forEach((y) => line(a, V(xs[i] + 0.34, y, 0), V(m, y, 0), st, cs));
-      if (hi > lo) line(a, V(m, lo, 0), V(m, hi, 0), st, cs);
-      B2.forEach((y) => line(a, V(m, y, 0), V(xs[i + 1] - 0.34, y, 0), st, cs));
+    const run = data.run, ids = run?.ids ?? [], n = ids.length, a: Slot[] = [], labels = new Map<number, V3>();
+    const hOf = (id: string) => (id === "implement" ? 1.8 : 0.9);
+    const ys: number[] = [];
+    let y = 0;
+    for (const id of ids) {
+      ys.push(y - hOf(id) / 2);
+      y -= hOf(id);
     }
-    const lanes = Math.max(...S), rowY = -((lanes - 1) / 2) - 1.25, np = Math.min(6, data.projects);
-    const span = xs[xs.length - 1] - xs[0];
-    for (let i = 0; i < np; i++) block(a, 3, 2, 2, 0.22, V(np > 1 ? xs[0] + (i * span) / (np - 1) : 0, rowY, 0), 0.19, { item: i + 1, proj: i });
-    for (let i = 0; i < lanes; i++) a.push({ p: V(xs[0], 0, 0), s: V(0.16, 0.16, 0.16), pk: i });
-    // one work item per lane: through every stage, on its lane where the stage runs in parallel
-    const paths = Array.from({ length: lanes }, (_, lane) => {
-      const p: number[][] = [[xs[0], laneY(0, lane)]];
-      for (let i = 0; i + 1 < S.length; i++) {
-        const m = (xs[i] + xs[i + 1]) / 2;
-        p.push([m, laneY(i, lane)], [m, laneY(i + 1, lane)], [xs[i + 1], laneY(i + 1, lane)]);
-      }
-      return p;
+    const top = -y / 2;
+    for (let k = 0; k < n; k++) ys[k] += top;
+    const SX = -1.6, PX = 0.55, tasks = Math.max(1, Math.min(4, run?.tasks ?? 0));
+    const laneY = (k: number, i: number) => ys[k] + ((tasks - 1) / 2 - i) * 0.5;
+    ids.forEach((id, k) => {
+      const ex = { stn: k };
+      if (id === "implement") for (let i = 0; i < tasks; i++) block(a, 2, 2, 2, 0.16, V(SX + (i - (tasks - 1) / 2) * 0.36, ys[k], 0), 0.14, { ...ex, lane: i });
+      else block(a, 3, 3, 2, 0.17, V(SX, ys[k], 0), 0.15, ex);
+      if (run?.gates.includes(k)) ring(a, 14, 0.42, V(SX, ys[k], 0), 0.09, { gate: k });
+      if (k + 1 < n) line(a, V(SX, ys[k] - (id === "implement" ? 0.38 : 0.3), 0), V(SX, ys[k + 1] + (ids[k + 1] === "implement" ? 0.38 : 0.3), 0), 0.15, 0.06, { rail: k });
+      labels.set(100 + k, V(SX + 0.5, ys[k] - 0.09, 0));
+      // the big caption of the stage shown: left of its station, level with it
+      labels.set(200 + k, V(SX - 0.6, ys[k], 0));
+      // the product, built from small blocks
+      const pr = (x: number, yy: number, sx: number, sy: number, extra: Record<string, unknown> = {}) => a.push({ p: V(PX + x * 1.35, yy, 0), s: V(sx * 1.3, sy * 1.3, 0.1), prod: k, ...extra });
+      const Y = ys[k];
+      if (id === "idea") [3, 2, 4, 2, 3].forEach((w, i, arr) => pr(arr.slice(0, i).reduce((s, v) => s + v * 0.17 + 0.1, 0) + (w * 0.17) / 2, Y, w * 0.17 - 0.03, 0.12, { mark: i < 2 }));
+      else if (id === "route") for (let i = 0; i < 5; i++) pr(i * 0.42, Y, 0.3, 0.2, { off: i === 4 });
+      else if (id === "brainstorm") [1.8, 1.4, 1.6].forEach((w, i) => pr(w / 2, Y + 0.18 - i * 0.18, w, 0.1));
+      else if (id === "design") for (let i = 0; i < 3; i++) for (let q = 0; q < 4; q++) pr(i * 0.7 + (q % 2) * 0.26, Y + 0.13 - Math.floor(q / 2) * 0.26, 0.24, 0.24, { look: i });
+      else if (id === "plan") {
+        for (let i = 0; i < tasks; i++) pr(0.35, Y + ((tasks - 1) / 2 - i) * 0.17, 0.7, 0.12, { wave: 0 });
+        pr(1.3, Y, 0.7, 0.12, { wave: 1 });
+      } else if (id === "implement")
+        for (let i = 0; i < tasks; i++) {
+          for (let s = 0; s < 4; s++) pr(s * 0.36, laneY(k, i), 0.3, 0.2, { lane: i, step: s });
+          pr(1.75, laneY(k, i), 0.24, 0.24, { lane: i, rev: true });
+        }
+      else if (id === "docs") for (let i = 0; i < Math.min(5, run?.docs ?? 0); i++) pr(i * 0.36, Y, 0.26, 0.4, { doc: i });
+      else if (id === "reviews") for (let i = 0; i < 3; i++) pr(i * 0.42, Y, 0.3, 0.3, { off: i === 2 });
+      else if (id === "deep-review") for (let i = 0; i < 10; i++) pr(i * 0.22, Y, 0.2, 0.2, { sweep: i });
+      else if (id === "final") for (let i = 0; i < Math.min(5, run?.options ?? 0); i++) pr(i * 0.5, Y, 0.4, 0.2, { opt: i });
     });
-    const work = (t: number, lane: number, o: V3) => {
-      const ph = fract(t / 6 + lane * 0.04), pp = paths[lane];
-      const seg = ph * (pp.length - 1), i = Math.min(pp.length - 2, Math.floor(seg)), f = ease(seg - i);
-      return o.set(lerp(pp[i][0], pp[i + 1][0], f), lerp(pp[i][1], pp[i + 1][1], f), 0);
+    for (let i = 0; i < 3; i++) a.push({ p: V(SX, ys[0] ?? 0, 0.3), s: V(), walker: i });
+    // where a token stands at run position u (0..n-1): on the route, on its lane through implement
+    const impl = ids.indexOf("implement");
+    const routeAt = (u: number, lane: number, o: V3) => {
+      const k = Math.max(0, Math.min(n - 1, Math.floor(u))), f = ease(u - k), k2 = Math.min(n - 1, k + 1);
+      const x = (j: number) => (j === impl ? SX + (lane - (tasks - 1) / 2) * 0.36 : SX);
+      return o.set(lerp(x(k), x(k2), f), lerp(ys[k] ?? 0, ys[k2] ?? 0, f), 0.32);
     };
-    const c = V(), wv = V();
-    exitX = xs[xs.length - 1];
     L.push({
-      slots: spares(a, [V(exitX, 0, 0), V(xs[0], 0, 0)]),
+      slots: spares(a, [V(SX, 0, 0)]),
+      labels,
       live(sl, t, o) {
-        if (sl.pk !== undefined) {
-          work(t, sl.pk, o.p).setZ(0.38);
+        // rp: the stage the run figure shows (eased); -1 before it, n after it
+        const rp = measure.ext ? n : runState.rp, cur = Math.round(rp), pinned = runState.pinned;
+        if (sl.walker !== undefined) {
+          // a work item: walking the route before the figure is reached, standing at the stage while pinned
+          const u = pinned ? Math.max(0, rp) : rp < 0 ? fract(t / 9 + sl.walker / 3) * (n - 1) : -1;
+          if (u < 0 || (pinned && sl.walker > 0)) {
+            o.s.setScalar(0);
+            return;
+          }
+          routeAt(u, sl.walker % tasks, o.p);
+          o.s.setScalar(0.16);
           o.g = 1.5;
           o.c.copy(WHITE);
           return;
         }
-        if (sl.st !== undefined && sl.surf) {
-          c.set(xs[sl.st], laneY(sl.st, sl.lane), 0);
-          let g = 0;
-          for (let i = 0; i < lanes; i++) g = Math.max(g, smooth(0.55, 0.15, work(t, i, wv).distanceTo(c)));
-          o.g = g * 0.7;
-        } else if (sl.conn) o.g = 0.06;
+        if (sl.stn !== undefined) {
+          const passed = sl.stn <= rp + 0.05;
+          o.g = sl.surf ? (sl.stn === cur && pinned ? 0.85 : passed ? 0.12 : 0.03) : 0;
+        } else if (sl.gate !== undefined) o.g = sl.gate === cur && pinned ? 0.9 + 0.4 * Math.sin(t * 3) : sl.gate <= rp ? 0.2 : 0.04;
+        else if (sl.rail !== undefined) o.g = sl.rail < rp ? 0.22 : 0.03;
+        else if (sl.prod !== undefined) {
+          // built when its stage is reached; the stage shown now is lit, earlier ones step back
+          const v = clamp01(rp - sl.prod + 1);
+          o.s.multiplyScalar(smooth(0, 1, v));
+          const now = sl.prod === cur && pinned, ph = fract(t / 3);
+          let g = now ? 0.45 : 0.05;
+          if (sl.off) g = 0.01;
+          else if (sl.mark) g = now ? 1.0 : 0.3;
+          else if (sl.look !== undefined) {
+            g = sl.look === 1 ? (now ? 0.9 : 0.3) : 0.05;
+            if (sl.look === 1) o.p.z += 0.25 * v;
+          } else if (sl.step !== undefined) {
+            // test (fails), code, test (passes), merge, lane by lane; the last lane is sent back once by its review
+            const s = now ? Math.floor(ph * 5 - sl.lane * 0.3) : 4;
+            g = sl.step < s ? 0.55 : 0.05;
+            if (sl.step === 0 && s === 1 && now) o.c.copy(WHITE);
+          } else if (sl.rev) g = now ? (sl.lane === tasks - 1 && ph > 0.55 && ph < 0.75 ? 1.4 : ph > 0.8 ? 0.8 : 0.1) : 0.2;
+          else if (sl.sweep !== undefined) g = now ? 0.15 + 0.9 * smooth(1.2, 0, Math.abs(ph * 12 - 1 - sl.sweep)) : 0.12;
+          else if (sl.opt !== undefined) g = sl.opt === 0 ? (now ? 1.0 : 0.35) : 0.06;
+          else if (sl.wave === 1) g = now ? 0.2 : 0.05;
+          o.g = g;
+        }
       },
     });
   }
-
-  // 9 contact: the merged output closes into a ring around the contact text; the opening stream, closed
+  // 9 the other projects: the run has ended and they get the page; only a few blocks drift at the window's
+  // edges, in camera space (see fit), so nothing sits behind their text
   {
-    const a: Slot[] = [], R = 3.4;
-    for (let lane = 0; lane < 8; lane++) for (let k = 0; k < 80; k++) a.push({ p: V(), s: V(), ring: true, lane, k });
+    const a: Slot[] = [], NB = 6;
+    for (let i = 0; i < NB; i++) block(a, 2, 2, 2, 0.17, V(), 0.15, { drift: i });
+    const c = V(), q = new THREE.Quaternion(), ax = V();
+    L.push({
+      // the spare tokens wait, unseen, at the blocks: the run dissolves toward the edges
+      slots: spares(a, [V()]).map((s, j) => (s.spare ? { ...s, drift: j % NB } : s)),
+      live(sl, t, o) {
+        const i = sl.drift;
+        if (i === undefined) return;
+        const side = i % 2 ? 1 : -1, ph = fract(i / NB + 0.05 * (i % 3) + t * 0.01), m = Math.min(0.5, view.vw * 0.04);
+        c.set(side * (view.vw / 2 - m - m * 0.6 * (i % 3)), (0.5 - ph) * view.vh * 1.15, -0.4 * (i % 2));
+        q.setFromAxisAngle(ax.set(0.3, 1, 0.2).normalize(), t * 0.15 + i);
+        o.p.copy(sl.p).applyQuaternion(q).add(c);
+        o.q.copy(q);
+        o.g = sl.surf && sl.idx === Math.floor(fract(t * 0.1 + i / NB) * 8) ? 0.35 : 0.02;
+      },
+    });
+  }
+  // 10 contact: a closed ring of blocks around the contact text (a band of its own on narrow screens), in
+  // camera space; `view.ring` is fitted to the text every frame, so the ring never runs into it
+  {
+    const a: Slot[] = [], NL = 8, NK = 80;
+    for (let lane = 0; lane < NL; lane++) for (let k = 0; k < NK; k++) a.push({ p: V(), s: V(), ring: true, lane, k });
     L.push({
       slots: a,
       live(sl, t, o) {
-        const u = fract(sl.k / 80 + t * 0.018), an = u * TAU;
-        const rp = (an: number, v: V3) => v.set(Math.cos(an) * R, 0.26 * Math.sin(3 * an + t * 0.5), Math.sin(an) * R);
-        rp(an, P);
-        rp(an + 0.01, P2);
-        T.subVectors(P2, P).normalize();
-        const tw = an * 2 + t * 0.3;
-        Nn.set(Math.cos(an), 0, Math.sin(an)).multiplyScalar(Math.cos(tw)).addScaledVector(Y, Math.sin(tw));
-        o.p.copy(P).addScaledVector(Nn, (sl.lane - 3.5) * 0.13);
+        // the band is a fixed width, narrower on a small ring (a phone's band) so it stays a ring
+        const { cx, cy, rx, ry } = view.ring, gap = Math.min(0.085, 0.045 * Math.min(rx, ry)), off = (sl.lane - (NL - 1) / 2) * gap;
+        const ra = rx + off, rb = ry + off, an = fract(sl.k / NK + t * 0.008) * TAU;
+        // Ramanujan's perimeter: every lane is laid with even bricks and even gaps
+        const per = Math.PI * (3 * (ra + rb) - Math.sqrt((3 * ra + rb) * (ra + 3 * rb)));
+        o.p.set(cx + Math.cos(an) * ra, cy + Math.sin(an) * rb, 0.04 * Math.sin(3 * an + t * 0.5));
+        T.set(-Math.sin(an) * ra, Math.cos(an) * rb, 0).normalize();
         o.q.setFromUnitVectors(X, T);
-        o.s.set(0.3, 0.1, 0.1);
+        o.s.set((per / NK) * 0.84, gap * 0.76, 0.12);
         o.g = isEvent(sl.k, sl.lane, 0.17) ? 0.8 : 0;
         o.c.copy(AMBER);
       },
@@ -490,40 +741,73 @@ function buildLayouts(data: FlowSceneData, codeCursor: { cur: number }, focus: n
 }
 
 /** Number of beats (forms); the page must render one `[data-beat]` with a `[data-stage]` per form. */
-export const BEATS = 10;
+export const BEATS = 11;
 
 /**
  * Starts the subject on `canvas`, driven by the beats inside `root`. Returns a stop function.
  * `reduced`: renders one still per form into its stage as an image and stops (no loop, no scroll).
  * Calls `onFail` when WebGL is missing or the context is lost; the page then stays static.
  */
-export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; data: FlowSceneData; reduced: boolean; onFail: () => void; onSlow: () => void }): () => void {
+export function startFlow(opts: FlowOpts): () => void {
+  const run = { cancelled: false, stop: () => {} };
+  void start(opts, run);
+  return () => {
+    run.cancelled = true;
+    run.stop();
+  };
+}
+type FlowOpts = { canvas: HTMLCanvasElement; root: HTMLElement; data: FlowSceneData; reduced: boolean; onFail: () => void; onSlow: () => void };
+/** Hands the main thread back between the parts of the startup, so none of them is a long task. */
+const pause = () => new Promise<void>((r) => setTimeout(r, 0));
+
+async function start(opts: FlowOpts, run: { cancelled: boolean; stop: () => void }) {
   const { canvas, root, data, reduced, onFail, onSlow } = opts;
   const codeCursor = { cur: -1 };
   const focus: number[] = new Array(BEATS).fill(-1);
   // when each beat's focus last changed (scene time), and what it was before
   const focusAt: number[] = new Array(BEATS).fill(0);
   const focusPrev: number[] = new Array(BEATS).fill(-1);
-  const L = buildLayouts(data, codeCursor, focus, focusAt, focusPrev);
+  const runState = { rp: -1, pinned: false };
+  // the camera plane at z = 0 (camera at z 16, fov 30); resize() keeps it current
+  const view: View = { vw: 1, vh: 2 * 16 * Math.tan(Math.PI / 12), ring: { cx: 0, cy: 0, rx: 3, ry: 2 } };
+  view.vw = (view.vh * innerWidth) / Math.max(1, innerHeight);
+  const L = buildLayouts(data, codeCursor, focus, runState, view);
   const B = L.length;
+  /** Forms laid out in camera space: the hero stream, the projects' edge blocks, the contact ring. */
+  const camForm = (k: number) => k === 0 || k >= B - 2;
 
+  /** A focus change (the item being read) fades over FOCUS_FADE s instead of switching every part in one frame. */
+  const FOCUS_FADE = 0.45, oF = out();
   function evalSlot(k: number, j: number, t: number, o: Out) {
+    evalAt(k, j, t, o);
+    const a = t - focusAt[k], fc = focus[k], fp = focusPrev[k];
+    if (fp === fc || a < 0 || a >= FOCUS_FADE || measure.ext) return;
+    focus[k] = fp;
+    evalAt(k, j, t, oF);
+    focus[k] = fc;
+    const w = smooth(0, FOCUS_FADE, a);
+    o.p.lerpVectors(oF.p, o.p, w);
+    o.s.lerpVectors(oF.s, o.s, w);
+    o.g = lerp(oF.g, o.g, w);
+    o.c.lerpColors(oF.c, o.c, w);
+    o.b.lerpColors(oF.b, o.b, w);
+  }
+  function evalAt(k: number, j: number, t: number, o: Out) {
     const lay = L[k], sl = lay.slots[j];
     o.g = 0;
     o.c.copy(AMBER);
     o.b.copy(sl.legacy ? LEGACY : MODERN);
-    if (sl.stream) {
-      liveStream(sl, t, o);
-      return;
+    if (sl.stream) liveStream(sl, t, o);
+    else {
+      o.p.copy(sl.p);
+      o.s.copy(sl.s);
+      if (sl.q) o.q.copy(sl.q);
+      else o.q.identity();
     }
-    o.p.copy(sl.p);
-    o.s.copy(sl.s);
-    if (sl.q) o.q.copy(sl.q);
-    else o.q.identity();
     lay.live?.(sl, t, o);
     // the part of the text item being read lights up; the other items' parts step back
     const f = focus[k];
-    if (f >= 0 && sl.item !== undefined) o.g = sl.item === f ? Math.max(o.g, sl.surf === false ? 0.05 : 0.2) : o.g * 0.3;
+    if (f >= 0 && sl.item !== undefined) o.g = sl.item === f ? Math.max(o.g, sl.surf ? 0.2 : 0.05) : o.g * 0.3;
   }
 
   /* matching: which slot each token takes next, who moves first, and an optional shared control point */
@@ -556,18 +840,12 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
   const edX = -4.25;
   // 0 -> 1: the stream contracts; the service assembles from it bottom layer first
   match(0, byX, byX, { stag: (s, r) => (s.svc === 0 ? 0.25 + 0.6 * (s.ly / 5) + 0.01 * s.lx : 0.2 * r) });
-  // 1 -> 2: the service grows into the monolith; its right part slides out as services
-  match(1, byX, byX, { stag: (s, r) => (s.mono ? 0.1 * r : 0.15 + 0.7 * r) });
-  // 2 -> 3: the monolith's last slices become the remaining services, left to right
-  match(2, byX, byX);
-  // 3 -> 4: platforms are laid down from the stream, then the apps cross one at a time on an arc
-  // the apps cross right to left, so each lands beside the one before
-  const appOrder = [...new Set(L[4].slots.filter((s) => s.app !== undefined).map((s) => s.app as number))].sort((a, b) => b - a);
-  const appStep = 0.58 / Math.max(1, appOrder.length);
-  match(3, byX, (p, s) => (s.app !== undefined ? 100 + appOrder.indexOf(s.app) * 10 + p.x * 0.01 : p.x), {
-    stag: (s) => (s.plate ? 0.05 * clamp01((s.p.x + 4) / 8) : s.app !== undefined ? 0.3 + appStep * appOrder.indexOf(s.app) : s.rebuild ? 0.9 : 0.2),
-    via: (s) => (s.app !== undefined ? V(s.p.x - 1.4, 1.6, 0) : null),
-  });
+  // 1 -> 2: the service opens into the intake: the streams first, then the applications, the core and the platform
+  match(1, byX, byX, { stag: (s, r) => (s.stream ? 0.08 * r : 0.15 + 0.7 * r) });
+  // 2 -> 3: the pipeline rises into the layered graph, the clusters behind it last
+  match(2, byX, (p, s) => p.x + (s.cluster !== undefined ? 0.001 : 0), { stag: (s, r) => (s.cluster !== undefined ? 0.5 + 0.4 * r : 0.6 * r) });
+  // 3 -> 4: the platforms are laid down first, then the apps settle on them, staging before production
+  match(3, byX, byX, { stag: (s, r) => (s.plate ? 0.05 + 0.15 * r : s.app !== undefined ? 0.3 + 0.08 * s.app + 0.1 * s.env : 0.2 + 0.6 * r) });
   // 4 -> 5: the platforms flatten into the time axis; the apps settle into the school pieces, left to right
   match(4, byX, byX, { stag: (s, r) => (s.axis ? 0.1 * r : 0.2 + 0.7 * r) });
   // 5 -> 6: tokens run through the editor first, then out into the diagram, drawn left to right
@@ -575,12 +853,17 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     stag: (s) => (s.plate === "ed" ? 0.05 + 0.2 * clamp01((1.8 - s.p.y) / 3.6) : s.code !== undefined ? 0.2 + 0.25 * (s.code / 9) : 0.45 + 0.5 * clamp01((s.p.x + 1.8) / 6.6)),
     via: (s) => (s.plate === "ed" || s.code !== undefined ? null : V(edX + 1.6, 0, 0.4)),
   });
-  // 6 -> 7: the diagram spreads into a desktop; the bar is laid first, then windows, then the screen behind
-  match(6, byX, byX, { stag: (s, r) => (s.bar !== undefined ? 0.05 + 0.3 * r : s.win !== undefined ? 0.3 + 0.3 * r : 0.45 + 0.45 * r) });
-  // 7 -> 8: the windows and bar condense into the pipeline's stages
-  match(7, byX, byX);
-  // 8 -> 9: the merged output pours out of the last stage and closes into a ring
-  match(8, (p) => -p.x, (_p, s) => s.k + s.lane * 0.001, { stag: (_s, r) => 0.85 * r, via: () => V(exitX + 1.3, 0.3, 0.4) });
+  // 6 -> 7: the diagram spreads into a desktop; the bar is laid first, then the windows, then the wallpaper behind
+  match(6, byX, byX, { stag: (s, r) => (s.part === "bar" ? 0.05 + 0.3 * r : s.part === "wallpaper" ? 0.45 + 0.45 * r : 0.3 + 0.3 * r) });
+  // 7 -> 8: the shell condenses into the route, top to bottom
+  match(7, (p) => -p.y, (p) => -p.y);
+  // 8 -> 9: the run ends: the route dissolves toward the window's edges, its left part to the left
+  match(8, byX, byX, { stag: (s, r) => (s.spare ? 0.1 + 0.5 * r : 0.6 * r) });
+  // 9 -> 10: the edge blocks and the waiting tokens close into the ring, lane by lane around it
+  match(9, byX, (p) => p.x, { stag: (s) => (s.ring ? 0.1 + 0.7 * (s.k / 80) : 0) });
+
+  await pause();
+  if (run.cancelled) return;
 
   /* renderer, one light setup */
   let renderer: THREE.WebGLRenderer;
@@ -588,7 +871,7 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: reduced });
   } catch {
     onFail();
-    return () => {};
+    return;
   }
   renderer.setClearColor(0x000000, 0);
   renderer.autoClear = false;
@@ -650,6 +933,24 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
   const halos = new THREE.Points(hGeo, hMat);
   halos.frustumCulled = false;
   group.add(halos);
+  const free = () => {
+    geo.dispose();
+    mat.dispose();
+    hGeo.dispose();
+    hMat.dispose();
+    envTex.dispose();
+    pmrem.dispose();
+    renderer.dispose();
+  };
+  // stopped while starting, or the context was lost before its listener is attached (below)
+  const gone = () => {
+    if (renderer.getContext().isContextLost()) onFail();
+    return run.cancelled || renderer.getContext().isContextLost();
+  };
+  if (gone()) return free();
+  // the shaders compile off the main thread where the browser can (KHR_parallel_shader_compile)
+  await renderer.compileAsync(scene, camera);
+  if (gone()) return free();
 
   /*
    * Clearance: the forms keep out of the text. Every line of text (headlines glyph by glyph), control
@@ -686,7 +987,7 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
       const glyphs = el.matches(".fl-head");
       const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
       for (let n = tw.nextNode() as Text | null; n; n = tw.nextNode() as Text | null) {
-        if (!n.data.trim()) continue;
+        if (!n.data.trim() || n.parentElement?.checkVisibility?.({ visibilityProperty: true }) === false) continue;
         clip = clipOf(n.parentElement, memo);
         if (glyphs)
           for (let i = 0; i < n.length; i++) {
@@ -701,6 +1002,8 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
         }
       }
       for (const c of el.querySelectorAll("a, button, input, summary, img, svg, pre")) {
+        // a drawing the scene stands in for (the devline run's) is hidden, not text
+        if (c.checkVisibility?.({ visibilityProperty: true }) === false) continue;
         clip = clipOf(c.parentElement, memo);
         push(c.getBoundingClientRect());
       }
@@ -744,6 +1047,8 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
   }
 
   /* layout: each form is fitted into its beat's stage box, and the renderer draws only inside that box */
+  await pause();
+  if (gone()) return free();
   const sections = [...root.querySelectorAll<HTMLElement>("[data-beat]")].sort((a, b) => +a.dataset.beat! - +b.dataset.beat!);
   const stages = sections.map((s) => s.querySelector<HTMLElement>("[data-stage]")!);
   // "stick": a column stage that holds its form below the header while the beat is read; "full": the
@@ -752,13 +1057,12 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
   const narrow = matchMedia("(max-width: 1199.98px)");
   // rest rotation per form: turned toward the text beside it (on the left in the odd beats, on the
   // right in the even ones); the contact ring faces the viewer, framing the text
-  const RX = [0, 0.36, 0.34, 0.42, 0.5, 0.34, 0.14, 0.16, 0.2, 1.18];
-  const RY = [0, -0.42, 0.42, -0.26, 0.38, -0.24, 0.3, -0.32, 0.34, 0];
-  const RZ = (k: number) => (k === B - 1 ? 0.06 : 0);
+  const RX = [0, 0.36, 0.3, 0.22, 0.3, 0.34, 0.14, 0.1, 0.1, 0, 0];
+  const RY = [0, -0.42, 0.36, -0.32, 0.34, -0.24, 0.3, -0.26, 0.32, 0, 0];
   // each form's extent at scale 1 in its rest rotation, over a few seconds of its own motion (its solid parts)
   measure.ext = true;
   const ext = L.map((_, k) => {
-    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(RX[k], RY[k], RZ(k))), b = new THREE.Box3(), o = out();
+    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(RX[k], RY[k], 0)), b = new THREE.Box3(), o = out();
     const solid = L[k].slots.some((s) => !s.stream && !s.spare);
     for (let t = 0; t < 6.5; t += 0.75)
       for (let j = 0; j < N; j++) {
@@ -772,6 +1076,8 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     return b;
   });
   measure.ext = false;
+  await pause();
+  if (gone()) return free();
   let W = 1, H = 1, mobile = false, viewH = 1, viewW = 1, hdrB = 0, T = 0, hBase = 1;
   type Box = { x: number; y: number; w: number; h: number };
   type StageBox = Box & { rest: number; lead: number };
@@ -780,6 +1086,8 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     camera.updateProjectionMatrix();
     viewH = 2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     viewW = viewH * camera.aspect;
+    view.vw = viewW;
+    view.vh = viewH;
   }
   function resize() {
     W = innerWidth;
@@ -805,6 +1113,11 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     if (mobile) {
       // the next form takes over only once this band is out of sight
       return { x: r.left, y: r.top, w: r.width, h: r.height, rest: Math.max(H * 0.25, end), lead: hdrB - r.height };
+    }
+    if (kinds[k] === "edge") {
+      // the whole section: it has arrived once its top is a third of the way up the screen, and hands
+      // over once its bottom comes up into the screen (the form itself keeps to the window's edges)
+      return { x: 0, y: r.top, w: W, h: r.height, rest: H * 0.35, lead: Math.min(H * 0.35, H - r.height) };
     }
     if (kinds[k] === "stick") {
       // the box runs from under the headline (or the header, once the headline has gone) to the
@@ -838,23 +1151,16 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     return B - 1;
   }
   /**
-   * Two columns: a form never rests half-changed beside text being read. Past the middle of the gap
-   * between two beats the next form takes over and completes on its own (sCur eases to it in about
-   * half a second). One column keeps the scroll-linked change: there the next band is out of sight.
-   */
-  function settledPos(s: number) {
-    return mobile ? s : Math.round(s);
-  }
-  /**
-   * The box the form is drawn in at beat position s. Two-column: between two stage boxes; a wide box
-   * narrows before it moves and a narrow one widens only on arrival, so the form never sweeps over
-   * the text column. One column: the next band, which is out of sight until the previous one is.
+   * The box the form is drawn in at beat position s. Two-column: between two stage boxes, in step
+   * with the scroll; a wide box narrows over the first part of the way and a narrow one widens over
+   * the last, so the form crosses the text column small. One column: the next band, which is out of
+   * sight until the previous one is.
    */
   function drawBox(s: number, bx: StageBox[]): Box {
     const k = Math.min(Math.floor(s), B - 2), p = s - k, a = bx[k], b = bx[k + 1];
     if (p <= 0) return a;
     if (mobile) return b;
-    const hx = a.w > b.w + 1 ? smooth(0, 0.15, p) : b.w > a.w + 1 ? smooth(0.8, 1, p) : p;
+    const hx = a.w > b.w + 1 ? smooth(0, 0.45, p) : b.w > a.w + 1 ? smooth(0.55, 1, p) : p;
     return { x: lerp(a.x, b.x, hx), w: lerp(a.w, b.w, hx), y: lerp(a.y, b.y, p), h: lerp(a.h, b.h, p) };
   }
   /** Group position and scale that fit form k into box b (screen px). */
@@ -867,11 +1173,49 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
       o.y = (0.5 - (b.y + b.h / 2) / H) * viewH;
       return;
     }
-    const s0 = Math.min((b.w * upp) / (e.max.x - e.min.x), (b.h * upp) / (e.max.y - e.min.y)) * 0.94;
+    if (camForm(k)) {
+      // the edge blocks and the ring place themselves in the camera plane (see view)
+      o.s = 1;
+      o.x = o.y = 0;
+      return;
+    }
+    // the projects form leaves the left part of its column to the stage caption beside the route
+    if (k === 8 && !mobile && data.run) b = { ...b, x: b.x + b.w * 0.44, w: b.w * 0.56 };
+    // the form takes most of its box but leaves room around it, so the text beside it leads
+    const s0 = Math.min((b.w * upp) / (e.max.x - e.min.x), (b.h * upp) / (e.max.y - e.min.y)) * 0.8;
     // perspective: the nearest part looks larger by z / (z - zNear)
     o.s = s0 * (1 - (Math.max(0, e.max.z) * s0) / z);
     o.x = ((b.x + b.w / 2) / W - 0.5) * viewW - (o.s * (e.min.x + e.max.x)) / 2;
     o.y = (0.5 - (b.y + b.h / 2) / H) * viewH - (o.s * (e.min.y + e.max.y)) / 2;
+  }
+
+  /**
+   * The contact ring's ellipse, in the camera plane: around the contact text with room for the band and
+   * its clearance (so no block ever shrinks away from the text and leaves a gap), or, on narrow screens,
+   * inside the band above the text.
+   */
+  const ringText = [...(sections[B - 1]?.querySelectorAll<HTMLElement>(".fl-head, .fl-body") ?? [])];
+  function fitRing(b: Box) {
+    let cx: number, cy: number, rx: number, ry: number;
+    if (mobile || !ringText.length) {
+      cx = b.x + b.w / 2;
+      cy = b.y + b.h / 2;
+      rx = b.w * 0.4;
+      ry = Math.min(b.h * 0.38, rx);
+    } else {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const el of ringText) {
+        const r = el.getBoundingClientRect();
+        [x0, y0, x1, y1] = [Math.min(x0, r.left), Math.min(y0, r.top), Math.max(x1, r.right), Math.max(y1, r.bottom)];
+      }
+      cx = (x0 + x1) / 2;
+      cy = (y0 + y1) / 2;
+      // an ellipse through the corners of the text box is that box's half-size times √2
+      rx = Math.min(W * 0.48, ((x1 - x0) / 2) * Math.SQRT2 + 60);
+      ry = Math.min(H * 0.47, ((y1 - y0) / 2) * Math.SQRT2 + 70);
+    }
+    const k = viewW / W;
+    Object.assign(view.ring, { cx: (cx / W - 0.5) * viewW, cy: (0.5 - cy / H) * viewH, rx: rx * k, ry: ry * k });
   }
 
   /* pointer: tokens near the cursor lean away a little */
@@ -896,7 +1240,7 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     group.scale.setScalar(lerp(fa.s, fb.s, f));
     // halos keep their size relative to the tokens on a small stage
     hMat.uniforms.uScale.value = hBase * Math.min(1, group.scale.x);
-    group.rotation.set(lerp(RX[k], RX[k + 1], f) + ptr.sy * 0.05, lerp(RY[k], RY[k + 1], f) + ptr.sx * 0.08, lerp(RZ(k), RZ(k + 1), f));
+    group.rotation.set(lerp(RX[k], RX[k + 1], f) + ptr.sy * 0.05, lerp(RY[k], RY[k + 1], f) + ptr.sx * 0.08, 0);
     key.position.set(group.position.x - 5 + ptr.sx * 1.5, group.position.y + 7, 9);
     key.target.position.copy(group.position);
     rim.position.set(group.position.x + 7, group.position.y + 2, -6);
@@ -920,6 +1264,8 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     const haloR = (hMat.uniforms.uScale.value * 1.4) / camera.position.z / 2 / renderer.getPixelRatio();
     if (avoid) group.updateMatrixWorld();
     for (let i = 0; i < N; i++) {
+      // how far this token is in flight (0 at rest): its clearance widens with it, token by token
+      let fly = 0;
       if (done) evalSlot(k + 1, pb[i], t, oA);
       else {
         evalSlot(k, pa[i], t, oA);
@@ -934,6 +1280,7 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
           const pA = pAv.copy(oA.p);
           oA.p.set(0, 0, 0).addScaledVector(pA, w * w).addScaledVector(C, 2 * w * fi).addScaledVector(oB.p, fi * fi);
           const arc = Math.sin(Math.PI * fi);
+          fly = arc;
           oA.q.slerp(oB.q, fi);
           if (tan.lengthSq() > 1e-6) {
             qT.setFromUnitVectors(X, tan.normalize());
@@ -959,7 +1306,7 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
         // even a tiny token shows as a speck at a large scale
         if (sm > 0) {
           // a token in flight keeps a wider berth: it is stretched and turning, so its reach is less certain
-          const v = clearance(oA.p, sm, moving ? 16 : 0);
+          const v = clearance(oA.p, sm, 16 * fly);
           oA.s.multiplyScalar(v);
           oA.g *= v;
         }
@@ -992,6 +1339,9 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
 
   /* page state that follows the subject: a beat's text appears as its form completes; the item being read is marked */
   const rail = [...root.querySelectorAll<HTMLElement>("[data-rail] > *")];
+  // the rail counts sections: an edge beat (the projects after the run) keeps its section's number
+  let railN = -1;
+  const railOf = kinds.map((kd) => (kd === "edge" ? Math.max(0, railN) : ++railN));
   const codeLines = [...root.querySelectorAll<HTMLElement>("[data-code] .ln")];
   const items = sections.map((sec) => {
     const r: [HTMLElement, number][] = [];
@@ -1000,9 +1350,40 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     return r;
   });
   let railOn = -1, hotLine = -1, readK = -1, readI = -1;
+  /*
+   * The devline run figure on the page: the projects form follows the stage it shows. While the figure is
+   * pinned the stage is the one its rail marks; before it the run has not started (-1), after it it is done.
+   */
+  const runFig = root.querySelector<HTMLElement>(".dlr");
+  const runPin = runFig?.querySelector<HTMLElement>(".dlr-pin");
+  const runTicks = [...(runFig?.querySelectorAll<HTMLElement>(".dlr-rail > li") ?? [])];
+  const runLabels = [...stages[8].querySelectorAll<HTMLElement>("[data-label]")].filter((l) => +l.dataset.label! >= 100);
+  let runLabOn = -1;
+  function readRun(dt: number) {
+    const n = data.run?.ids.length ?? 0;
+    let target = n;
+    runState.pinned = false;
+    if (runPin && runFig?.dataset.mode === "live") {
+      // y: how far the pin is below its stuck place (> 0 before the scene, < 0 once released). The last
+      // stage's place is the very end of the sticky range, so a scroll that lands a pixel or two past it
+      // (rounding, a released wheel notch) still shows that stage: the figure counts as pinned for half a
+      // stage's scroll after its end, as the figure's own stepping does.
+      const top = parseFloat(getComputedStyle(runPin).top) || 0, y = runPin.getBoundingClientRect().top - top;
+      const step = (runPin.parentElement!.offsetHeight - runPin.offsetHeight) / Math.max(1, n - 1);
+      runState.pinned = y < 2 && -y < step / 2;
+      target = runState.pinned ? Math.max(0, runTicks.findIndex((t) => t.hasAttribute("data-cur"))) : y > 0 ? -1 : n;
+    }
+    runState.rp += (target - runState.rp) * (1 - Math.exp(-dt * 5));
+    const on = runState.pinned ? Math.round(runState.rp) : -1;
+    if (on !== runLabOn) {
+      // the station's name (100 + k) and the stage caption beside it (200 + k)
+      runLabels.forEach((l) => l.toggleAttribute("data-on", +l.dataset.label! % 100 === on));
+      runLabOn = on;
+    }
+  }
   function textState(s: number, target: number, now: number) {
     sections.forEach((sec, k) => sec.classList.toggle("in", s >= k - 0.18 || sec.getBoundingClientRect().top < H * 0.75));
-    const on = Math.round(s);
+    const on = railOf[Math.round(s)];
     if (on !== railOn) {
       rail.forEach((r, i) => r.toggleAttribute("data-on", i === on));
       railOn = on;
@@ -1042,13 +1423,22 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
       // only while the form is at rest in its beat
       const v = shown ? clamp01(1 - Math.abs(s - k) * 5) : 0;
       for (const [el, p] of ls) {
-        el.style.visibility = v > 0.01 ? "visible" : "hidden";
-        if (v <= 0.01) continue;
+        // a label for one text item's part (`data-for`) shows while that item is read
+        const it = el.dataset.for, on = v > 0.01 && (it === undefined || focus[k] === +it);
+        el.style.visibility = on ? "visible" : "hidden";
+        if (!on) continue;
         lp.copy(p).applyMatrix4(group.matrixWorld).project(camera);
+        // never over the header, or for a form that is off screen
+        const ly = (1 - lp.y) * 0.5 * H;
+        if (ly < hdrB + 24 || ly > H) {
+          el.style.visibility = "hidden";
+          continue;
+        }
         el.style.opacity = String(v);
-        // a label near the right edge of the window moves left to stay whole
-        const x = Math.min((lp.x + 1) * 0.5 * W, W - el.offsetWidth - 10);
-        el.style.transform = `translate3d(${Math.round(x)}px,${Math.round((1 - lp.y) * 0.5 * H) - 10}px, 0) translateY(-100%)`;
+        // a label stands right of its point (or ends at it, `data-end`) and moves in to stay whole
+        const px = (lp.x + 1) * 0.5 * W, x = el.hasAttribute("data-end") ? Math.max(10, px - el.offsetWidth) : Math.min(px, W - el.offsetWidth - 10);
+        // a stage caption (`data-cap`) sets its first line level with the point; a label sits on it
+        el.style.transform = el.hasAttribute("data-cap") ? `translate3d(${Math.round(x)}px,${Math.round(ly) - 24}px, 0)` : `translate3d(${Math.round(x)}px,${Math.round(ly) - 10}px, 0) translateY(-100%)`;
       }
     });
   }
@@ -1057,13 +1447,7 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
   function dispose() {
     if (disposed) return;
     disposed = true;
-    geo.dispose();
-    mat.dispose();
-    hGeo.dispose();
-    hMat.dispose();
-    envTex.dispose();
-    pmrem.dispose();
-    renderer.dispose();
+    free();
   }
 
   /* stills: one image of each form in its stage, no loop (reduced motion, or too slow to animate) */
@@ -1078,8 +1462,12 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     hBase = h * 0.9;
     sections.forEach((s) => s.classList.add("in"));
     focus.fill(-1);
+    runState.rp = data.run?.ids.length ?? 0;
     try {
+      // the ring centred in the still; the edge beat has no still (its blocks only drift at the window's edges)
+      Object.assign(view.ring, { cx: 0, cy: 0, rx: view.vw * 0.36, ry: view.vh * 0.34 });
       for (let k = 0; k < B && !stopped; k++) {
+        if (kinds[k] === "edge") continue;
         ptr.sx = ptr.sy = 0;
         placeGroup(k, { x: 0, y: 0, w, h });
         updateTokens(k, 2.6);
@@ -1098,11 +1486,12 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
   }
   const removeStills = () => stages.forEach((st) => st.querySelectorAll("img").forEach((i) => i.remove()));
   if (reduced) {
-    stills();
-    return () => {
+    void stills();
+    run.stop = () => {
       stopped = true;
       removeStills();
     };
+    return;
   }
 
   let sCur = 0, t = 0, last = performance.now(), raf = 0, visible = true, lost = false;
@@ -1126,16 +1515,18 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
     last = now;
     t += dt;
-    const bx = stages.map((_, k) => stageBox(k)), target = settledPos(beatPos(bx));
+    const bx = stages.map((_, k) => stageBox(k)), target = beatPos(bx);
     sCur += (target - sCur) * (1 - Math.exp(-dt * 6));
     if (Math.abs(target - sCur) < 1e-4) sCur = target;
     root.dataset.pos = sCur.toFixed(3); // test hook: the beat position
+    readRun(dt);
     ptr.sx += (ptr.x - ptr.sx) * (1 - Math.exp(-dt * 3));
     ptr.sy += (ptr.y - ptr.sy) * (1 - Math.exp(-dt * 3));
     // the box follows the page exactly; the form inside it eases toward the scroll position
     const box = drawBox(mobile ? target : sCur, bx);
     renderer.clear();
     const shown = box.y < H && box.y + box.h > 0;
+    if (sCur > B - 2.5) fitRing(bx[B - 1]);
     if (shown) {
       placeGroup(sCur, box);
       // wall clock, like collectedAt (a frame time can lag it)
@@ -1183,7 +1574,7 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
   resize();
   collect();
   // start at the current scroll position (reload, anchor jump) without flying in from the top
-  sCur = settledPos(beatPos(stages.map((_, k) => stageBox(k))));
+  sCur = beatPos(stages.map((_, k) => stageBox(k)));
   textState(sCur, sCur, 0);
   wake();
 
@@ -1201,7 +1592,7 @@ export function startFlow(opts: { canvas: HTMLCanvasElement; root: HTMLElement; 
     removeEventListener("pointermove", onPointer);
     document.removeEventListener("visibilitychange", wake);
   }
-  return () => {
+  run.stop = () => {
     stopped = true;
     detach();
     dispose();

@@ -15,8 +15,8 @@ const EV = 64; // start event and fork gateway, between the lane labels and the 
 /**
  * The hero's career diagram: one BPMN pool with a Work lane and an Education lane on a shared
  * month axis. A start event forks into both lanes; each entry is a task linking to its row
- * below. Running entries are lit: a set end is solid up to it, an open-ended one stops on the today
- * line (with a token) and its flow continues dashed. Upcoming entries are dashed. Overlapping entries take a row of their own,
+ * below. Running entries are lit up to the today line (with a token); everything after it is a dotted
+ * bar: the rest of a running entry up to its planned end (or the axis end) and upcoming entries. Overlapping entries take a row of their own,
  * forked and joined through parallel gateways. Server-rendered: complete without JS.
  */
 export async function TraceCareer({ content, locale, today }: SectionProps) {
@@ -45,16 +45,7 @@ export async function TraceCareer({ content, locale, today }: SectionProps) {
   ];
 
   return (
-    <figure className="t-career">
-      <figcaption className="meta t-career-cap">
-        {t("trace.career")}
-        <span className="cg-key" data-kind="now">
-          {t("trace.careerNow")}
-        </span>
-        <span className="cg-key" data-kind="next">
-          {t("trace.careerNext")}
-        </span>
-      </figcaption>
+    <figure className="t-career" aria-label={t("trace.career")}>
       <div className="t-career-scroll">
         <div className="cg" style={{ height: H + FOOT, "--ev": `${EV}px` } as CSSProperties}>
           {bands.map((b) => (
@@ -81,7 +72,6 @@ export async function TraceCareer({ content, locale, today }: SectionProps) {
               return (
                 <span key={b.id}>
                   {last && <i className="cg-flow cg-at" style={at(0, last.x0, cy(b.id, 0))} />}
-                  {last?.kind === "now" && last.end === null && <i className="cg-flow cg-on cg-at" style={at(last.x1, 1 - last.x1, cy(b.id, 0))} />}
                 </span>
               );
             })}
@@ -110,14 +100,17 @@ export async function TraceCareer({ content, locale, today }: SectionProps) {
               aria-label={meta.get(x.id)!.aria}
               className="cg-task cg-at"
               data-kind={x.kind}
-              data-open={x.kind === "now" && x.end === null ? "" : undefined}
               data-out={x.out ? "" : undefined}
+              data-wrap={x.wrap ? "" : undefined}
               data-branch={x.row > 0 ? "" : undefined}
               style={at(x.x0, x.x1 - x.x0, cy(x.band, x.row))}
             >
               <span className="cg-l">{x.label}</span>
             </a>
           ))}
+          {layout.tasks.map(
+            (x) => x.ahead !== null && <i key={x.id} className="cg-ahead cg-at" aria-hidden="true" style={at(x.x1, x.ahead - x.x1, cy(x.band, x.row))} />,
+          )}
           {layout.tasks
             .filter((x) => x.kind === "now")
             .map((x) => (

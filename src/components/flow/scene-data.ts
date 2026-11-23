@@ -12,14 +12,26 @@ export interface FlowSceneData {
   services: number;
   /** [moved, total] apps of the current job's migration (first two numbers of its significant line). */
   migrate: [number, number];
-  /** Featured Dux PRs as listed, and how many of them have a screenshot. */
+  /** Applications the lead job's pipeline takes data in through. */
+  intake: number;
+  /** Featured Dux PRs as listed, and the part of the shell each one changed (null: none drawn). */
   prs: number;
-  shots: number;
-  /** The featured project's pipeline: lanes per stage; a per-task stage fans out into 3, a picture of "one per task", not a count. */
-  stages: number[];
+  duxParts: (DuxPart | null)[];
+  /** The featured devline run: its stages, the stages it stops at for approval, and the example's tasks, doc files and end options. */
+  run: { ids: string[]; gates: number[]; tasks: number; docs: number; options: number } | null;
   /** The entries below the featured project: the Dux projects as one, then the others. */
   projects: number;
 }
+
+export type DuxPart = "bar" | "profiles" | "network" | "monitor" | "wallpaper";
+/** A PR's title scope (`feat(sysmon): …`, `gops: …`) names the part of the shell it changed. */
+const PART: [RegExp, DuxPart][] = [
+  [/^\w+\((bar|island|popout)/, "bar"],
+  [/^\w+\(settings\)/, "profiles"],
+  [/^\w+\(network\)/, "network"],
+  [/^(\w+\(sysmon\)|gops:)/, "monitor"],
+  [/^(\w+\()?wallpaper/, "wallpaper"],
+];
 
 const months = (ym: YearMonth) => +ym.slice(0, 4) * 12 + +ym.slice(5, 7) - 1;
 const clamp = (x: number, a: number, b: number) => Math.min(b, Math.max(a, x));
@@ -47,7 +59,18 @@ export function sceneData(content: HomeContent, today: YearMonth): FlowSceneData
   const projects = content.projects?.projects ?? [];
   const feature = projects.find((p) => p.emphasis) ?? projects[0];
   const viz = feature?.panel?.viz;
-  const stages = viz?.type === "pipeline" ? viz.stages.slice(0, 8).map((s) => (s.perTask ? 3 : 1)) : [];
+  const run =
+    viz?.type === "devline-run"
+      ? {
+          ids: viz.stages.map((s) => s.id),
+          gates: viz.stages.flatMap((s, i) => (s.gate ? [i] : [])),
+          tasks: viz.card.tasks.length,
+          docs: viz.card.docFiles.length,
+          options: viz.card.options.length,
+        }
+      : null;
+  const intake = clamp(lead?.figures?.apps ?? 4, 2, 6);
+  const featured = content.dux?.featuredPrs ?? [];
 
   // A current school runs to today; an upcoming one has no end yet and is drawn 18 months long.
   const spans = (content.education?.schools ?? [])
@@ -62,9 +85,10 @@ export function sceneData(content: HomeContent, today: YearMonth): FlowSceneData
     jobs,
     services,
     migrate,
-    prs: content.dux?.featuredPrs.length ?? 0,
-    shots: content.dux?.featuredPrs.filter((p) => p.image).length ?? 0,
-    stages,
+    intake,
+    prs: featured.length,
+    duxParts: featured.map((p) => PART.find(([re]) => re.test(p.title))?.[1] ?? null),
+    run,
     projects: Math.max(0, projects.length - 1) + (content.dux?.projects.length ? 1 : 0),
   };
   if (!spans.length) return { ...rest, schools: [] };

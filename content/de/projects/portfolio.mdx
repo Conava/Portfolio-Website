@@ -1,7 +1,7 @@
 ---
 title: "Portfolio-Website"
 date: "2026–heute"
-summary: "Diese Website: vier Designs über denselben Inhalten, von einem WebGL-Tintenfluid bis zu einer three.js-Szene, die aus den Inhalten entsteht, und ein BPMNscript-Playground, der Language Server und Compiler im Browser ausführt."
+summary: "Genau diese Website: vier Designs für dieselben Inhalte, von fließender Tinte in WebGL bis zu einer three.js-Szene, die aus den Inhalten entsteht, und ein Playground, der den Language Server und Compiler von BPMNscript im Browser ausführt."
 tech: ["Next.js 16", "TypeScript", "React 19", "Tailwind CSS v4", "next-intl", "next-themes", "MDX", "Monaco", "three.js", "Docker", "Traefik"]
 githubUrl: "https://github.com/Conava/Portfolio-Website"
 thumbnail: "/images/projects/portfolio/cover.jpg"
@@ -11,42 +11,42 @@ status: "active"
 
 ## Überblick
 
-Ich habe diese Seite selbst gebaut, um Design, Inhalte und Hosting zu kontrollieren, statt eine Vorlage anzupassen. Sie hat vier Designs, Deutsch und Englisch, in MDX geschriebene Projektseiten, einen Playground für meine Sprache BPMNscript und GitHub-Zahlen aus Live-Daten. Unit- und End-to-End-Tests sichern sie ab.
+Ich habe diese Website selbst gebaut, weil ich Design, Inhalte und Hosting selbst in der Hand haben wollte, statt mich nach einem Template zu richten. Sie hat vier Designs, eine deutsche und eine englische Fassung, Projektseiten in MDX, einen Playground für meine Sprache BPMNscript und GitHub-Zahlen aus Live-Daten. Unit- und End-to-End-Tests decken sie ab.
 
 ## Designs
 
-Design und Farbmodus wählt man unabhängig voneinander. Den Modus setzt `next-themes` als Klasse auf `<html>`. Ink, Trace und Type gibt es hell und dunkel, Flow nur dunkel. Das Symbol im Header schaltet der Reihe nach durch die vier Designs.
+Design und Hell- oder Dunkelmodus lassen sich unabhängig voneinander wählen. Den Modus setzt `next-themes` als Klasse auf `<html>`. Ink, Trace und Type gibt es hell und dunkel, Flow nur dunkel. Das Icon im Header schaltet der Reihe nach durch die vier Designs.
 
-- **Ink** ist eine Seite, die mit Stift auf Papier geschrieben wird. Das Hero ist Tinte, die dem Cursor folgt.
-- **Trace** ist die Seite als Prozessdiagramm: eine Linie vom Namen zur E-Mail-Adresse, mit Nebenspuren, die sich aus den Daten in den Content-Dateien berechnen. Eine Spur entsteht dort, wo sich zwei Einträge zeitlich überschneiden.
-- **Flow** ist eine dunkle Seite um eine three.js-Szene: 640 Metallplättchen bilden für jeden Abschnitt eine neue Form und wandern beim Scrollen in die nächste.
-- **Type** setzt die Seite in großen Archivo-Buchstaben auf Papier. Beim Scrollen fliegt man durch die Punze eines Buchstabens in den nächsten Abschnitt.
+- **Ink** ist Tinte auf Papier. Im Hero folgt die Tinte dem Cursor.
+- **Trace** zeigt die Seite als Prozessdiagramm: eine Linie von meinem Namen bis zu meiner E-Mail-Adresse, mit Nebenspuren, die aus den Daten in den Content-Dateien berechnet werden. Wo sich zwei Einträge zeitlich überschneiden, entsteht eine Spur.
+- **Flow** ist eine dunkle Seite rund um eine three.js-Szene: 640 Metallplättchen formen sich für jeden Abschnitt neu und wandern beim Scrollen in die nächste Form.
+- **Type** setzt die Seite in großen Buchstaben aus der Archivo auf Papier. Beim Scrollen fliegt man durch die Punze eines Buchstabens in den nächsten Abschnitt.
 
-Der Server wählt das Design bei jeder Anfrage: zuerst ein gültiges `design`-Cookie, dann die Umgebungsvariable `DESIGN`, dann der Standard. Schon das erste HTML-Byte trägt deshalb das richtige `data-design` auf `<html>`, ohne Aufblitzen und ohne Client-Skript. Ein Link mit `?design=thread` setzt das Cookie und leitet auf dieselbe URL ohne diesen Parameter um.
+Der Server entscheidet bei jedem Request über das Design: zuerst zählt ein gültiges `design`-Cookie, dann die Umgebungsvariable `DESIGN`, dann der Default. Deshalb steht schon im ersten Byte HTML das richtige `data-design` auf `<html>`, ohne Flackern und ohne Client-Skript. Ein Link mit `?design=thread` setzt das Cookie und leitet auf dieselbe URL ohne diesen Parameter um.
 
 ## Inhalte und Sprachen
 
-Fakten liegen in JSON-Dateien unter `content/{locale}/data/`, die Projektseiten sind MDX-Dateien mit Frontmatter, geparst mit `gray-matter` und gerendert über `next-mdx-remote`. Die Projekt-Slugs stammen aus den englischen Dateinamen. Fehlt eine deutsche MDX-Datei, wird die englische verwendet.
+Die Fakten liegen in JSON-Dateien unter `content/{locale}/data/`. Die Projektseiten sind MDX-Dateien mit Frontmatter, die `gray-matter` parst und `next-mdx-remote` rendert. Die Projekt-Slugs stammen aus den englischen Dateinamen. Fehlt eine deutsche MDX-Datei, greift die englische.
 
-Englische Seiten liegen unter `/…`, deutsche unter `/de/…`, umgesetzt mit `next-intl`. Allein die URL bestimmt die Sprache: Es gibt kein Cookie und keine Erkennung über `Accept-Language`. UI-Texte stehen in `messages/{locale}.json`.
+Englische Seiten liegen unter `/…`, deutsche unter `/de/…`, umgesetzt mit `next-intl`. Die Sprache hängt nur an der URL, es gibt weder ein Cookie noch eine Erkennung über `Accept-Language`. UI-Texte stehen in `messages/{locale}.json`.
 
-Ein Test vergleicht die Faktenfelder (IDs, Daten, URLs, Zahlen, Status) der englischen und deutschen Dateien und meldet den Pfad der ersten Abweichung. Ändert sich ein Fakt nur in einer Sprache, schlägt der Test fehl.
+Ein Test vergleicht die Faktenfelder der englischen und deutschen Dateien, also IDs, Datumsangaben, URLs, Zahlen und Status, und meldet den Pfad der ersten Abweichung. Wer einen Fakt nur in einer Sprache ändert, bekommt einen roten Test.
 
 ## Live-GitHub-Daten
 
-Sterne und Releases der Repositories, der Stand der Pull Requests, die ich hervorhebe, und meine Pull-Request-Summen in der Dux-Organisation kommen aus einer einzigen GraphQL-Anfrage, die eine Stunde zwischengespeichert wird. Schlägt eine Anfrage fehl, bleibt das letzte gute Ergebnis in Gebrauch. Ohne Ergebnis zeigen die Seiten keine Zahlen, und von Hand eingetragen wird nichts.
+Stars und Releases der Repositories, der Status der Pull Requests, die ich hervorhebe, und meine Pull-Request-Zahlen in der Dux-Organisation kommen aus einem einzigen GraphQL-Request, der eine Stunde lang gecacht wird. Schlägt ein Request fehl, bleibt das letzte gute Ergebnis stehen. Gibt es gar kein Ergebnis, zeigen die Seiten keine Zahlen. Von Hand trage ich keine ein.
 
 ## Playground
 
-Der [Playground](/playground) führt den BPMNscript-Language-Server und den Compiler in einem Web Worker im Browser aus, mit Monaco als Editor und bpmn-js für das Diagramm. Der Worker liegt nicht in diesem Repository. Ein Skript baut `@bpmn-script/web` aus dem BPMNscript-Repository in einer festgelegten Version, bevor Dev-Server, Build und Tests laufen.
+Der [Playground](/playground) führt den Language Server und den Compiler von BPMNscript in einem Web Worker im Browser aus, mit Monaco als Editor und bpmn-js für das Diagramm. Der Worker ist nicht in diesem Repository eingecheckt. Bevor Dev-Server, Build und Tests starten, baut ein Skript `@bpmn-script/web` in einer gepinnten Version aus dem BPMNscript-Repository.
 
 ## Analytics
 
-Als Analytics dient ein selbst gehostetes Umami. Das Skript wird nur geladen, wenn Site-ID und URL von Umami konfiguriert sind. Events sind in einer typisierten Liste deklariert: Abschnittsansichten mit Verweildauer-Bereich, Scrolltiefe, ausgehende Klicks, Lebenslauf-Downloads sowie die Wechsel von Design, Sprache und Farbmodus.
+Für Analytics läuft ein selbst gehostetes Umami. Das Skript lädt nur, wenn Site-ID und URL von Umami konfiguriert sind. Alle Events stehen in einer typisierten Liste: Aufrufe von Abschnitten mit grober Verweildauer, Scrolltiefe, ausgehende Klicks, Downloads des Lebenslaufs und das Umschalten von Design, Sprache und Farbmodus.
 
 ## Deployment
 
-Ein GitHub-Actions-Workflow führt bei jedem Push und jedem Pull Request Typprüfung und Unit-Tests aus. Auf `main` baut er zusätzlich das Docker-Image, schiebt es nach GHCR und führt per SSH auf meinem Server `docker compose pull` und `up -d` aus. Traefik übernimmt TLS und Routing.
+Bei jedem Push und jedem Pull Request führt ein GitHub-Actions-Workflow den Typecheck und die Unit-Tests aus. Auf `main` baut er außerdem das Docker-Image, pusht es nach GHCR und ruft per SSH auf meinem Server `docker compose pull` und `up -d` auf. TLS und Routing übernimmt Traefik.
 
 ## Stack
 

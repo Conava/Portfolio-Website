@@ -1,8 +1,8 @@
 {
   "meta": {
     "title": "Dux",
-    "description": "Meine Features und Fehlerbehebungen in Dux Shell, einer Desktop-Shell für Wayland-Compositors, mit dem aktuellen Stand der Pull Requests, dazu der Musikplayer und das Cast-Plugin, die ich dafür baue.",
-    "lede": "Ich gehöre zu den Core-Contributors von Dux Shell, einer Desktop-Shell für Wayland-Compositors. Hier stehen die Features, die ich gebaut habe, die Fehler, die ich behoben habe, und der Musikplayer und das Cast-Plugin, die ich dafür entwickle.",
+    "description": "Meine Features und Bugfixes in Dux Shell, einer Desktop-Shell für Wayland-Compositors, mit dem aktuellen Stand der Pull Requests, dazu der Musikplayer und das Cast-Plugin, die ich für die Shell baue.",
+    "lede": "Ich arbeite als Contributor an Dux Shell mit, einer Desktop-Shell für Wayland-Compositors. Hier stehen die Features, die ich gebaut, und die Bugs, die ich behoben habe, außerdem der Musikplayer und das Cast-Plugin, die ich für die Shell entwickle.",
     "published": "2026-11-11",
     "updated": "2026-11-17",
     "ogImage": {
@@ -35,7 +35,7 @@
         "href": "https://duxlabs.dev"
       },
       {
-        "label": "Dokumentation",
+        "label": "Doku",
         "href": "https://duxlabs.dev/docs"
       },
       {
@@ -67,7 +67,7 @@
     {
       "id": "profiles",
       "title": "Konfigurationsprofile",
-      "summary": "Konfigurationsprofile sind Kopien der Einstellungen, zwischen denen sich wechseln lässt und die sich vergleichen, exportieren und importieren lassen: für unterschiedliche Arbeitsweisen, als Sicherung einer funktionierenden Einrichtung mit einem Klick oder um eine Konfiguration weiterzugeben.",
+      "summary": "Konfigurationsprofile sind Kopien der Einstellungen, zwischen denen man wechseln kann und die sich vergleichen, exportieren und importieren lassen: für unterschiedliche Aufgaben, als Backup eines funktionierenden Setups per Klick oder um eine Konfiguration zu teilen.",
       "prs": [
         {
           "ref": "duxlabs-dev/dux-shell#3867",
@@ -109,17 +109,17 @@
     {
       "id": "sysmon",
       "title": "Systemmonitor",
-      "summary": "Das Fenster System Monitor zeigt zu jedem Prozess die zugehörige App, die Nutzung von GPU und Videoeinheit, die Internetverbindungen sowie Download und Upload und hat Seiten für Leistung, Laufwerke und Systeminformationen.",
+      "summary": "Das Fenster System Monitor zeigt zu jedem Prozess die zugehörige App, die GPU- und Video-Auslastung, die Internetverbindungen sowie Download und Upload. Dazu kommen Seiten für Leistung, Laufwerke und Systeminformationen.",
       "prs": [
         {
           "ref": "duxlabs-dev/dux-shell#3768",
           "title": "feat(sysmon): rework the system monitor window",
-          "note": "Ein neues Fenster für den Systemmonitor"
+          "note": "Neues Fenster für den Systemmonitor"
         },
         {
           "ref": "duxlabs-dev/dux-gop#50",
           "title": "gops: add data for the DMS system monitor rework",
-          "note": "GPU-, Laufwerks- und Netzwerkdaten pro Prozess, schneller gesammelt"
+          "note": "GPU-, Laufwerks- und Netzwerkdaten pro Prozess, schneller erfasst"
         },
         {
           "ref": "duxlabs-dev/dux-shell#4137",
@@ -129,7 +129,7 @@
         {
           "ref": "duxlabs-dev/dux-shell#4219",
           "title": "sysmon: expand merged process rows",
-          "note": "Zeilen aufklappen, um die Prozesse dahinter zu sehen"
+          "note": "Zusammengefasste Zeilen in ihre Prozesse aufklappen"
         },
         {
           "ref": "duxlabs-dev/dux-gop#56",
@@ -192,7 +192,7 @@
     {
       "id": "network",
       "title": "Netzwerkverbindungen",
-      "summary": "Netzwerkverbindungen lassen sich in den Einstellungen anlegen und bearbeiten: Ethernet, WLAN, WireGuard und andere VPNs, Bluetooth und Mobilfunk, auch mit 802.1X und den meisten anderen Arten von Unternehmensnetzen.",
+      "summary": "Netzwerkverbindungen lassen sich in den Einstellungen anlegen und bearbeiten: Ethernet, WLAN, WireGuard und andere VPNs, Bluetooth und Mobilfunk, auch mit 802.1X und den meisten anderen Arten von Enterprise-Netzen.",
       "prs": [
         {
           "ref": "duxlabs-dev/dux-shell#3727",
@@ -239,12 +239,12 @@
     {
       "id": "wallpapers",
       "title": "Hintergrundbilder",
-      "summary": "Hintergrundbilder können aus mehreren Ordnern kommen, und die Bildauswahl, Next, Previous und der automatische Wechsel lassen sich auf ausgewählte Ordner beschränken.",
+      "summary": "Hintergrundbilder können aus mehreren Ordnern kommen, und die Bildauswahl, Next, Previous und der automatische Wechsel lassen sich auf die gewählten Ordner beschränken.",
       "prs": [
         {
           "ref": "duxlabs-dev/dux-shell#4150",
           "title": "wallpaper: list wallpapers through the background process",
-          "note": "Hintergrundbilder zuverlässig auflisten, auch mit ungewöhnlichen Dateinamen"
+          "note": "Hintergrundbilder zuverlässig auflisten, auch bei ungewöhnlichen Dateinamen"
         },
         {
           "ref": "duxlabs-dev/dux-shell#4155",
@@ -259,7 +259,7 @@
         {
           "ref": "duxlabs-dev/dux-shell#4130",
           "title": "wallpaper: scroll the dash grid freely and add a paged grid layout",
-          "note": "Freies Scrollen im Raster der Hintergrundbilder"
+          "note": "Raster der Hintergrundbilder frei scrollen"
         },
         {
           "ref": "duxlabs-dev/dux-shell#4148",
@@ -299,12 +299,12 @@
     {
       "id": "popouts",
       "title": "Verbundene Popouts",
-      "summary": "Popouts, die von der Leiste oder der Island aus geöffnet werden, können sich mit ihr verbinden, wie im verbundenen Rahmenmodus, aber ohne den Rahmen um den Bildschirm.",
+      "summary": "Popouts, die man aus der Leiste oder der Island öffnet, können direkt an ihr andocken, wie im verbundenen Rahmenmodus, nur ohne den Rahmen um den Bildschirm.",
       "prs": [
         {
           "ref": "duxlabs-dev/dux-shell#4129",
           "title": "feat(bar): connected popouts for bar & island variants",
-          "note": "Popouts, die sich mit der Leiste verbinden"
+          "note": "Popouts, die an der Leiste andocken"
         }
       ],
       "images": [
@@ -327,7 +327,7 @@
     {
       "id": "theming",
       "title": "Theming",
-      "summary": "Die Farben des Hintergrundbilds erreichen mehr vom Desktop: Wählbar ist, aus welcher Farbe des Bilds das Farbschema entsteht, Qt-Anwendungen können dem Theme über qtengine folgen, und Terminals erhalten eine Hintergrundtransparenz und zum Hintergrundbild hin getönte Farben.",
+      "summary": "Die Farben des Hintergrundbilds reichen jetzt weiter in den Desktop: Man wählt, aus welcher Farbe des Bilds das Farbschema entsteht, Qt-Anwendungen können dem Theme über qtengine folgen, und Terminals bekommen einen transparenten Hintergrund und Farben, die zum Hintergrundbild hin getönt sind.",
       "prs": [
         {
           "ref": "duxlabs-dev/dux-shell#3020",
@@ -371,8 +371,8 @@
     },
     {
       "id": "fixes",
-      "title": "Fehlerbehebungen",
-      "summary": "Eine Auswahl der Fehler, die ich in der Shell, in dux-gop und in den gemeinsamen QML-Komponenten der Dux-Apps behoben habe. Die Korrekturen am Systemmonitor stehen oben beim Systemmonitor.",
+      "title": "Bugfixes",
+      "summary": "Eine Auswahl der Bugs, die ich in der Shell, in dux-gop und in den gemeinsamen QML-Komponenten der Dux-Apps behoben habe. Die Fixes am Systemmonitor stehen oben beim Systemmonitor.",
       "prs": [
         {
           "ref": "duxlabs-dev/dux-shell#3665",
@@ -387,7 +387,7 @@
         {
           "ref": "duxlabs-dev/dux-shell#3670",
           "title": "fix(notifications): edit rules from the menu instead of deleting them",
-          "note": "Stummschaltung aufheben behält die Benachrichtigungsregel"
+          "note": "Stummschaltung aufheben löscht die Benachrichtigungsregel nicht mehr"
         },
         {
           "ref": "duxlabs-dev/dux-shell#3791",
@@ -407,7 +407,7 @@
         {
           "ref": "duxlabs-dev/dux-shell#3844",
           "title": "fix(notifications): close popups when their screen stops showing them",
-          "note": "Benachrichtigungen schließen sich mit ihrem Bildschirm"
+          "note": "Benachrichtigungs-Popups schließen sich mit ihrem Bildschirm"
         },
         {
           "ref": "duxlabs-dev/dux-shell#3921",
@@ -436,21 +436,21 @@
     {
       "id": "dux-player",
       "summary": [
-        "Dux Player ist ein Musikplayer für Linux im Stil der Dux Shell. Er läuft nativ in der Shell, mit ihren Einstellungen und ihrem Theme, oder eigenständig in jeder anderen Shell, und spielt lokale Bibliotheken ab und streamt von Navidrome-, Subsonic- und Jellyfin-Servern. Wiedergabe, Bibliothek und Server laufen in einem Go-Daemon, das Fenster ist QML auf Quickshell.",
-        "Regeln halten Titel vom Server auf dem Gerät vor (Favoriten, meistgespielte Titel, ein Album oder eine Playlist), und die Kataloge der Server werden lokal gespeichert. Stöbern und Suche funktionieren auch dann, wenn ein Server nicht erreichbar ist. Ist die Warteschlange zu Ende, kann der Player mit ähnlichen Titeln weitermachen, ausgewählt nach Künstlern, Genres und Playlists der ganzen Sitzung. Songtexte holt er automatisch vom Server oder aus Online-Quellen, ordnet sie dem Titel zu und lässt sie Wort für Wort synchron mitlaufen, und das Timing lässt sich an die Aufnahme anpassen.",
-        "Er scrobbelt zu ListenBrainz und Last.fm, überträgt über dux-cast, das Hilfsprogramm hinter dem Cast-Plugin, auf Geräte im Netzwerk und hat eigene Seiten mit Filterregeln und Spalten sowie eine CLI für Tastenkürzel und Statusleisten. Leiste, Seitenleiste und Vollansicht gibt es im Bento- und im Material-Stil, mit Elementen, die sich frei anordnen lassen. Die Oberfläche prüfe ich mit Headless-Szenarien gegen einen nachgebauten Subsonic-Server, die Animationen Bild für Bild. Der Player ist noch in der Alpha-Phase."
+        "Dux Player ist ein Musikplayer für Linux im Stil von Dux Shell. Er läuft nativ in der Shell mit deren Einstellungen und Theme oder eigenständig unter jeder anderen Shell, spielt lokale Bibliotheken ab und streamt von Navidrome-, Subsonic- und Jellyfin-Servern. Wiedergabe, Bibliothek und Server übernimmt ein Go-Daemon, das Fenster ist in QML auf Quickshell gebaut.",
+        "Per Regel lassen sich Titel vom Server auf dem Gerät vorhalten, etwa Favoriten, die meistgespielten Titel, ein Album oder eine Playlist, und die Serverkataloge liegen lokal. Stöbern und Suchen funktionieren auch, wenn ein Server nicht erreichbar ist. Wenn die Warteschlange zu Ende ist, kann der Player mit ähnlichen Titeln weitermachen, ausgewählt nach Künstlern, Genres und Playlists der ganzen Session. Songtexte holt er automatisch vom Server oder aus Online-Quellen, ordnet sie dem Titel zu und synchronisiert sie Wort für Wort, und ihr Timing lässt sich an der Aufnahme ausrichten.",
+        "Er scrobbelt zu ListenBrainz und Last.fm, castet über dux-cast, das Hilfsprogramm hinter dem Cast-Plugin, und hat eigene Seiten mit Filterregeln und Spalten sowie eine CLI für Keybinds und Statusleisten. Leiste, Seitenleiste und Vollansicht gibt es im Bento- und im Material-Stil, die Elemente lassen sich frei anordnen. Die Oberfläche teste ich mit Headless-Szenarien gegen einen Fake-Subsonic-Server, bis hin zu den Animationen, Bild für Bild. Der Player ist noch in der Alpha-Phase."
       ]
     },
     {
       "id": "dux-plugins",
       "summary": [
-        "In Dux Plugins liegen meine Plugins für die Dux Shell. Das erste, Cast, spiegelt den Bildschirm mit Ton auf Chromecast-, Google-TV- und AirPlay-Geräte und spielt Dateien, Musik, Playlists, Diashows und Links auf Chromecast ab, gesteuert über die Leiste oder das Control Center. Dateien, die ein Gerät nicht abspielen kann, etwa 8K-Videos oder HEIC-Fotos, werden vorher auf der GPU umgewandelt. Die Geräte steuert dux-cast, über das auch Dux Player überträgt."
+        "In Dux Plugins sammle ich meine Plugins für Dux Shell. Das erste, Cast, spiegelt den Bildschirm samt Ton auf Chromecast-, Google-TV- und AirPlay-Geräte und spielt Dateien, Musik, Playlists, Diashows und Links auf Chromecast ab, gesteuert über die Leiste oder das Control Center. Dateien, die ein Gerät nicht abspielen kann, etwa 8K-Videos oder HEIC-Fotos, wandelt es vorher auf der GPU um. Die Gerätesteuerung steckt in dux-cast, über das auch Dux Player castet."
       ]
     },
     {
       "id": "dux-cast",
       "summary": [
-        "dux-cast ist das in Go geschriebene Hilfsprogramm hinter Cast. Pro Benutzer läuft ein Helper, und jede damit verbundene App sieht und steuert dieselbe Übertragung. Auch Dux Player überträgt darüber auf Geräte im Netzwerk."
+        "dux-cast ist das Hilfsprogramm hinter Cast, geschrieben in Go. Pro Benutzer läuft eine Instanz, und jede verbundene App sieht und steuert dieselbe Übertragung. Auch Dux Player castet darüber."
       ]
     }
   ]

@@ -176,7 +176,7 @@ for (const [w, h] of [
   }, 120_000);
 }
 
-test("flow at 1440: big headlines over a wide form column, the sides alternate, the schools are labelled", async () => {
+test("flow at 1440: big headlines, large text beside a smaller form column, the sides alternate, the schools are labelled", async () => {
   await withPage({}, async (page) => {
     await page.goto(site.base + "/", { waitUntil: "load" });
     await page.waitForFunction(() => document.querySelector<HTMLElement>("[data-flow]")?.dataset.live === "on");
@@ -189,19 +189,21 @@ test("flow at 1440: big headlines over a wide form column, the sides alternate, 
       }),
     );
     const [, ...beats] = boxes.slice(0, 9);
-    const contact = boxes[9];
+    const contact = boxes[10];
     beats.forEach((b, i) => {
       // odd beats (about, the current job, education, Dux): text left, form right; even beats the other way
       if (i % 2 === 0) expect(b.st[0]).toBeGreaterThanOrEqual(b.tx[1]);
       else expect(b.st[1]).toBeLessThanOrEqual(b.tx[0]);
-      // the form column is the wide one, the text column a readable measure
-      expect(b.st[1] - b.st[0]).toBeGreaterThan(1.6 * (b.tx[1] - b.tx[0]));
-      expect(b.tx[1] - b.tx[0]).toBeLessThanOrEqual(31 * 16);
+      // the text column is a large, readable measure; the form column beside it is still the wider one
+      expect(b.st[1] - b.st[0]).toBeGreaterThan(1.2 * (b.tx[1] - b.tx[0]));
+      expect(b.tx[1] - b.tx[0]).toBeGreaterThanOrEqual(30 * 16);
+      expect(b.tx[1] - b.tx[0]).toBeLessThanOrEqual(44 * 16);
       // a form column on the right stops short of the rail
       if (i % 2 === 0) expect(b.st[1]).toBeLessThanOrEqual(1440 - 100);
     });
-    // every section headline is set large (the current job and the migration have none: a wordmark, a step)
+    // every section headline is set large (the current job has its wordmark); the migration has its own, smaller one
     for (const k of [1, 2, 5, 6, 7, 8]) expect(boxes[k].hl).toBeGreaterThanOrEqual(96);
+    expect(boxes[4].hl).toBeGreaterThanOrEqual(44);
     // the migration's text steps each take most of a screen
     const steps = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-beat="4"] .fl-step')].map((s) => s.offsetHeight));
     expect(steps).toHaveLength(2);
@@ -211,10 +213,10 @@ test("flow at 1440: big headlines over a wide form column, the sides alternate, 
       const i = document.querySelector('[data-beat="5"] .fl-inner')!;
       scrollTo(0, i.getBoundingClientRect().top + scrollY - 80);
     });
-    await page.waitForFunction(() => [...document.querySelectorAll<HTMLElement>("[data-label]")].every((l) => getComputedStyle(l).visibility === "visible" && +getComputedStyle(l).opacity > 0.9), null, { timeout: 10_000 });
+    await page.waitForFunction(() => [...document.querySelectorAll<HTMLElement>('[data-beat="5"] [data-label]')].every((l) => getComputedStyle(l).visibility === "visible" && +getComputedStyle(l).opacity > 0.9), null, { timeout: 10_000 });
     const labs = await page.evaluate(() => {
       const st = document.querySelector('[data-beat="5"] [data-stage]')!.getBoundingClientRect();
-      return [...document.querySelectorAll<HTMLElement>("[data-label]")].map((l) => {
+      return [...document.querySelectorAll<HTMLElement>('[data-beat="5"] [data-label]')].map((l) => {
         const r = l.getBoundingClientRect();
         return r.left >= st.left - 1 && r.right <= 1440 && r.top >= st.top - 40 && r.bottom <= 900;
       });
@@ -230,7 +232,7 @@ for (const [w, h] of [
   [1920, 1080],
   [2560, 1440],
 ]) {
-  test(`flow at ${w}: the split holds (text at its own side, one form beside it), marks fit the text column, no form rests half-changed`, async () => {
+  test(`flow at ${w}: the split holds (text at its own side, one form beside it), marks fit the text column, the form follows the scroll a little at a time`, async () => {
     await withPage({ viewport: { width: w, height: h } }, async (page) => {
       await evenFrames(page, 33);
       await page.goto(site.base + "/", { waitUntil: "load" });
@@ -257,14 +259,27 @@ for (const [w, h] of [
         }
         for (const m of b.marks) expect(m).toBeLessThanOrEqual(b.tx[1] - b.tx[0]);
       }
-      // in the gap after each of the first beats the form settles on a whole beat
-      const pos = () => page.evaluate(() => document.querySelector<HTMLElement>("[data-flow]")!.dataset.pos);
-      for (const [i, b] of r.slice(0, 2).entries()) {
-        await page.evaluate((y) => scrollTo(0, y), b.end - h * 0.45);
-        // software rendering is slow: near the whole beat is enough (scroll-linked it rested near x.5)
-        await page.waitForFunction((k) => Math.abs(+document.querySelector<HTMLElement>("[data-flow]")!.dataset.pos! - k) < 0.02, i + 2, poll).catch(() => {});
-        expect(Math.abs(Number(await pos()) - (i + 2))).toBeLessThan(0.02);
+      // through the gap after the first beat the form changes in step with the scroll: it never snaps to
+      // the next beat, a small scroll moves it a little, and it gets there
+      const pos = () => page.evaluate(() => +document.querySelector<HTMLElement>("[data-flow]")!.dataset.pos!);
+      const seen: number[] = [];
+      for (let y = r[0].end - h; y <= r[0].end + h * 0.6; y += 80) {
+        await page.evaluate((y) => scrollTo(0, y), y);
+        // the form eases to the scroll position in a few hundred ms; wait until it holds still
+        let a = await pos(), b2 = a;
+        for (let i = 0; i < 20; i++) {
+          await page.waitForTimeout(250);
+          b2 = await pos();
+          if (Math.abs(b2 - a) < 0.005) break;
+          a = b2;
+        }
+        seen.push(b2);
       }
+      for (let i = 1; i < seen.length; i++) {
+        expect(seen[i] - seen[i - 1], `step ${i}: ${seen.join(" ")}`).toBeGreaterThanOrEqual(-0.01);
+        expect(seen[i] - seen[i - 1], `step ${i}: ${seen.join(" ")}`).toBeLessThan(0.35);
+      }
+      expect(seen[seen.length - 1] - seen[0]).toBeGreaterThan(0.9);
     });
   }, 150_000);
 }
@@ -285,6 +300,78 @@ test("flow: in the pinned beat the step being read is marked as the form changes
     expect(await page.evaluate(() => document.querySelectorAll('[data-beat="4"] .fl-step')[0].hasAttribute("data-reading"))).toBe(false);
   });
 }, 60_000);
+
+test("flow: the migration beat is headed as the migration I lead, in both languages", async () => {
+  for (const [path, text] of [["/", "The migration I lead"], ["/de", "Die Migration, die ich leite"]]) {
+    const html = await (await get(site, path)).text();
+    expect(html).toMatch(new RegExp(`data-beat="4"[^]*?<h4 class="fl-hl">${text}</h4>`));
+  }
+});
+
+test("flow at 1440: the projects form is the devline run: the figure shows its card beside it, the caption of the stage shown stands at its station, and the Final gate stays lit at the last stage", async () => {
+  await withPage({}, async (page, errors) => {
+    await evenFrames(page);
+    await page.goto(site.base + "/", { waitUntil: "load" });
+    await page.waitForFunction(() => document.querySelector<HTMLElement>("[data-flow]")?.dataset.live === "on");
+    // the figure draws its card and slider alone (the form is the route); its own caption is for assistive tech
+    await page.waitForFunction(() => document.querySelector<HTMLElement>("#devline .dlr")?.dataset.lay === "cd", null, { timeout: 10_000 });
+    expect(await page.evaluate(() => document.querySelector("#devline .dlr-capcol")!.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    const stage = async (k: number, extra = 0) => {
+      await page.evaluate(
+        ([k, extra]) => {
+          const s = document.querySelector<HTMLElement>("#devline .dlr-scene")!, pin = document.querySelector<HTMLElement>("#devline .dlr-pin")!;
+          const top0 = s.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(pin).top) || 0);
+          scrollTo(0, top0 + (k * (s.offsetHeight - pin.offsetHeight)) / 9 + extra);
+        },
+        [k, extra],
+      );
+      await page.waitForFunction((k) => document.querySelector(`[data-beat="8"] [data-label="${100 + k}"]`)?.hasAttribute("data-on"), k, { timeout: 15_000 });
+      return page.evaluate(() => ({
+        names: [...document.querySelectorAll('[data-beat="8"] [data-label][data-on]:not([data-cap])')].map((l) => l.textContent),
+        caps: [...document.querySelectorAll('[data-beat="8"] [data-cap][data-on] b')].map((l) => l.textContent),
+      }));
+    };
+    expect(await stage(2)).toEqual({ names: ["Brainstorm"], caps: ["Brainstorm"] });
+    expect(await stage(5)).toEqual({ names: ["Implement"], caps: ["Implement"] });
+    // a scroll that lands a little past the last stage's place still shows the Final gate lit
+    expect(await stage(9, 3)).toEqual({ names: ["Final gate"], caps: ["Final gate"] });
+    expect(errors).toEqual([]);
+  });
+}, 90_000);
+
+test("flow at 1440: after the devline run the other projects get the whole width, with only a few blocks at the window's edges", async () => {
+  await withPage({}, async (page) => {
+    await evenFrames(page);
+    await page.goto(site.base + "/", { waitUntil: "load" });
+    await page.waitForFunction(() => document.querySelector<HTMLElement>("[data-flow]")?.dataset.live === "on");
+    const width = await page.evaluate(() => document.querySelector('[data-beat="9"] .fl-body')!.getBoundingClientRect().width);
+    expect(width).toBeGreaterThan(1440 * 0.7);
+    await page.evaluate(() => scrollTo(0, document.querySelector('[data-beat="9"]')!.getBoundingClientRect().top + scrollY));
+    await page.waitForFunction(() => Math.abs(+document.querySelector<HTMLElement>("[data-flow]")!.dataset.pos! - 9) < 0.02, null, { polling: 250, timeout: 20_000 });
+    // what the scene draws stays in the outer strips of the window
+    const r = await page.evaluate(
+      () =>
+        new Promise<{ mid: number; edge: number }>((resolve) => {
+          const root = document.querySelector<HTMLElement>("[data-flow]")!;
+          root.addEventListener(
+            "flowframe",
+            () => {
+              const gl = root.querySelector<HTMLCanvasElement>(".fl-gl")!.getContext("webgl2")!;
+              const w = gl.drawingBufferWidth, h = gl.drawingBufferHeight, px = new Uint8Array(w * h * 4);
+              gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+              let mid = 0, edge = 0;
+              for (let y = 0; y < h; y += 3)
+                for (let x = 0; x < w; x += 3) if (px[(y * w + x) * 4 + 3] > 8) (x > w * 0.12 && x < w * 0.88 ? mid++ : edge++);
+              resolve({ mid, edge });
+            },
+            { once: true },
+          );
+        }),
+    );
+    expect(r.mid).toBe(0);
+    expect(r.edge).toBeGreaterThan(0);
+  });
+}, 90_000);
 
 test("flow: a lost WebGL context leaves the static page", async () => {
   await withPage({}, async (page) => {
@@ -342,8 +429,8 @@ test("flow: without JS stages take no room and the text moves into the first col
       stages: [...document.querySelectorAll<HTMLElement>("[data-stage]")].map((s) => s.offsetHeight),
       left: document.querySelector('[data-beat="2"] .fl-body')!.getBoundingClientRect().left,
       h1: document.querySelector("h1")!.textContent,
-      // beats whose headline overlaps their text
-      overlap: [...document.querySelectorAll<HTMLElement>(".fl-beat")]
+      // beats whose headline overlaps their text (the projects after the devline run have no headline)
+      overlap: [...document.querySelectorAll<HTMLElement>(".fl-beat:has(> .fl-inner > .fl-head)")]
         .filter((b) => b.querySelector(".fl-head")!.getBoundingClientRect().bottom > b.querySelector(".fl-body")!.getBoundingClientRect().top)
         .map((b) => b.dataset.beat),
     }));

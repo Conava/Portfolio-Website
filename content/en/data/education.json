@@ -12,6 +12,7 @@
         "height": 162
       },
       "degree": "M.S.",
+      "short": "M.S. CS",
       "field": "Computer Science",
       "start": "2027-01",
       "end": null,
@@ -44,8 +45,7 @@
           "German grade 1.97 so far (1.0 is the best grade, 4.0 the pass mark). The degree is expected in December 2026.",
           "Thesis: BPMNscript, a domain-specific language and compiler for BPMN 2.0. The code is open source and the thesis is published on this site.",
           "Teaching assistant for Software Engineering II, April to July 2026."
-        ],
-        "significant": "In the evaluation, the importer accepts 4,946 of the 6,060 public models that Operaton deploys, and 3,858 of them round-trip to an equivalent model."
+        ]
       }
     },
     {
@@ -70,7 +70,7 @@
       "note": "San Diego, California.",
       "panel": {
         "did": [
-          "Exchange year in Computer Science, August 2024 to May 2025, with a GPA of 3.87 out of 4.00."
+          "Exchange year in Computer Science, August 2024 to May 2025, with a GPA of 3.87 (US scale; best: 4.0)."
         ]
       }
     }

@@ -34,6 +34,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/content ./content
 
 USER nextjs
+# Runtime env comes from the compose file, not the image: GITHUB_TOKEN, RESUME_PDF_URL(_DE), DESIGN,
+# and the release switches DESIGNS (e.g. keynote,type; unset = all), GERMAN=on, ARTICLES=on (unset = off).
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"

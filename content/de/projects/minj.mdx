@@ -1,7 +1,7 @@
 ---
 title: "MinJ: Eine Programmiersprache für die JVM"
 date: "2024"
-summary: "Eine Skriptsprache, die ich entworfen und gebaut habe, um zu lernen, wie Interpreter funktionieren: ANTLR4-Grammatik, Tree-Walking-Interpreter in Java, Klassen, Methoden und Listen sowie ein GitHub-Actions-Workflow, der pro Release ein fat-JAR veröffentlicht."
+summary: "Eine Skriptsprache, die ich entworfen und gebaut habe, um zu verstehen, wie Interpreter funktionieren: eine ANTLR4-Grammatik, ein Tree-Walking-Interpreter in Java, Klassen, Methoden und Listen und ein GitHub-Actions-Workflow, der für jedes Release ein Fat-JAR veröffentlicht."
 tech: ["Java 21", "ANTLR4", "Gradle", "ShadowJar", "GitHub Actions", "JVM"]
 githubUrl: "https://github.com/Conava/MinJ"
 thumbnail: "/images/projects/minj/cover.jpg"
@@ -12,29 +12,29 @@ fullWidth: true
 
 ## Überblick
 
-MinJ (Minimalistic Java) ist eine Skriptsprache, die ich gebaut habe, um von innen zu verstehen, wie ein Interpreter arbeitet. Sie hat Klassen, Methoden, typisierte Variablen, Schleifen, Listen und `return` und läuft auf der JVM. Eine ANTLR4-Grammatik mit 246 Zeilen erzeugt Lexer und Parser, ein `EvalVisitor` mit rund 730 Zeilen durchläuft den Parse-Tree und führt ihn aus, und das Ergebnis wird als einzelnes fat-JAR ausgeliefert, das überall mit Java 21 läuft.
+MinJ (Minimalistic Java) ist eine Skriptsprache, mit der ich verstehen wollte, wie ein Interpreter von innen funktioniert. Sie hat Klassen, Methoden, typisierte Variablen, Schleifen, Listen und `return` und läuft auf der JVM. Aus einer ANTLR4-Grammatik mit 246 Zeilen entstehen Lexer und Parser, ein `EvalVisitor` mit rund 730 Zeilen läuft den Parse Tree ab und führt ihn aus, und alles zusammen steckt in einem Fat-JAR, das überall läuft, wo es Java 21 gibt.
 
-Jede Schicht wollte ich selbst implementieren, statt nur darüber zu lesen: Lexing, Parsing, Scoping, Typprüfung und Methodenaufruf.
+Ich wollte jede Schicht selbst implementieren, statt nur darüber zu lesen: Lexing, Parsing, Scoping, Typprüfung und Method Dispatch.
 
 ## Funktionsweise
 
-Der Quellcode durchläuft drei Stufen:
+Quellcode geht durch drei Stufen:
 
 1. `MinJ.g4` definiert die Grammatik. Der Gradle-Build lässt ANTLR4 daraus `MinJLexer` und `MinJParser` erzeugen.
-2. `EvalVisitor` erweitert ANTLRs `MinJBaseVisitor<Object>` und überschreibt eine Methode pro Grammatikregel. Jeder `visit*`-Aufruf durchläuft seinen Teil des Baums und führt ihn aus: Variablenanlage, Arithmetik, Kontrollfluss, Methodenaufruf und Objekterzeugung.
+2. `EvalVisitor` erweitert ANTLRs `MinJBaseVisitor<Object>` und überschreibt eine Methode pro Grammatikregel. Jeder `visit*`-Aufruf läuft seinen Teil des Baums ab und führt ihn aus: Variablen anlegen, rechnen, Kontrollfluss, Method Dispatch und Objekte erzeugen.
 3. `Main.java` liest eine `.mj`-Datei, schickt sie durch Lexer und Parser und ruft `visitor.visit(tree)` auf.
 
-Grammatik und Ausführung sind getrennt: Die `.g4`-Datei legt fest, wie ein MinJ-Programm aussieht, `EvalVisitor`, was es tut. Ein neues Sprachkonstrukt betrifft deshalb diese beiden Dateien.
+Grammatik und Ausführung sind getrennt. Die `.g4`-Datei legt fest, wie ein MinJ-Programm aussieht, und `EvalVisitor`, was es tut. Für ein neues Sprachkonstrukt ändert man deshalb genau diese beiden Dateien.
 
-Die Laufzeit hält jede Variable in einer `Cell` mit Wert, deklariertem Typ, Veränderlichkeit und dem Merkmal, ob sie dynamisch typisiert ist. Eine `return`-Anweisung wirft ein `ReturnSignal`, eine Unterklasse von `RuntimeException`, um den Call-Stack abzubauen. Ein Return funktioniert dadurch auch mitten in verschachtelten Schleifen und Bedingungen. Beim Erzeugen eines Objekts kopiert dieses die Feld-Cells seiner Klasse, sodass jede Instanz einen eigenen Zustand hat.
+Zur Laufzeit liegt jede Variable in einer `Cell`. Die speichert den Wert, den deklarierten Typ, ob die Variable veränderlich ist und ob sie dynamisch typisiert ist. Eine `return`-Anweisung wirft ein `ReturnSignal`, eine Unterklasse von `RuntimeException`, und baut damit den Call Stack ab. So funktioniert ein Return auch mitten in verschachtelten Schleifen und Bedingungen. Ein neues Objekt kopiert die Feld-Cells seiner Klasse, damit jede Instanz ihren eigenen State hat.
 
 ## Die Sprache
 
-`var` deklariert eine veränderliche, dynamisch typisierte Variable, `val` eine unveränderliche. Explizite Typen sind `int`, `float`, `double`, `boolean`, `char` und `String`. Eine typisierte Deklaration wird bei der Zuweisung geprüft: Ein String in einer `int`-Variable führt zu einem Fehler.
+`var` deklariert eine veränderliche, dynamisch typisierte Variable, `val` eine unveränderliche. Explizite Typen sind `int`, `float`, `double`, `boolean`, `char` und `String`. Bei typisierten Deklarationen wird jede Zuweisung geprüft: Wer einer `int`-Variable einen String zuweist, bekommt einen Fehler.
 
-Der Kontrollfluss besteht aus `if`/`elseif`/`else`, `while`, `for i = 1 to n step s` und `foreach x in list`. Blöcke enden mit `end`. Boolesche Operatoren gibt es als Symbole oder Wörter (`&&` oder `and`, `||` oder `or`, `!` oder `not`).
+Für den Kontrollfluss gibt es `if`/`elseif`/`else`, `while`, `for i = 1 to n step s` und `foreach x in list`. Blöcke enden mit `end`. Boolesche Operatoren gibt es als Symbole oder Wörter (`&&` oder `and`, `||` oder `or`, `!` oder `not`).
 
-Klassen haben Felder und Methoden, `new` erzeugt eine Instanz. Globale Funktionen nutzen `func`, und ein `return` kann mehrere Werte aufführen. Kommentare beginnen mit `//` oder `#` oder stehen zwischen `/*` und `*/`.
+Klassen haben Felder und Methoden, `new` erzeugt eine Instanz. Globale Funktionen werden mit `func` definiert, und ein `return` kann mehrere Werte zurückgeben. Kommentare beginnen mit `//` oder `#` oder stehen zwischen `/*` und `*/`.
 
 ## Beispiele
 
@@ -89,20 +89,20 @@ print factorial(5)   // 120
 
 ## Build und Releases
 
-Der Gradle-Build nutzt das ANTLR-Plugin, um Lexer und Parser aus `MinJ.g4` neu zu erzeugen. ShadowJar packt alles, auch die ANTLR-Runtime, in ein fat-JAR. Ein Skript läuft mit `java -jar minjc-<Version>.jar datei.mj`.
+Der Gradle-Build erzeugt Lexer und Parser mit dem ANTLR-Plugin jedes Mal neu aus `MinJ.g4`. ShadowJar packt alles, auch die ANTLR-Runtime, in ein Fat-JAR. Ein Skript startet man mit `java -jar minjc-<version>.jar file.mj`.
 
-Ein GitHub-Actions-Workflow läuft bei Pushes auf Branches mit dem Namen `release-v*`. Er baut das fat-JAR mit JDK 21, packt es zusammen mit den Beispielen und der README in ein Zip, legt ein Release mit der Version aus dem Branch-Namen an und lädt das Zip als Release-Asset hoch. Die Dokumentation steht auf GitHub Pages.
+Ein GitHub-Actions-Workflow läuft bei jedem Push auf einen Branch namens `release-v*`. Er baut das Fat-JAR mit JDK 21, packt es mit den Beispielen und der README in ein Zip, legt ein Release mit der Version aus dem Branch-Namen an und hängt das Zip als Release-Asset an. Die Doku liegt auf GitHub Pages.
 
 ## Die Sprache erweitern
 
-Ein neues Konstrukt erfordert vier Änderungen. So wurde die `while`-Schleife ergänzt:
+Ein neues Konstrukt braucht vier Änderungen. So ist die `while`-Schleife dazugekommen:
 
 1. Eine Grammatikregel in `MinJ.g4`:
 ```antlr
 whileStmt : WHILE expr DO COLON block END ;
 ```
 
-2. In der Regel `statement` eintragen:
+2. Sie in der Regel `statement` eintragen:
 ```antlr
 statement : varDecl | assign | printStmt | ifStmt | whileStmt ;
 ```

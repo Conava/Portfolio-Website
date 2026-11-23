@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { siteConfig } from "./site-config";
+import { ARTICLE_SLUGS, germanLive, siteConfig } from "./site-config";
 import type { Locale } from "./types";
 
 /** Path for a locale: English is unprefixed, German lives under `/de`. Keeps `?query` and `#hash`; an already-German path is returned as is. */
@@ -15,12 +15,18 @@ export function isPageHref(href: string): boolean {
   return /^\/(?!\/)/.test(href) && !/\.\w+$/.test(path) && !/^\/playground(\/|$)/.test(path);
 }
 
-/** Self-referencing canonical plus hreflang alternates (path-relative; `metadataBase` makes them absolute). */
+/** An article route (`/dux`, `/de/dux#x`, ...). */
+export function isArticleHref(href: string): boolean {
+  const m = href.split(/[?#]/)[0].match(/^(?:\/de)?\/([^/]+)\/?$/);
+  return !!m && (ARTICLE_SLUGS as readonly string[]).includes(m[1]);
+}
+
+/** Self-referencing canonical plus hreflang alternates (path-relative; `metadataBase` makes them absolute); `de` only while German is published. */
 export function alternatesFor(path: string, locale: Locale): NonNullable<Metadata["alternates"]> {
   const en = localizedPath(path, "en");
   return {
     canonical: localizedPath(path, locale),
-    languages: { en, de: localizedPath(path, "de"), "x-default": en },
+    languages: { en, ...(germanLive() && { de: localizedPath(path, "de") }), "x-default": en },
   };
 }
 
@@ -51,7 +57,7 @@ export function socialFor(input: {
       description: input.description,
       siteName: siteConfig.name,
       locale: ogLocale(input.locale),
-      alternateLocale: [ogLocale(input.locale === "en" ? "de" : "en")],
+      ...(germanLive() && { alternateLocale: [ogLocale(input.locale === "en" ? "de" : "en")] }),
       ...(input.path && { url: localizedPath(input.path, input.locale) }),
       images,
       ...(input.published && { publishedTime: input.published }),

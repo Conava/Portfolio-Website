@@ -2,6 +2,8 @@ import { playgroundHref } from "@/lib/playground/share";
 import fs from "fs/promises";
 import path from "path";
 import { routing } from "../i18n/routing";
+import { isArticleHref } from "./seo";
+import { articlesLive } from "./site-config";
 import type { Locale, HomeContent, Image, Panel, ArticleSlug, ArticleMap } from "./types";
 
 export const contentRoot = path.join(process.cwd(), "content");
@@ -53,6 +55,12 @@ export async function getHomeContent(
   b.links = b.links.map((l) => (l.href === "/playground" ? { ...l, href: pg } : l));
   const d = dux as HomeContent["dux"];
   d.shellImages = await keepExisting(d.shellImages);
+  // Unpublished articles get no links: their routes only say "coming soon".
+  if (!articlesLive()) {
+    b.links = b.links.filter((l) => !isArticleHref(l.href));
+    d.links = d.links.filter((l) => !isArticleHref(l.href));
+    for (const p of (projects as HomeContent["projects"]).projects) if (p.url && isArticleHref(p.url)) delete p.url;
+  }
   return { about, work, education, bpmnscript, dux, projects, contact };
 }
 
@@ -79,7 +87,7 @@ export function contentGithubRefs(home: HomeContent): { repos: string[]; prs: st
   return { repos: unique, prs: home.dux.featuredPrs.map((p) => p.ref) };
 }
 
-export const ARTICLE_SLUGS: readonly ArticleSlug[] = ["bpmnscript", "dux", "devline"];
+export { ARTICLE_SLUGS } from "./site-config";
 
 /** Facts from `data/article-<slug>.json`, prose from `articles/<slug>.mdx`; each falls back to `en` on ENOENT only. */
 export async function getArticle<S extends ArticleSlug>(

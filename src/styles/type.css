@@ -268,7 +268,7 @@
   .pj-body > * {
     max-width: 64ch;
   }
-  .pj-body > :is(div:has(> svg), .pj-table, .pj-fig:not([data-size])) {
+  .pj-body > :is(div:not([data-size]):has(> svg), .pj-table, .pj-fig:not([data-size])) {
     max-width: 880px;
   }
   .pj-body > pre {

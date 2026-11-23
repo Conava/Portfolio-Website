@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { assertBuilt, get, ROOT, startSite, stub, type Site } from "./helpers";
+import { assertBuilt, get, ROOT, startSite, stub, type Site, markup, textOf } from "./helpers";
 
 // HTTP-level checks of the articles and SEO against the production build.
 const SLUGS = ["bpmnscript", "dux", "devline"] as const;
@@ -9,7 +9,6 @@ const DESIGNS = ["keynote", "thread", "flow", "type"] as const;
 const ORIGIN = "https://marlonkranz.com";
 
 const json = (file: string) => JSON.parse(readFileSync(join(ROOT, "content", file), "utf8"));
-const markup = (html: string) => html.replace(/<script[^]*?<\/script>/g, "");
 const text = async (s: Site, path: string, headers: Record<string, string> = {}) => (await get(s, path, headers)).text();
 const links = (html: string, rel: string) =>
   [...html.matchAll(/<link\b[^>]*>/g)].map((m) => m[0]).filter((l) => l.includes(`rel="${rel}"`));
@@ -48,7 +47,7 @@ describe("articles", () => {
           const html = await res.text();
           expect(html).toContain(`<html lang="${locale}"`);
           const data = json(`${locale}/data/article-${slug}.json`).meta;
-          const h1 = /<h1[^>]*>([^]*?)<\/h1>/.exec(markup(html))![1].replace(/<[^>]+>/g, "");
+          const h1 = textOf(/<h1[^>]*>([^]*?)<\/h1>/.exec(markup(html))![1]);
           expect(h1.replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, "&")).toContain(data.title);
           for (const s of data.sections as { id: string }[]) expect(markup(html)).toMatch(new RegExp(`<section[^>]*id="${s.id}"`));
         });
@@ -181,7 +180,7 @@ describe("live PR state on /dux", () => {
 });
 
 describe("articles not published (ARTICLES unset)", () => {
-  test("each article route says coming soon, is noindex and left out of the sitemap; homepage links still lead there", async () => {
+  test("each article route says coming soon, is noindex and left out of the sitemap; no homepage links lead there", async () => {
     const s = await startSite({ ARTICLES: "" });
     sites.push(s);
     const m = JSON.parse(readFileSync(join(ROOT, "messages", "en.json"), "utf8"));
@@ -197,7 +196,10 @@ describe("articles not published (ARTICLES unset)", () => {
     }
     const xml = await text(s, "/sitemap.xml");
     for (const slug of SLUGS) expect(xml, slug).not.toContain(`${ORIGIN}/${slug}<`);
-    const home = await text(s, "/", { Cookie: "design=keynote" });
-    expect(home).toMatch(/href="\/devline"/);
+    for (const design of DESIGNS) {
+      const home = markup(await text(s, "/", { Cookie: `design=${design}` }));
+      expect(home, design).toContain(`data-design="${design}"`);
+      expect(home, design).not.toMatch(/href="\/(de\/)?(bpmnscript|dux|devline)[/"?#]/);
+    }
   }, 90_000);
 });

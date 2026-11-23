@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Browser, BrowserContext, Locator, Page } from "playwright-core";
 import { launchBrowser } from "../scripts/shots";
-import { assertBuilt, escapeHtml, get, ROOT, startSite, type Site } from "./helpers";
+import { assertBuilt, escapeHtml, get, ROOT, startSite, type Site, markup } from "./helpers";
 
 const preset = (name: string) => join(ROOT, "public", "playground", "presets", name);
 const presetText = (name: string) => readFileSync(preset(name), "utf8");
@@ -269,8 +269,12 @@ describe("playground", () => {
       // Panel starts closed on phones, and so does the explorer drawer.
       expect(await page.locator(".pg-panel").count()).toBe(0);
       expect(await page.locator("[data-pg-explorer]").isVisible()).toBe(false);
+      // Examples live in the explorer drawer, which makes way for the opened file.
+      await page.locator("[data-pg-explorer-toggle]").click();
+      await page.locator("[data-pg-explorer]").waitFor({ state: "visible" });
       await pick(page, '[data-pg-preset="loan-approval"]');
       await page.waitForFunction(() => document.querySelector("[data-playground]")!.getAttribute("data-active-file") === "loan-approval.bpmnscript");
+      await page.locator("[data-pg-explorer]").waitFor({ state: "hidden" });
       await page.locator("[data-pg-explorer-toggle]").click();
       await page.locator("[data-pg-explorer]").waitFor({ state: "visible" });
       await page.locator('[data-pg-file="invoice-approval.bpmnscript"] .pg-xrow').click();
@@ -279,19 +283,35 @@ describe("playground", () => {
       await page.locator("#pg-tab-phone-diagram").click();
       await page.locator("#pg-pane-diagram [data-pg-diagram]").waitFor({ state: "visible" });
       expect(await page.locator("#pg-pane-source").isVisible()).toBe(false);
-      // The whole diagram is fitted into the pane, end event included.
+      // The default view keeps labels readable: at least 90 %, starting at the diagram's left edge,
+      // the rest panned to. The Fit button shows the whole diagram, end event included.
       await page.waitForTimeout(200);
-      const fit = await page.evaluate(() => {
-        const host = document.querySelector("#pg-pane-diagram .pg-diagram-canvas")!.getBoundingClientRect();
-        const drawn = document.querySelector("#pg-pane-diagram .djs-container .viewport")!.getBoundingClientRect();
-        return { host: [host.left, host.right], drawn: [drawn.left, drawn.right] };
-      });
+      const extent = () =>
+        page.evaluate(() => {
+          const host = document.querySelector("#pg-pane-diagram .pg-diagram-canvas")!.getBoundingClientRect();
+          const drawn = document.querySelector("#pg-pane-diagram .djs-container .viewport")!.getBoundingClientRect();
+          return { host: [host.left, host.right], drawn: [drawn.left, drawn.right] };
+        });
+      const start = await extent();
+      expect(await page.locator("#pg-pane-diagram .pg-diagram-zoom").textContent()).toBe("90%");
+      expect(start.drawn[0]).toBeGreaterThanOrEqual(start.host[0]);
+      expect(start.drawn[1]).toBeGreaterThan(start.host[1]);
+      await page.locator('#pg-pane-diagram .pg-diagram-controls button[aria-label="Fit to view"]').click();
+      await page.waitForTimeout(200);
+      const fit = await extent();
       expect(fit.drawn[0]).toBeGreaterThanOrEqual(fit.host[0]);
       expect(fit.drawn[1]).toBeLessThanOrEqual(fit.host[1]);
       await page.locator("#pg-tab-phone-xml").click();
       await page.locator("#pg-pane-xml").waitFor({ state: "visible" });
       await page.locator("#pg-tab-phone-source").click();
       await page.locator("#pg-pane-source").waitFor({ state: "visible" });
+      // Compile on a phone shows the diagram it produced.
+      let s = await seq(page);
+      await page.locator("[data-pg-compile]").click();
+      await compiledAfter(page, s);
+      await page.locator("#pg-pane-diagram [data-pg-diagram]").waitFor({ state: "visible" });
+      expect(await attr(page, "data-tab")).toBe("diagram");
+      await page.locator("#pg-tab-phone-source").click();
       const [sw, cw] = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
       expect(sw).toBeLessThanOrEqual(cw);
       expect(bad).toEqual([]);
@@ -324,7 +344,7 @@ describe("playground", () => {
       const html = await res.text();
       const msg = escapeHtml(messages("en").notFound.message);
       expect(html, path).toContain(`<html lang="en" data-design="${design}"`);
-      const main = html.replace(/<script[^]*?<\/script>/g, "").match(/<main id="main">([^]*?)<\/main>/)?.[1] ?? "";
+      const main = markup(html).match(/<main id="main">([^]*?)<\/main>/)?.[1] ?? "";
       expect(main, path).toContain(`<h1>${msg}</h1>`);
       expect(main, path).toContain(design === "keynote" ? "ink-nf-path" : "t-nf-trace");
       expect(html, path).not.toContain("data-playground");
@@ -588,4 +608,94 @@ describe("playground", () => {
       expect(await page.locator("[data-pg-file]").count()).toBe(1);
     });
   }, 120_000);
+
+  test("13. import, export and examples sit in the explorer; the header has Compile, Share and the shortcuts", async () => {
+    await open("/playground", { design: "keynote" }, async ({ page, bad }) => {
+      await ready(page);
+      const explorer = page.locator("[data-pg-explorer]");
+      for (const sel of ["[data-pg-new-file]", "[data-pg-import-btn]", "input[data-pg-import]", "[data-pg-export-btn]", "[data-pg-examples]"])
+        expect(await explorer.locator(sel).count(), sel).toBe(1);
+      const header = page.locator(".pg-hdr");
+      expect(await header.locator("[data-pg-examples], [data-pg-export-btn], [data-pg-import-btn], input[data-pg-import]").count()).toBe(0);
+      for (const sel of ["[data-pg-compile]", "[data-pg-share]", "[data-pg-shortcuts-btn]"]) expect(await header.locator(sel).isVisible(), sel).toBe(true);
+      // The import button opens the file picker.
+      const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.locator("[data-pg-import-btn]").click()]);
+      await chooser.setFiles(preset("invoice-handwritten.bpmn"));
+      await page.waitForFunction(() => document.querySelector("[data-playground]")!.getAttribute("data-active-file") === "invoice-handwritten.bpmnscript");
+      expect(bad).toEqual([]);
+    });
+  }, 60_000);
+
+  test("14. Compile (button or Ctrl+Enter) compiles now: the diagram updates, errors open Problems", async () => {
+    await open("/playground", { design: "keynote" }, async ({ page, bad }) => {
+      await ready(page);
+      const button = page.locator("[data-pg-compile]");
+      const state = (v: string) => page.waitForFunction((v) => document.querySelector("[data-pg-compile]")!.getAttribute("data-state") === v, v);
+
+      let s = await seq(page);
+      await button.click();
+      await compiledAfter(page, s);
+      await state("ok");
+      const label = () => button.locator(".pg-swap > :not([aria-hidden])").innerText();
+      expect(await label()).toBe("Compiled");
+
+      // A task added and compiled with Ctrl+Enter shows up in the diagram; the key does not insert a line.
+      await page.keyboard.press("Control+j");
+      await page.locator(".pg-panel").waitFor({ state: "detached" });
+      const before = await elements(page);
+      // A new line after the third, the first user task: it lands in the main flow.
+      await focusEditor(page);
+      await page.keyboard.press("Control+Home");
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("End");
+      await page.keyboard.press("Enter");
+      await page.keyboard.insertText('user extraStep(label: "Extra step")');
+      const lines = await page.locator("[data-pg-editor] .view-line").count();
+      s = await seq(page);
+      await page.keyboard.press("Control+Enter");
+      await compiledAfter(page, s);
+      await page.waitForFunction((n) => Number(document.querySelector("#pg-pane-diagram [data-pg-diagram]")!.getAttribute("data-elements")) > n, before);
+      expect(await page.locator("[data-pg-editor] .view-line").count()).toBe(lines);
+      expect(await page.locator(".pg-panel").count()).toBe(0);
+
+      // Broken source: the button reports the errors and the Problems panel opens with them.
+      await page.keyboard.insertText(" bogus(");
+      await page.keyboard.press("Control+Enter");
+      await state("error");
+      expect(await label()).toMatch(/^[1-9]\d* errors?$/);
+      await page.locator(".pg-panel").waitFor();
+      await page.waitForFunction(() => document.querySelectorAll("[data-pg-problems] [data-pg-problem]").length >= 1);
+      expect(bad).toEqual([]);
+    });
+  }, 90_000);
+
+  test("15. keyboard shortcuts: ? and the button open a dialog with the editor's real bindings", async () => {
+    await open("/playground", { design: "keynote" }, async ({ page, bad }) => {
+      await ready(page);
+      const dialog = page.locator("dialog[data-pg-shortcuts]");
+      // "?" typed into the editor is just text.
+      await focusEditor(page);
+      await page.keyboard.type("?");
+      expect(await dialog.evaluate((d: HTMLDialogElement) => d.open)).toBe(false);
+      await page.keyboard.press("Control+Z");
+
+      await page.locator(".pg-title").click();
+      await page.keyboard.press("?");
+      await page.waitForSelector("dialog[data-pg-shortcuts][open]");
+      expect(await dialog.innerText()).toContain("Compile");
+      // Bindings come from Monaco's keybinding service (in a browser F12 alone is taken by the dev tools).
+      expect(await dialog.locator('[data-pg-shortcut="palette"]').innerText()).toMatch(/Ctrl\s*\+\s*Shift\s*\+\s*P/);
+      expect(await dialog.locator('[data-pg-shortcut="renameSymbol"]').innerText()).toContain("F2");
+      expect(await dialog.locator('[data-pg-shortcut="definition"]').count()).toBe(1);
+      await page.keyboard.press("Escape");
+      await page.waitForSelector("dialog[data-pg-shortcuts]:not([open])", { state: "attached" });
+
+      await page.locator("[data-pg-shortcuts-btn]").click();
+      await page.waitForSelector("dialog[data-pg-shortcuts][open]");
+      await page.locator("[data-pg-shortcuts-close]").click();
+      await page.waitForSelector("dialog[data-pg-shortcuts]:not([open])", { state: "attached" });
+      expect(bad).toEqual([]);
+    });
+  }, 60_000);
 });

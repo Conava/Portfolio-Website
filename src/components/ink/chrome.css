@@ -373,3 +373,7 @@
     display: inline;
   }
 }
+/* Empty while German is unpublished (the locale toggle renders nothing); keep it out of the gap. */
+:root[data-design="keynote"] .ink-utils-locale:empty {
+  display: none;
+}

@@ -1,5 +1,5 @@
 {
-  "intro": "Dux is a desktop shell for Wayland compositors, written in Go and QML on Quickshell. I'm one of its core contributors: I build larger features, fix bugs, investigate issues, help users and take part in design discussions. I also build plugins and apps for it, among them a music player.",
+  "intro": "Dux is a desktop shell for Wayland compositors, written in Go and QML on Quickshell. I'm a contributor: I build larger features, fix bugs, investigate issues, help users and take part in design discussions. I also build plugins and apps for it, among them a music player.",
   "shellRepo": "duxlabs-dev/dux-shell",
   "featuredPrs": [
     {

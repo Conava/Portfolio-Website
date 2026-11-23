@@ -49,7 +49,6 @@
     "entry": "Eintrag",
     "period": "Zeitraum",
     "count": "Anzahl",
-    "ongoing": "laufend",
     "workTimeline": "Berufserfahrung im Zeitverlauf",
     "timeline": "Beruf und Ausbildung im Zeitverlauf",
     "eduTimeline": "Ausbildung im Zeitverlauf"
@@ -93,6 +92,12 @@
     "resume": "Lebenslauf (PDF)",
     "resumeShort": "Lebenslauf"
   },
+  "resumeChooser": {
+    "title": "Welche Version?",
+    "de": "Deutsch",
+    "en": "International (Englisch)",
+    "close": "Schließen"
+  },
   "scene": {
     "diagramLabel": "Kompiliertes BPMN-Diagramm der Rechnungsfreigabe",
     "diagramSteps": [
@@ -119,8 +124,6 @@
     "overlapNote": "Überschneidet sich mit {b}",
     "overlapDuring": "Neben dem {b}",
     "career": "Berufserfahrung und Ausbildung",
-    "careerNow": "läuft gerade",
-    "careerNext": "geplant",
     "keysHint": "j und k: nächster und vorheriger Eintrag"
   },
   "flow": {
@@ -128,9 +131,23 @@
     "work": "Berufserfahrung seit {year}",
     "education": "Wirtschaftsinformatik und Informatik",
     "bpmnscript": "Eine Textsprache für BPMN",
-    "dux": "Core-Contributor der Dux Shell",
+    "dux": "Contributor der Dux Shell",
     "projects": "Eigene Projekte",
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "migration": "Die Migration, die ich leite",
+    "labels": {
+      "ottoIn": "Eingehende Kanäle und Formate",
+      "ottoApps": "Eingangsanwendungen",
+      "ottoCore": "Ein internes Format",
+      "ottoPlatform": "Verteilte Plattform",
+      "ottoLegacy": "Altsystem",
+      "adobeTop": "Services für Nutzer",
+      "adobeBottom": "Speicherschicht für Assets auf MongoDB",
+      "gitops": "Deployments in mehrere AWS-Regionen",
+      "oldPlatform": "Spring Cloud Data Flow",
+      "newPlatform": "GitOps-Plattform auf Kubernetes",
+      "changelog": "Kafka-Streams-Changelog"
+    }
   },
   "gallery": {
     "previous": "Vorheriges Bild",
@@ -143,8 +160,7 @@
     "page": "Projektseite",
     "article": "Artikel lesen",
     "usedBy": "Genutzt von <list></list>",
-    "uses": "Nutzt <h>{helper}</h>, wie auch <list></list>",
-    "builtOn": "Baut auf <a>Dux Shell</a> auf."
+    "builtFor": "Gebaut für die <a>Dux Shell</a>, nutzt <h>{helper}</h>."
   },
   "notFound": {
     "message": "Unter dieser Adresse gibt es keine Seite.",

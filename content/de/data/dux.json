@@ -1,12 +1,12 @@
 {
-  "intro": "Dux ist eine Desktop-Shell für Wayland-Compositors, geschrieben in Go und QML auf Quickshell. Ich gehöre zu ihren Core-Contributors: Ich baue größere Features, behebe Fehler, untersuche Issues, helfe Nutzern und diskutiere Designfragen mit. Dazu entwickle ich Plugins und Apps für die Shell, darunter einen Musikplayer.",
+  "intro": "Dux ist eine Desktop-Shell für Wayland-Compositors, geschrieben in Go und QML auf Basis von Quickshell. Ich arbeite als Contributor mit: Ich baue größere Features, behebe Bugs, gehe Issues nach, helfe Nutzern und bringe mich in Designdiskussionen ein. Außerdem entwickle ich Plugins und Apps für Dux, darunter einen Musikplayer.",
   "shellRepo": "duxlabs-dev/dux-shell",
   "featuredPrs": [
     {
       "ref": "duxlabs-dev/dux-shell#3867",
       "label": "Konfigurationsprofile",
       "title": "feat(settings): Add config profiles",
-      "blurb": "Konfigurationsprofile sind Kopien der Einstellungen, zwischen denen sich wechseln lässt: für unterschiedliche Arbeitsweisen, als Sicherung einer funktionierenden Einrichtung mit einem Klick oder exportiert, um eine Konfiguration weiterzugeben. Importe gelten als nicht vertrauenswürdig, weil Profile zum Teilen gedacht sind.",
+      "blurb": "Konfigurationsprofile sind gespeicherte Kopien der Einstellungen, zwischen denen man wechseln kann: für unterschiedliche Aufgaben, als Backup eines funktionierenden Setups per Klick oder als Export, um eine Konfiguration weiterzugeben. Weil Profile zum Teilen gedacht sind, gelten Importe als nicht vertrauenswürdig.",
       "note": "Einstellungen als Profile speichern und wechseln",
       "image": {
         "src": "/images/dux-shell/pr3867-5.webp",
@@ -19,8 +19,8 @@
       "ref": "duxlabs-dev/dux-shell#3768",
       "label": "Systemmonitor",
       "title": "feat(sysmon): rework the system monitor window",
-      "blurb": "Das Fenster System Monitor hat Seiten für Prozesse, Leistung, Laufwerke und Systeminformationen. Zu jedem Prozess zeigt es die App, die Nutzung von GPU und Videoeinheit, die Internetverbindungen sowie Download und Upload.",
-      "note": "Ein neues Fenster für den Systemmonitor",
+      "blurb": "Das Fenster System Monitor hat Seiten für Prozesse, Leistung, Laufwerke und Systeminformationen. Zu jedem Prozess sieht man die zugehörige App, die GPU- und Video-Auslastung, die Internetverbindungen sowie Download und Upload.",
+      "note": "Neues Fenster für den Systemmonitor",
       "image": {
         "src": "/images/dux-shell/pr3768-2.webp",
         "alt": "Die CPU-Seite mit einem Graphen pro Thread, Takt, Temperatur sowie Prozess- und Thread-Anzahl",
@@ -32,8 +32,8 @@
       "ref": "duxlabs-dev/dux-gop#50",
       "label": "Prozessdaten",
       "title": "gops: add data for the DMS system monitor rework",
-      "blurb": "Die Daten hinter dem neuen System Monitor, gesammelt in Go: GPU-, Laufwerks- und Netzwerknutzung pro Prozess, Sensoren und Speichermodule. Eine Abfrage der Prozessliste braucht auf meinem Rechner 22 statt 375 ms CPU-Zeit.",
-      "note": "GPU-, Laufwerks- und Netzwerkdaten pro Prozess, schneller gesammelt",
+      "blurb": "Die Daten hinter dem neuen System Monitor, in Go gesammelt: GPU-, Laufwerks- und Netzwerknutzung pro Prozess, Sensoren und Speichermodule. Eine Abfrage der Prozessliste kostet auf meinem Rechner jetzt 22 statt 375 ms CPU-Zeit.",
+      "note": "GPU-, Laufwerks- und Netzwerkdaten pro Prozess, schneller erfasst",
       "image": {
         "src": "/images/dux-shell/pr4219-2.webp",
         "alt": "Eine zusammengefasste Steam-Zeile, aufgeklappt in ihre neun Prozesse, jeder mit eigenen Werten",
@@ -45,7 +45,7 @@
       "ref": "duxlabs-dev/dux-shell#3727",
       "label": "Netzwerkeinstellungen",
       "title": "feat(network): edit NetworkManager connections from Settings",
-      "blurb": "Netzwerkverbindungen lassen sich in den Einstellungen anlegen und bearbeiten: Ethernet, WLAN, VPN und mehr, auch Unternehmensnetze wie eduroam. Dazu kommen eine Hotspot-Seite mit QR-Code, eine Tailscale-Seite und eine Anmeldung für Captive Portals.",
+      "blurb": "Netzwerkverbindungen lassen sich direkt in den Einstellungen anlegen und bearbeiten: Ethernet, WLAN, VPN und mehr, auch Enterprise-Netze wie eduroam. Dazu kommen eine Hotspot-Seite mit QR-Code, eine Tailscale-Seite und ein Login-Button für Captive Portals.",
       "note": "Netzwerkverbindungen in den Einstellungen anlegen und bearbeiten",
       "image": {
         "src": "/images/dux-shell/network-editor-connections.webp",
@@ -58,7 +58,7 @@
       "ref": "duxlabs-dev/dux-shell#4155",
       "label": "Hintergrundordner",
       "title": "wallpaper: add wallpaper folders",
-      "blurb": "Hintergrundbilder können aus mehreren Ordnern kommen, und die Bildauswahl und der automatische Wechsel lassen sich auf ausgewählte Ordner beschränken.",
+      "blurb": "Hintergrundbilder können aus mehreren Ordnern kommen. Die Bildauswahl und der automatische Wechsel lassen sich auf die Ordner beschränken, die man auswählt.",
       "note": "Hintergrundbilder aus mehreren Ordnern",
       "image": {
         "src": "/images/dux-shell/pr4155-4.webp",
@@ -71,8 +71,8 @@
       "ref": "duxlabs-dev/dux-shell#4129",
       "label": "Verbundene Popouts",
       "title": "feat(bar): connected popouts for bar & island variants",
-      "blurb": "Popouts von Leiste oder Island können sich mit ihr verbinden, wie im verbundenen Rahmenmodus, aber ohne Rahmen um den Bildschirm.",
-      "note": "Popouts, die sich mit der Leiste verbinden",
+      "blurb": "Popouts aus der Leiste oder der Island können direkt an ihr andocken, wie im verbundenen Rahmenmodus, nur ohne den Rahmen um den Bildschirm.",
+      "note": "Popouts, die an der Leiste andocken",
       "image": {
         "src": "/images/dux-shell/pr4129-3.webp",
         "alt": "Das Popout des Control Centers ist oben am Bildschirm mit der Island zu einer Form verbunden",
@@ -102,7 +102,7 @@
       "name": "Dux Player",
       "repo": "Conava/dux-player",
       "url": "https://github.com/Conava/dux-player",
-      "blurb": "Ein Musikplayer für Linux im Stil der Dux Shell: Er läuft nativ in der Shell, mit ihren Einstellungen und ihrem Theme, oder eigenständig in jeder anderen Shell. Er spielt lokale Bibliotheken und streamt von Navidrome-, Subsonic- und Jellyfin-Servern. Songtexte holt er automatisch und ordnet sie dem Titel zu, gleicht ihr Timing an die Aufnahme an und füllt sie Wort für Wort. Leiste, Seitenleiste und Vollansicht gibt es im Bento- und im Material-Stil, und übertragen wird über dux-cast, das Hilfsprogramm hinter dem Cast-Plugin. Noch in der Alpha-Phase.",
+      "blurb": "Ein Musikplayer für Linux im Stil von Dux Shell. Er läuft nativ in der Shell und übernimmt deren Einstellungen und Theme, funktioniert aber auch eigenständig unter jeder anderen Shell. Abspielen kann er lokale Bibliotheken, und er streamt von Navidrome-, Subsonic- und Jellyfin-Servern. Songtexte lädt er automatisch, ordnet sie dem richtigen Titel zu, richtet ihr Timing an der Aufnahme aus und blendet sie Wort für Wort ein. Leiste, Seitenleiste und Vollansicht gibt es im Bento- und im Material-Stil, und gecastet wird über dux-cast, das Hilfsprogramm hinter dem Cast-Plugin. Noch im Alpha-Stadium.",
       "images": [
         {
           "src": "/images/dux-player/home.webp",
@@ -128,11 +128,11 @@
       ],
       "panel": {
         "did": [
-          "Spielt lokale Ordner, indiziert und überwacht, und beliebig viele Navidrome-, Subsonic- und Jellyfin-Server. Regeln halten Titel vom Server auf dem Gerät vor, und die Kataloge der Server werden lokal gespeichert. Stöbern und Suche funktionieren auch ohne erreichbaren Server.",
-          "Holt Songtexte vom Server oder aus Online-Quellen wie LRCLIB, ordnet sie dem Titel zu, gleicht ihr Timing an die Aufnahme an und füllt sie Wort für Wort, in der Vollansicht und als eine Zeile in der Leiste.",
-          "Bei der Wiedergabe gibt es lückenloses Abspielen, Crossfade, Lautstärkeausgleich, das Überspringen von Stille am Anfang und Ende eines Titels und einen Equalizer. Ist die Warteschlange zu Ende, hört der Player auf oder spielt mit zufälligen oder ähnlichen Titeln weiter, wahlweise vertraut, ausgewogen oder abenteuerlich.",
-          "Drei Player-Ansichten, Leiste, Seitenleiste und Vollansicht, gibt es jeweils im Bento- und im Material-Stil, mit Elementen, die sich frei anordnen lassen. Seiten, Spalten und Filterregeln lassen sich anpassen, die Farben können dem Cover folgen, und die Einstellungen sind durchsuchbar.",
-          "Den Player baue ich allein: einen Go-Daemon für Wiedergabe, Bibliothek und Server und eine QML-Oberfläche auf Quickshell. Übertragen wird über dux-cast, dasselbe Hilfsprogramm, das auch das Cast-Plugin nutzt."
+          "Spielt lokale Ordner ab, die indiziert und auf Änderungen überwacht werden, und beliebig viele Navidrome-, Subsonic- und Jellyfin-Server. Per Regel lassen sich Titel vom Server auf dem Gerät vorhalten, und die Serverkataloge liegen lokal. Stöbern und Suchen funktionieren auch, wenn ein Server nicht erreichbar ist.",
+          "Songtexte kommen vom Server oder aus Online-Quellen wie LRCLIB. Der Player ordnet sie dem Titel zu, richtet ihr Timing an der Aufnahme aus und blendet sie Wort für Wort ein, in der Vollansicht und als einzelne Zeile in der Leiste.",
+          "Lückenlose Wiedergabe mit Crossfade, Lautstärkeausgleich, Equalizer und dem Überspringen von Stille am Anfang und Ende eines Titels. Ist die Warteschlange leer, stoppt der Player oder spielt mit zufälligen oder ähnlichen Titeln weiter, wahlweise vertraut, ausgewogen oder abenteuerlich.",
+          "Drei Ansichten, die Wiedergabeleiste, die Seitenleiste und die Vollansicht, jeweils im Bento- oder Material-Stil und mit Elementen, die man selbst anordnet. Seiten, Spalten und Filterregeln sind anpassbar, die Farben können sich nach dem Cover richten, und die Einstellungen sind durchsuchbar.",
+          "Den Player entwickle ich allein: einen Go-Daemon für Wiedergabe, Bibliothek und Server und eine QML-Oberfläche auf Quickshell. Zum Casten nutzt er dux-cast, dasselbe Hilfsprogramm wie das Cast-Plugin."
         ]
       }
     },
@@ -141,7 +141,7 @@
       "name": "Dux Plugins",
       "repo": "Conava/dux-plugins",
       "url": "https://github.com/Conava/dux-plugins",
-      "blurb": "Plugins für die Dux Shell. Das Cast-Plugin spiegelt den Bildschirm auf Chromecast-, Google-TV- und AirPlay-Geräte und spielt Dateien, Musik, Playlists und Diashows ab. Die Geräte steuert dux-cast, ein Hilfsprogramm, über das auch Dux Player überträgt.",
+      "blurb": "Plugins für Dux Shell. Das Cast-Plugin spiegelt den Bildschirm auf Chromecast-, Google-TV- und AirPlay-Geräte und spielt Dateien, Musik, Playlists und Diashows ab. Die Gerätesteuerung steckt in dux-cast, einem Hilfsprogramm, über das auch Dux Player castet.",
       "images": [
         {
           "src": "/images/cast/overview.webp",
@@ -181,7 +181,7 @@
       ],
       "panel": {
         "did": [
-          "Das Cast-Plugin spiegelt den Bildschirm und spielt Dateien, Musik, Playlists und Diashows auf Geräten im Netzwerk ab. Die Geräteanbindung habe ich in ein Hilfsprogramm ausgelagert, dux-cast, damit auch Dux Player darüber übertragen kann."
+          "Das Cast-Plugin spiegelt den Bildschirm und spielt Dateien, Musik, Playlists und Diashows auf Geräten im Netzwerk ab. Die Gerätesteuerung habe ich in ein eigenes Hilfsprogramm ausgelagert, dux-cast, damit auch Dux Player darüber casten kann."
         ]
       }
     },
@@ -194,7 +194,7 @@
       "name": "dux-cast",
       "repo": "Conava/dux-cast",
       "url": "https://github.com/Conava/dux-cast",
-      "blurb": "Das Hilfsprogramm hinter dem Cast-Plugin und dem Übertragen in Dux Player. Es streamt Bildschirm, Dateien, Musik und Links, und auch andere Anwendungen können es nutzen."
+      "blurb": "Das Hilfsprogramm hinter dem Cast-Plugin und dem Casting in Dux Player. Es überträgt Bildschirm, Dateien, Musik und Links, und auch andere Anwendungen können es nutzen."
     }
   ],
   "links": [
@@ -207,7 +207,7 @@
       "href": "https://duxlabs.dev"
     },
     {
-      "label": "Dokumentation",
+      "label": "Doku",
       "href": "https://duxlabs.dev/docs"
     },
     {
@@ -225,9 +225,9 @@
   ],
   "panel": {
     "did": [
-      "Meine größten Features in der Shell sind die Konfigurationsprofile, der überarbeitete Systemmonitor, die Netzwerkeinstellungen und die Ordner für Hintergrundbilder. Die meisten reichen vom Go-Backend bis in die QML-Oberfläche, beim Systemmonitor auch in dux-gop, die Go-Bibliothek, die die Systemdaten sammelt. Für Profile und Systemmonitor habe ich die Seiten in der Dux-Dokumentation geschrieben.",
-      "Die meisten meiner übrigen Pull Requests beheben Fehler: in der Shell, in dux-gop und in den QML-Komponenten, die sich die Dux-Apps teilen.",
-      "Außerdem melde ich Fehler mit ihrer Ursache, helfe Nutzern in den Support-Kanälen, diskutiere Designfragen mit, etwa wo die Profile in den Einstellungen liegen, und arbeite mit den Maintainern an größeren Features."
+      "Meine größten Features in der Shell sind die Konfigurationsprofile, der überarbeitete Systemmonitor, die Netzwerkeinstellungen und die Ordner für Hintergrundbilder. Die meisten ziehen sich durch das Go-Backend und die QML-Oberfläche, der Systemmonitor zusätzlich durch dux-gop, die Go-Bibliothek, die die Systemdaten sammelt. Für Profile und Systemmonitor habe ich auch die Seiten in der Doku geschrieben.",
+      "Die meisten meiner übrigen Pull Requests sind Bugfixes, in der Shell, in dux-gop und in den QML-Komponenten, die alle Dux-Apps gemeinsam nutzen.",
+      "Neben dem Code melde ich Bugs gleich mit ihrer Ursache, helfe Nutzern in den Support-Kanälen, diskutiere Designfragen mit, etwa wo die Profile in den Einstellungen hingehören, und arbeite bei größeren Features mit den Maintainern zusammen."
     ],
     "viz": {
       "type": "pr-dots",

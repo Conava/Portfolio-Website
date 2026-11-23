@@ -16,7 +16,7 @@ export interface EventMap {
   panel_open: { panel: string; section: string };
   panel_close: { panel: string; section: string };
   outbound_click: { host: string; url: string; label: string; section: string };
-  resume_download: { section: string };
+  resume_download: { section: string; version: "en" | "de" };
   email_click: { section: string };
   email_copy: { section: string };
   design_toggle: { from: string; to: string; via: "header" | "footer" | "menu" };
@@ -63,7 +63,7 @@ export function classifyClick(
   pageOrigin: string
 ):
   | { name: "outbound_click"; host: string; url: string }
-  | { name: "resume_download" }
+  | { name: "resume_download"; version: "en" | "de" }
   | { name: "email_click" }
   | null {
   if (/^mailto:/i.test(href)) return { name: "email_click" };
@@ -75,13 +75,17 @@ export function classifyClick(
   }
   if (u.protocol !== "http:" && u.protocol !== "https:") return null;
   if (u.origin === new URL(pageOrigin).origin) {
-    return u.pathname === "/resume.pdf" ? { name: "resume_download" } : null;
+    if (u.pathname === "/resume.pdf") return { name: "resume_download", version: "en" };
+    if (u.pathname === "/resume-de.pdf") return { name: "resume_download", version: "de" };
+    return null;
   }
   return { name: "outbound_click", host: u.host, url: truncate(u.href, 500) };
 }
 
 /** Id of the closest section[id], else header/footer landmark, else "page". */
 export function sectionOf(el: Element | null): string {
+  const tagged = el?.closest("[data-section]")?.getAttribute("data-section");
+  if (tagged) return tagged;
   const s = el?.closest("section[id]");
   if (s) return s.id;
   if (el?.closest("header")) return "header";

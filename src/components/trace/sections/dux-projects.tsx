@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { SectionProps } from "@/components/home-types";
 import { ActionLink } from "@/components/shared/action-link";
-import { DuxBuiltOn, DuxRelations } from "@/components/shared/dux-relations";
+import { DuxRelations } from "@/components/shared/dux-relations";
 import { Gallery } from "@/components/shared/gallery";
 import { RepoFacts } from "@/components/shared/github/repo-facts";
 import { DetailPanel } from "@/components/shared/panel/detail-panel";
@@ -27,14 +27,13 @@ export async function TraceDuxProjects({ content, github, locale }: SectionProps
       <ActionLink href={p.url}>{tp("github")}</ActionLink>
     </p>
   );
-  const head = (p: DuxProject, extra?: React.ReactNode) => (
+  const head = (p: DuxProject) => (
     <div className="t-lane-head">
       <Pad station={p.id} label={p.name} kind="entry" entryId={p.id} />
       <h3>
         <a href={p.url}>{p.name}</a>
       </h3>
       <p className="prose">{p.blurb}</p>
-      {extra}
       <DuxRelations project={p} projects={projects} locale={locale} />
       <p className="meta">
         <RepoFacts repo={p.repo} github={github} locale={locale} />
@@ -48,7 +47,7 @@ export async function TraceDuxProjects({ content, github, locale }: SectionProps
       {player && (
         <article id={player.id} className="t-lane">
           <div className="wrap">
-            {head(player, <DuxBuiltOn locale={locale} />)}
+            {head(player)}
             {player.panel && (
               <div className="t-dux-panel">
                 <DetailPanel id={player.id} name={player.name} section="projects">

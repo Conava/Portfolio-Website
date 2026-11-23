@@ -27,6 +27,12 @@ const ARRIVE = 0.62;
 const PEEK = 1.2;
 /** Scroll after the flight lands for a room marked `data-ty-rest`, in stage heights (mirrors the CSS). */
 const REST = 0.6;
+/** Scroll after the flight lands for every other room, in stage heights (mirrors the CSS): the
+ * stage stays pinned while the eased camera catches up, so the room arrives at its top. */
+const SETTLE = 0.15;
+/** Most the eased camera may trail the scroll, in flights. LAG times the longest flight (0.9
+ * stage heights) stays under SETTLE, so the flight has ended when the stage scrolls on. */
+const LAG = 0.12;
 const STRETCH: Record<string, CanvasFontStretch> = {
   "62.5%": "extra-condensed",
   "75%": "condensed",
@@ -242,7 +248,7 @@ function startStage(): () => void {
       const rr = f.fly.room.getBoundingClientRect();
       // The facade is one stage height (100lvh); the stage itself grows with open panels.
       const hold = f.fly.room.hasAttribute("data-ty-hold") ? (mobile ? HOLD_PHONE : HOLD) * f.el.offsetHeight : 0;
-      const rest = f.fly.room.hasAttribute("data-ty-rest") ? REST * f.el.offsetHeight : 0;
+      const rest = (f.fly.room.hasAttribute("data-ty-rest") ? REST : SETTLE) * f.el.offsetHeight;
       f.top = rr.top + scrollY + hold;
       f.flyPx = Math.max(1, f.fly.room.offsetHeight - f.fly.stage.offsetHeight - rest - hold);
     } else {
@@ -602,17 +608,22 @@ function startStage(): () => void {
       }
       const p = (y - f.top) / f.flyPx;
       const offBelow = f.top - y > vh * 1.5;
-      if (p >= 1 || offBelow) {
+      // Just past the landing the camera may still be catching up (see LAG); beyond that it has landed.
+      const done = p >= 1 + LAG;
+      if (done || offBelow) {
         show(f, false);
-        fl.stage.toggleAttribute("data-landed", p >= 1);
-        f.ann.style.opacity = p >= 1 ? "0" : "";
-        f.e = p >= 1 ? 1 : 0;
+        fl.stage.toggleAttribute("data-landed", done);
+        f.ann.style.opacity = done ? "0" : "";
+        f.e = done ? 1 : 0;
         rest(f);
         continue;
       }
       // The dolly: one exponential zoom per flight, its clock eased a little behind the scroll.
       const target = clamp(p, 0, 1);
       f.e += (target - f.e) * (1 - Math.exp(-dt * 10));
+      // A fast flick: the camera trails by at most LAG, measured on the unclamped scroll so it
+      // reaches the landing within the settle scroll.
+      f.e = clamp(f.e, clamp(p - LAG, 0, 1), clamp(p + LAG, 0, 1));
       if (Math.abs(target - f.e) < 1e-4) f.e = target;
       else busy = true;
       const e = f.e;

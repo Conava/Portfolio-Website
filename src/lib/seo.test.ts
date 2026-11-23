@@ -12,6 +12,17 @@ import {
   thesisJsonLd,
 } from "./seo";
 
+// German is published unless a test turns it off.
+process.env.GERMAN = "on";
+const withoutGerman = (fn: () => void) => {
+  process.env.GERMAN = "";
+  try {
+    fn();
+  } finally {
+    process.env.GERMAN = "on";
+  }
+};
+
 describe("seo", () => {
   test("localizedPath", () => {
     expect(localizedPath("/", "en")).toBe("/");
@@ -42,6 +53,13 @@ describe("seo", () => {
     });
     expect(alternatesFor("/", "en").canonical).toBe("/");
   });
+
+  test("without GERMAN=on there is no de hreflang and no German Open Graph alternate", () =>
+    withoutGerman(() => {
+      expect(alternatesFor("/dux", "en")).toEqual({ canonical: "/dux", languages: { en: "/dux", "x-default": "/dux" } });
+      const og = socialFor({ title: "T", description: "D", locale: "en", image: { url: "/i.jpg", alt: "x" } }).openGraph!;
+      expect("alternateLocale" in og).toBe(false);
+    }));
 
   test("ogLocale", () => {
     expect(ogLocale("de")).toBe("de_DE");

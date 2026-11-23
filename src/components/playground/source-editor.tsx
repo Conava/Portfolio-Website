@@ -1,16 +1,21 @@
 "use client";
 
-import { createModelReference } from "@codingame/monaco-vscode-api/monaco";
-import { editor as monacoEditor, languages, MarkerSeverity, type IDisposable } from "@codingame/monaco-vscode-editor-api";
+import { getService, IKeybindingService } from "@codingame/monaco-vscode-api";
+import { editor as monacoEditor, type IDisposable } from "@codingame/monaco-vscode-editor-api";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import * as vscode from "vscode";
+import { modelUri } from "@/generated/bpmnscript/editor/language";
+import {
+  createBpmnscriptEditor,
+  followMonacoTheme,
+  modelDiagnostics,
+  openBpmnscriptModel,
+  registerBpmnscriptLanguage,
+} from "@/generated/bpmnscript/editor/monaco";
+import type { ConvDiagnostic } from "@/generated/bpmnscript/editor/protocol";
 import languageConfiguration from "@/generated/bpmnscript/language-configuration.json";
 import monarch from "@/generated/bpmnscript/monarch.js";
-import type { ConvDiagnostic } from "@/lib/playground/protocol";
-import { fileUri } from "@/lib/playground/workspace";
-import { ensureMonacoApi, LANGUAGE_ID } from "./bpmnscript-client";
-import { followMonacoTheme } from "./monaco-theme";
+import { ensureMonacoApi } from "./bpmnscript-client";
 import "./source-editor.css";
 
 // Same dynamic entry as the editor, so Monaco is fetched once:
@@ -24,11 +29,13 @@ export type EditorApi = {
   /** 1-based line and column in file `id`: once that file is shown, moves the cursor there, scrolls it into view and focuses. */
   revealPosition(id: string, line: number, col: number): void;
   focus(): void;
+  /** Every key label Monaco binds to a command on this platform (e.g. ["Ctrl+Shift+P", "F1"]). */
+  keybindings(commandId: string): string[];
 };
 
 type Props = {
   /** One model per file; `text` is read only when the model is created. */
-  files: readonly { id: string; text: string }[];
+  files: readonly { id: string; name: string; text: string }[];
   /** The file shown; null shows nothing. */
   active: string | null;
   /** Server-rendered source shown until Monaco is live. */
@@ -43,32 +50,15 @@ type Props = {
   onError?: (err: unknown) => void;
 };
 
-type Doc = { id: string; ref: { dispose(): void }; model: monacoEditor.ITextModel; sub: IDisposable };
+type Doc = { id: string; uri: string; ref: { dispose(): void }; model: monacoEditor.ITextModel; sub: IDisposable };
 
 // Mounts and unmounts run one after another, so a Strict Mode remount never overlaps a start.
 let lifecycle: Promise<void> = Promise.resolve();
-let languageRegistered = false;
-
-function registerLanguage() {
-  if (languageRegistered) return;
-  languageRegistered = true;
-  languages.register({ id: LANGUAGE_ID, extensions: [".bpmnscript"], aliases: ["BPMNscript"] });
-  languages.setMonarchTokensProvider(LANGUAGE_ID, monarch);
-  // The file is VS Code's format: pairs as [open, close] or {open, close}, wordPattern as a regex source.
-  const pair = (p: string[] | { open: string; close: string }) => (Array.isArray(p) ? { open: p[0], close: p[1] } : p);
-  const c = languageConfiguration;
-  languages.setLanguageConfiguration(LANGUAGE_ID, {
-    comments: { lineComment: c.comments.lineComment, blockComment: c.comments.blockComment as [string, string] },
-    brackets: c.brackets as [string, string][],
-    autoClosingPairs: c.autoClosingPairs.map(pair),
-    surroundingPairs: c.surroundingPairs.map(pair),
-    wordPattern: new RegExp(c.wordPattern),
-  });
-}
 
 /**
  * Monaco (classic mode) for BPMNscript with the language server's completion, hover and diagnostics.
  * Every file keeps its own model, so switching files keeps text, undo history, cursor and scroll.
+ * The model URI is the file name, so a rename swaps the model: text, cursor and scroll stay, undo does not.
  */
 export default function SourceEditor({ files, active, fallback, onChange, onReady, onDiagnostics, onCursor, onError }: Props) {
   const t = useTranslations("playground.tabs");
@@ -92,46 +82,33 @@ export default function SourceEditor({ files, active, fallback, onChange, onRead
     // A position to show once its file is the shown one (the switch may still be on its way).
     let reveal: { id: string; line: number; col: number } | null = null;
 
-    const emitDiagnostics = (doc: Doc) => {
-      const markers = monacoEditor.getModelMarkers({ resource: doc.model.uri });
-      props.current.onDiagnostics?.(
-        doc.id,
-        markers.map((m) => ({
-          line: m.startLineNumber - 1,
-          character: m.startColumn - 1,
-          endLine: m.endLineNumber - 1,
-          endCharacter: m.endColumn - 1,
-          message: m.message,
-          severity: m.severity === MarkerSeverity.Error ? 1 : 2,
-          text: doc.model.getValueInRange(m),
-        })),
-      );
-    };
+    const emitDiagnostics = (doc: Doc) => props.current.onDiagnostics?.(doc.id, modelDiagnostics(doc.model));
 
     const reconcile = async () => {
       if (cancelled || !ed) return;
       const { files } = props.current;
-      const want = new Set(files.map((f) => f.id));
-      for (const [id, doc] of docs)
-        if (!want.has(id)) {
-          if (shown === id) {
-            ed.setModel(null);
-            shown = null;
-          }
-          doc.sub.dispose();
-          doc.ref.dispose();
-          docs.delete(id);
-          views.delete(id);
-          props.current.onDiagnostics?.(id, []);
+      const want = new Map(files.map((f) => [f.id, modelUri(f.name)]));
+      for (const [id, doc] of docs) {
+        const uri = want.get(id);
+        if (uri === doc.uri) continue;
+        if (shown === id) {
+          // A rename keeps the view state for the new model.
+          if (uri) views.set(id, ed.saveViewState());
+          ed.setModel(null);
+          shown = null;
         }
+        doc.sub.dispose();
+        doc.ref.dispose();
+        docs.delete(id);
+        if (!uri) views.delete(id);
+        props.current.onDiagnostics?.(id, []);
+      }
       for (const f of files) {
         if (docs.has(f.id)) continue;
-        const ref = await createModelReference(vscode.Uri.parse(fileUri(f.id)), f.text);
+        const uri = modelUri(f.name);
+        const { ref, model } = await openBpmnscriptModel(f.name, f.text);
         if (cancelled) return ref.dispose();
-        ref.object.setLanguageId(LANGUAGE_ID);
-        const model = ref.object.textEditorModel!;
-        if (model.getValue() !== f.text) model.setValue(f.text);
-        const doc: Doc = { id: f.id, ref, model, sub: model.onDidChangeContent(() => props.current.onChange?.(f.id, model.getValue())) };
+        const doc: Doc = { id: f.id, uri, ref, model, sub: model.onDidChangeContent(() => props.current.onChange?.(f.id, model.getValue())) };
         docs.set(f.id, doc);
         emitDiagnostics(doc);
       }
@@ -161,37 +138,15 @@ export default function SourceEditor({ files, active, fallback, onChange, onRead
         if (cancelled) return;
         await Promise.all([ensureMonacoApi(), document.fonts.ready]);
         if (cancelled) return;
-        registerLanguage();
+        registerBpmnscriptLanguage({ monarch, languageConfiguration });
         const root = host.closest("[data-playground]") ?? document.documentElement;
         stopTheme = followMonacoTheme(root);
-        const coarse = matchMedia("(pointer: coarse)").matches;
-        ed = monacoEditor.create(host, {
-          model: null,
+        ed = await createBpmnscriptEditor(host, {
           ariaLabel: props.current.label,
           fontFamily: getComputedStyle(root).getPropertyValue("--pg-font-mono").trim() || "monospace",
-          // 16px on touch screens keeps iOS from zooming in on focus.
-          fontSize: coarse ? 16 : 14,
-          lineHeight: coarse ? 24 : 22,
-          padding: { top: 8, bottom: 8 },
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          tabSize: 2,
-          glyphMargin: false,
-          folding: false,
-          lineNumbersMinChars: 3,
-          lineDecorationsWidth: 10,
-          renderLineHighlight: "line",
-          stickyScroll: { enabled: false },
-          wordBasedSuggestions: "off",
-          fixedOverflowWidgets: true,
-          cursorSmoothCaretAnimation: "off",
-          smoothScrolling: false,
-          guides: { indentation: true, bracketPairs: false },
-          scrollbar: { useShadows: false, verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
         });
-        // Fonts finished loading before Monaco measured; this catches a late swap.
-        monacoEditor.remeasureFonts();
         const editor = ed;
+        const keys = await getService(IKeybindingService);
         disposables.push(
           editor,
           monacoEditor.onDidChangeMarkers((uris) => {
@@ -214,6 +169,7 @@ export default function SourceEditor({ files, active, fallback, onChange, onRead
             sync.current();
           },
           focus: () => editor.focus(),
+          keybindings: (id) => keys.lookupKeybindings(id).flatMap((k) => k.getLabel() ?? []),
         });
       })
       .catch((err: unknown) => {
@@ -238,7 +194,7 @@ export default function SourceEditor({ files, active, fallback, onChange, onRead
     };
   }, []);
 
-  const ids = files.map((f) => f.id).join(" ");
+  const ids = files.map((f) => `${f.id}/${f.name}`).join(" ");
   useEffect(() => sync.current(), [ids, active]);
 
   return (

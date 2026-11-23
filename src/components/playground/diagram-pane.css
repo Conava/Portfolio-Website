@@ -39,6 +39,7 @@
 
 /* The bpmn.io watermark stays unaltered where bpmn-js puts it, on a light plate in both modes. */
 .pg-diagram .bjs-powered-by {
+  text-decoration: none;
   background: #fff;
   padding: 2px 4px;
   border-radius: var(--pg-r-1);

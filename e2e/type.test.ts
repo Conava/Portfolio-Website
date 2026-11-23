@@ -358,3 +358,34 @@ test("type: each counter flight is one monotonic camera move, and the hero rests
     });
   }
 }, 120_000);
+
+test("type: every flight has finished, the room at the top with no wall left, before its stage scrolls on", async () => {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    await withPage({ viewport, reducedMotion: "no-preference" }, async (page) => {
+      await page.waitForFunction(() => [...document.querySelectorAll(".ty-stage > [data-ty-facade]")].every((f) => f.hasAttribute("data-ready")));
+      const ids = await page.evaluate(() => [...document.querySelectorAll(".ty-stage")].map((s) => s.parentElement!.id));
+      expect(ids).toEqual(["top", "work", "education", "bpmnscript", "dux", "projects", "contact"]);
+      for (const id of ids) {
+        const r = await page.evaluate(async (id) => {
+          const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          const room = document.getElementById(id)!;
+          const stage = room.querySelector<HTMLElement>(".ty-stage")!;
+          const start = room.getBoundingClientRect().top + scrollY;
+          const release = start + room.offsetHeight - stage.offsetHeight;
+          // Mid-flight, then one fast flick to the last pinned scroll position: the eased camera lags behind.
+          scrollTo({ top: start + (release - start) * 0.4, behavior: "instant" });
+          await new Promise((r) => setTimeout(r, 400));
+          scrollTo({ top: Math.floor(release), behavior: "instant" });
+          await frame();
+          const f = room.querySelector<HTMLElement>("[data-ty-facade]")!;
+          return {
+            wallGone: f.dataset.off !== undefined,
+            stageTop: Math.round(stage.getBoundingClientRect().top) + 0,
+            roomAtRest: room.querySelector<HTMLElement>("[data-ty-in]")!.style.transform === "",
+          };
+        }, id);
+        expect(r, `${viewport.width}px ${id}`).toEqual({ wallGone: true, stageTop: 0, roomAtRest: true });
+      }
+    });
+  }
+}, 120_000);

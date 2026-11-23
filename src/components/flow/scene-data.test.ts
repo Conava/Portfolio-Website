@@ -41,18 +41,32 @@ test("a current school without an end runs to today", () => {
   expect(d.schools[0].x1).toBe(1);
 });
 
-test("counts come from the copy: services, the migration, the pipeline lanes, one job per entry in text order", async () => {
+test("counts come from the copy: services, the migration, OTTO's applications, one job per entry in text order", async () => {
   const d = sceneData(await getHomeContent("en"), "2026-11");
   expect(d.services).toBe(5);
   expect(d.migrate).toEqual([9, 10]);
-  expect(d.stages).toEqual([1, 1, 1, 3, 1, 1, 1]);
+  expect(d.intake).toBe(4);
   expect(d.jobs.map((j) => j.id)).toEqual(["otto", "uhh-ta", "msg-life"]);
   expect(d.jobs[0].months).toBe(11);
   expect(d.prs).toBe(6);
   // Dux Player with its plugins and dux-cast is one projects entry after devline, then the other four.
-  expect(d.shots).toBe(6);
   expect(d.projects).toBe(5);
-  expect(sceneData(await getHomeContent("de"), "2026-11")).toMatchObject({ services: 5, migrate: [9, 10] });
+  expect(sceneData(await getHomeContent("de"), "2026-11")).toMatchObject({ services: 5, migrate: [9, 10], intake: 4 });
+});
+
+test("the devline run form follows the run's stages: gates where the run stops, the example's tasks, docs and end options", async () => {
+  for (const l of ["en", "de"] as const) {
+    const d = sceneData(await getHomeContent(l), "2026-11");
+    expect(d.run).toEqual({ ids: ["idea", "route", "brainstorm", "design", "plan", "implement", "docs", "reviews", "deep-review", "final"], gates: [2, 4, 9], tasks: 3, docs: 3, options: 4 });
+  }
+});
+
+test("each featured Dux PR stands for the part of the shell it changed, read from its title", async () => {
+  const d = sceneData(await getHomeContent("en"), "2026-11");
+  expect(d.duxParts).toEqual(["profiles", "monitor", "monitor", "network", "wallpaper", "bar"]);
+  const pr = (title: string) => ({ ref: "x#1", title, blurb: "" });
+  const c = { bpmnscript: { sample: "" }, dux: { featuredPrs: [pr("fix(bar): typo"), pr("docs: readme"), pr("feat(sysmon): x")], projects: [] } } as unknown as HomeContent;
+  expect(sceneData(c, "2026-11").duxParts).toEqual(["bar", null, "monitor"]);
 });
 
 test("copy without a number still gives a whole form", () => {
@@ -60,6 +74,8 @@ test("copy without a number still gives a whole form", () => {
   expect(d.services).toBeGreaterThan(0);
   expect(d.migrate[0]).toBeLessThanOrEqual(d.migrate[1]);
   expect(d.jobs).toEqual([]);
+  expect(d.intake).toBeGreaterThan(0);
+  expect(d.run).toBeNull();
 });
 
 test("the real content fits the scene: at most 12 code lines, every school on the axis", async () => {

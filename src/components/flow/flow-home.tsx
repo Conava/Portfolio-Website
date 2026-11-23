@@ -14,7 +14,7 @@ import { StatusLine } from "@/components/shared/status-line";
 import { DetailPanel } from "@/components/shared/panel/detail-panel";
 import { PanelBody } from "@/components/shared/panel/panel-body";
 import { Viz } from "@/components/shared/viz/viz";
-import { DuxBuiltOn, DuxRelations } from "@/components/shared/dux-relations";
+import { DuxRelations } from "@/components/shared/dux-relations";
 import { Gallery } from "@/components/shared/gallery";
 import { Link } from "@/i18n/navigation";
 import { formatMonth, formatRange } from "@/lib/format";
@@ -63,12 +63,29 @@ function SchoolMark({ logo }: { logo: Img }) {
 }
 
 /** A beat's headline: one plain sentence in one face and colour. */
-function Headline({ as: H = "h2", text, label }: { as?: "h1" | "h2" | "h3"; text: string; label?: string }) {
+function Headline({ as: H = "h2", text, label }: { as?: "h1" | "h2" | "h3" | "h4"; text: string; label?: string }) {
   return (
     <H className="fl-hl">
       {label && <span className="sr-only">{label}: </span>}
       {text}
     </H>
+  );
+}
+
+/**
+ * Labels the scene stands on parts of a form, keyed by the part (`data-label`); decorative, the text
+ * says it all. `end`: the keys of labels that end at their point instead of starting there. `item`:
+ * labels shown only while that text item is read (key to item).
+ */
+function Labels({ items, end = [], item = {} }: { items: [number, ReactNode][]; end?: number[]; item?: Record<number, number> }) {
+  return (
+    <ul className="fl-labs" aria-hidden="true">
+      {items.map(([k, v]) => (
+        <li key={k} data-label={k} data-end={end.includes(k) ? "" : undefined} data-for={item[k]}>
+          {v}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -152,6 +169,8 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
 
   const feature = projects.projects.find((p) => p.emphasis) ?? projects.projects[0];
   const restProjects = projects.projects.filter((p) => p !== feature);
+  // the projects form draws the featured devline run; its stations carry the stage names
+  const run = feature?.panel?.viz?.type === "devline-run" ? feature.panel.viz : null;
   const duxLead = dux.projects.find((p) => p.id === "dux-player");
   const duxShot = dux.shellImages?.[0];
   const projName = (p: Project) =>
@@ -217,7 +236,13 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
 
       <TrackedSection id="work" className="fl-sec">
         {lead && (
-          <Beat beat={2} idx="02" at="l" head={<Headline text={t("flow.work", { year: String(since) })} label={t("sections.work")} />}>
+          <Beat
+            beat={2}
+            idx="02"
+            at="l"
+            head={<Headline text={t("flow.work", { year: String(since) })} label={t("sections.work")} />}
+            stage={lead.id === "otto" && <Labels items={(["ottoIn", "ottoApps", "ottoCore", "ottoPlatform", "ottoLegacy"] as const).map((k, i) => [i, t(`flow.labels.${k}`)])} />}
+          >
             <p className="fl-kick rv" aria-hidden="true">{t("sections.work")}</p>
             <div id={lead.id} data-item={0}>
               <div className="rv">
@@ -242,11 +267,24 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
         )}
         {current && (
           <>
-            <Beat beat={3} idx="03" at="r" id={current.id} head={<Employer job={current} />}>
+            <Beat
+              beat={3}
+              idx="03"
+              at="r"
+              id={current.id}
+              head={<Employer job={current} />}
+              stage={<Labels items={(["adobeTop", "adobeBottom", "gitops"] as const).map((k, i) => [i, t(`flow.labels.${k}`)])} end={[0, 1]} />}
+            >
               {jobMeta(current)}
               <p className="fl-p fl-big rv">{current.summary}</p>
             </Beat>
-            <Beat beat={4} idx="04" at="l" head={null}>
+            <Beat
+              beat={4}
+              idx="04"
+              at="l"
+              head={<Headline as="h4" text={t("flow.migration")} />}
+              stage={<Labels items={(["oldPlatform", "newPlatform", "changelog"] as const).map((k, i) => [i, t(`flow.labels.${k}`)])} item={{ 2: 1 }} />}
+            >
               <p className="fl-kick rv" aria-hidden="true">{current.company}</p>
               {curDid.slice(0, 2).map((d, i) => (
                 <div key={d} className="fl-step" data-item={i}>
@@ -353,7 +391,29 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
       </TrackedSection>
 
       <TrackedSection id="projects" className="fl-sec">
-        <Beat beat={8} idx="08" at="l" head={<Headline text={t("flow.projects")} label={t("sections.projects")} />}>
+        <Beat
+          beat={8}
+          idx="08"
+          at="l"
+          head={<Headline text={t("flow.projects")} label={t("sections.projects")} />}
+          stage={
+            run && (
+              <>
+                <Labels items={run.stages.map((s, i) => [100 + i, s.name])} />
+                {/* the stage shown, big, beside its station (the figure's own caption gives way to it) */}
+                <ul className="fl-labs fl-caps" aria-hidden="true">
+                  {run.stages.map((s, i) => (
+                    <li key={s.id} data-label={200 + i} data-end="" data-cap="">
+                      <b>{s.name}</b>
+                      {s.gate && <em>{s.gate}</em>}
+                      <span>{s.line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )
+          }
+        >
           <p className="fl-kick rv" aria-hidden="true">{t("sections.projects")}</p>
           {projects.intro && <p className={`${lede(projects.intro)} rv`}>{projects.intro}</p>}
           {feature && (
@@ -376,14 +436,18 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
               )}
             </div>
           )}
-          {/* Dux Player with its plugins and dux-cast: one entry of the form (item 1). */}
+        </Beat>
+        {/* The other projects, after the run: the whole width, a few blocks drifting at the window's edges. */}
+        <div className="fl-beat fl-more" data-beat={9}>
+          <div className="fl-stage" data-stage="edge" />
+          <div className="fl-body">
+          {/* Dux Player with its plugins and dux-cast */}
           {dux.projects.map((p) => (
-            <div key={p.id} id={p.id} className={p === duxLead ? "fl-feature rv" : "fl-entry rv"} data-item={1} data-dux-shared={p.usedBy ? "" : undefined}>
+            <div key={p.id} id={p.id} className={p === duxLead ? "fl-feature rv" : "fl-entry rv"} data-dux-shared={p.usedBy ? "" : undefined}>
               <h3>
                 <a href={p.url}>{p.name}</a>
               </h3>
               <p className="fl-p">{p.blurb}</p>
-              {p === duxLead && <DuxBuiltOn locale={locale} />}
               <DuxRelations project={p} projects={dux.projects} locale={locale} />
               <p className="fl-meta">
                 <RepoFacts repo={p.repo} github={github} locale={locale} />
@@ -400,8 +464,8 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
               )}
             </div>
           ))}
-          {restProjects.map((p, i) => (
-            <div key={p.id} id={p.id} className="fl-entry rv" data-item={i + 2}>
+          {restProjects.map((p) => (
+            <div key={p.id} id={p.id} className="fl-entry rv">
               <h3>{projName(p)}</h3>
               <p className="fl-p">{p.blurb}</p>
               <p className="fl-meta">
@@ -419,11 +483,12 @@ export async function FlowHome({ content, github, locale, today }: SectionProps)
               )}
             </div>
           ))}
-        </Beat>
+          </div>
+        </div>
       </TrackedSection>
 
       <TrackedSection id="contact" className="fl-sec">
-        <div className="fl-beat fl-contact" data-beat={9}>
+        <div className="fl-beat fl-contact" data-beat={10}>
           <div className="fl-inner">
             <div className="fl-stage" data-stage="full" />
             <div className="fl-head">

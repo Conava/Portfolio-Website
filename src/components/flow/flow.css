@@ -73,6 +73,21 @@
   .fl[data-live="on"] .fl-rail {
     display: flex;
   }
+  /*
+   * The projects form draws the devline run's route here, with the stage caption beside its station:
+   * the figure keeps its stepping and shows its card and model slider alone (the engine's "cd" layout);
+   * its own caption stays for assistive tech only.
+   */
+  .fl[data-live="on"] .fl-feature .dlr {
+    --dlr-lay: cd;
+  }
+  .fl[data-live="on"] .fl-feature .dlr-capcol {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
 }
 
 /* ---- Beats: a wide column (headline, then the form) and a narrow text column; sides alternate ---- */
@@ -90,7 +105,7 @@
   /* how far a stage may reach past the page margin, to the edge of the window */
   --bleed: max(var(--fl-x), (100vw - var(--fl-max)) / 2);
   display: grid;
-  grid-template-columns: minmax(0, 64fr) minmax(0, 36fr);
+  grid-template-columns: minmax(0, 56fr) minmax(0, 44fr);
   grid-template-rows: auto 1fr;
   column-gap: 4vw;
   width: 100%;
@@ -125,12 +140,12 @@
   justify-self: end;
   /* a fixed width, so wide content (the code block) scrolls inside instead of widening the column */
   width: 100%;
-  max-width: clamp(31rem, 25vw, 36rem);
+  max-width: clamp(33rem, 30vw, 44rem);
   padding-top: 1.2vw;
 }
 /* r: the text on the left, the form on the right */
 .fl-beat[data-at="r"] .fl-inner {
-  grid-template-columns: minmax(0, 36fr) minmax(0, 64fr);
+  grid-template-columns: minmax(0, 44fr) minmax(0, 56fr);
 }
 .fl-beat[data-at="r"] :is(.fl-head, .fl-stage) {
   grid-column: 2;
@@ -192,17 +207,50 @@
   justify-items: start;
   gap: 8px;
   color: var(--fg-2);
-  font: 400 13px/1.3 var(--mono);
+  font: 400 15px/1.3 var(--sans);
   white-space: nowrap;
   visibility: hidden;
   will-change: transform;
+}
+/* the devline run: the stage shown has its big caption beside the station, so its small name steps back */
+.fl-labs:not(.fl-caps) li[data-label][data-on] {
+  visibility: hidden !important;
+}
+.fl-caps li {
+  justify-items: end;
+  gap: 10px;
+  width: min(22vw, 340px);
+  color: var(--fg);
+  white-space: normal;
+  text-align: end;
+}
+.fl-caps li:not([data-on]) {
+  display: none;
+}
+.fl-caps b {
+  font: 400 clamp(40px, 3.4vw, 60px) / 1 var(--display);
+}
+.fl-caps em {
+  color: var(--acc);
+  font: 500 15px/1.2 var(--sans);
+  font-style: normal;
+}
+.fl-caps span {
+  color: var(--fg-2);
+  font: 400 clamp(17px, 1.25vw, 21px) / 1.35 var(--sans);
+  text-wrap: balance;
+}
+.fl-labs li[data-end] {
+  justify-items: end;
+  text-align: end;
 }
 .fl-labs img {
   /* the same visual weight for marks of different shapes: wider marks are set lower */
   width: auto;
   height: calc(var(--lh) * min(1, 3.4 / var(--ar)) + var(--lh) * 0.25);
 }
-.fl-labs li[data-upcoming] span {
+.fl-labs li[data-upcoming] span,
+.fl-labs li[data-on] {
   color: var(--acc);
 }
 .fl:not([data-live="on"]) .fl-labs {
@@ -231,12 +279,16 @@
 .fl-beat .fl-head {
   margin-bottom: 4vh;
 }
+/* a beat inside a section (the migration under its employer) */
+h4.fl-hl {
+  font-size: clamp(44px, 4.8vw, 88px);
+}
 
 /* ---- Text column ---- */
 .fl-kick {
   margin: 0 0 18px;
   color: var(--fg-3);
-  font: 400 13px/1.4 var(--mono);
+  font: 400 14px/1.4 var(--mono);
 }
 .fl-meta {
   display: flex;
@@ -244,7 +296,7 @@
   gap: 2px 14px;
   margin: 0 0 14px;
   color: var(--fg-3);
-  font: 400 13px/1.5 var(--mono);
+  font: 400 14px/1.5 var(--mono);
   font-variant-numeric: tabular-nums;
 }
 .fl-meta b {
@@ -254,7 +306,7 @@
 .fl-lede {
   margin: 0 0 18px;
   color: var(--fg);
-  font: 400 clamp(19px, 1.55vw, 22px) / 1.42 var(--sans);
+  font: 400 clamp(20px, 1.6vw, 26px) / 1.42 var(--sans);
   letter-spacing: -0.01em;
   text-wrap: pretty;
 }
@@ -265,13 +317,13 @@
 .fl-p {
   margin: 0 0 14px;
   color: var(--fg-2);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.6;
   text-wrap: pretty;
 }
 .fl-big {
   color: var(--fg);
-  font-size: 17px;
+  font-size: 19px;
 }
 .fl-small {
   color: var(--fg-3);
@@ -289,7 +341,7 @@
   border-radius: var(--r-2);
   background: rgb(10 10 12 / 0.72);
   color: #d8d1c4;
-  font: 400 12.5px/1.7 var(--mono);
+  font: 400 13.5px/1.7 var(--mono);
 }
 .fl-code .ln {
   display: block;
@@ -318,6 +370,36 @@
   margin-top: 28px;
   padding-top: 20px;
   border-top: 1px solid var(--line);
+}
+/* the other projects, after the devline run: a regular section over the whole width; the form only
+   drifts at the window's edges (the stage is the section, the blocks keep to its sides) */
+.fl-more {
+  position: relative;
+  min-height: 0;
+}
+.fl-more > .fl-stage {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  margin: 0;
+}
+.fl-more > .fl-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
+  align-items: start;
+  gap: 56px 72px;
+  max-width: min(1440px, 100%);
+  margin-inline: auto;
+  padding: 0;
+}
+.fl-more > .fl-body > * {
+  margin: 0;
+  max-width: 44rem;
+}
+/* Dux Player leads with its images: the whole row */
+.fl-more > .fl-body > .fl-feature {
+  grid-column: 1 / -1;
+  max-width: none;
 }
 /* a soft dark halo per line, so a form passing near the text never lowers its contrast */
 .fl[data-live="on"] :is(.fl-head, .fl-body, .fl-hero-foot) {
@@ -369,11 +451,11 @@
 .fl-entry h3,
 .fl-feature h3 {
   margin: 0 0 6px;
-  font: 500 19px/1.3 var(--sans);
+  font: 500 21px/1.3 var(--sans);
   letter-spacing: 0;
 }
 .fl-feature h3 {
-  font: 400 34px/1.05 var(--display);
+  font: 400 40px/1.05 var(--display);
 }
 /* The text item the form is showing right now. */
 .fl [data-item],
@@ -490,7 +572,7 @@
   max-width: 28rem;
   margin: 14px 0 0;
   color: var(--fg-2);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
   text-wrap: pretty;
 }
@@ -611,7 +693,7 @@
     grid-column: 1;
     grid-row: 2;
     min-height: 0;
-    height: 54vh;
+    height: 44vh;
     margin-inline: calc(-1 * var(--fl-x));
   }
   .fl-stage > img {
@@ -685,7 +767,7 @@
     margin-bottom: 2vh;
   }
   .fl-beat[data-at] .fl-stage {
-    height: 48vh;
+    height: 40vh;
     margin-inline: -16px;
   }
   .fl-hl {
@@ -697,11 +779,15 @@
   .fl-labs li {
     --lh: 24px;
     gap: 5px;
-    font-size: 11px;
+    font-size: 13px;
   }
   .fl-labs span {
     max-width: 9em;
     white-space: normal;
+  }
+  /* a phone band is too small for more than the schools' labels */
+  .fl-beat:not([data-beat="5"]) .fl-labs {
+    display: none;
   }
   .fl-idx {
     transform: translateY(-1.6em);

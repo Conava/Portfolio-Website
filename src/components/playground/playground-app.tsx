@@ -3,11 +3,12 @@
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { createContext, useContext, useEffect, useRef, useState, type DragEvent, type ReactNode } from "react";
+import { isCompileShortcut } from "@/generated/bpmnscript/editor/language";
+import type { ConvDiagnostic } from "@/generated/bpmnscript/editor/protocol";
 import { trackEvent } from "@/lib/analytics";
 import type { Design } from "@/lib/design-values";
 import { compileView, exportName, importView, shouldReportCompileError, type ImportView, type Message } from "@/lib/playground/outcome";
 import { PRESETS, type Preset } from "@/lib/playground/presets";
-import type { ConvDiagnostic } from "@/lib/playground/protocol";
 import { decodeShare, encodeShare } from "@/lib/playground/share";
 import {
   activate,
@@ -33,9 +34,10 @@ import { BottomPanel, type PanelTab } from "./bottom-panel";
 import { EditorTabs } from "./editor-tabs";
 import { Explorer, NEW_FILE } from "./explorer";
 import type { ExportFormat } from "./export-menu";
-import { PlaygroundHeader, SHARE_COPIED_MS, type ShareState } from "./header";
+import { COMPILE_RESULT_MS, PlaygroundHeader, SHARE_COPIED_MS, type CompileButtonState, type ShareState } from "./header";
 import { ImportBanner } from "./import-banner";
 import { MobileTabs, tabId, type PaneTab } from "./mobile-tabs";
+import { PlaygroundShortcutList, ShortcutsDialog } from "./shortcuts";
 import type { BpmnscriptClient, EditorApi, LspStatus } from "./source-editor";
 import { StatusBar, type CompileState } from "./status-bar";
 import { XmlPane } from "./xml-pane";
@@ -165,11 +167,15 @@ export function PlaygroundApp({
   const [tab, setTab] = useState<PaneTab>("source");
   const [shareState, setShareState] = useState<ShareState>("idle");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [compileBtn, setCompileBtn] = useState<{ state: CompileButtonState; errors: number }>({ state: "idle", errors: 0 });
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [editorFailed, setEditorFailed] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
   const shareTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const compileTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const inflight = useRef<{ id: string; text: string } | null>(null);
   const requested = useRef(0);
   const compiledId = useRef<string | null>(null);
   const importSeq = useRef(0);
@@ -179,21 +185,22 @@ export function PlaygroundApp({
   const good = active ? goods[active.id] : undefined;
   const isPhone = () => matchMedia(PHONE).matches;
 
+  /** Compiles `text` as file `id`; resolves to the result, or null when there was nothing to compile or it was superseded. */
   async function runCompile(id: string, text: string) {
     const seq = ++requested.current;
     if (!text.trim()) {
       // Nothing to compile; the diagram keeps the last good version.
       compileState.current = "pending";
       setCompile((c) => ({ state: "pending", seq: c.seq + 1, errors: 0 }));
-      return;
+      return null;
     }
     let r;
     try {
       r = await (await client.get()).compile(text);
     } catch {
-      return; // the worker is down; the status bar says so and Retry recompiles
+      return null; // the worker is down; the status bar says so and Retry recompiles
     }
-    if (seq !== requested.current) return; // a newer edit or another file is on its way
+    if (seq !== requested.current) return null; // a newer edit or another file is on its way
     const v = compileView(r);
     if (shouldReportCompileError(compileState.current, v.state)) trackEvent("playground_compile_error", { errors: v.errors });
     compileState.current = v.state;
@@ -202,6 +209,26 @@ export function PlaygroundApp({
       setLayoutWarning(v.layoutWarning ?? null);
       setGoods((g) => ({ ...g, [id]: { source: text, xml: v.xml! } }));
     }
+    return v;
+  }
+
+  // The Compile button and Ctrl/Cmd+Enter: compile now (live compile also runs while typing) and show
+  // the result: errors open the Problems panel, success on a phone switches to the diagram.
+  async function compileNow() {
+    const id = wsRef.current.active;
+    const text = activeSource();
+    if (!id || text == null) return;
+    clearTimeout(compileTimer.current);
+    setCompileBtn((b) => ({ ...b, state: "busy" }));
+    inflight.current = { id, text };
+    const v = await runCompile(id, text).finally(() => (inflight.current = null));
+    if (!v) return setCompileBtn((b) => ({ ...b, state: "idle" }));
+    setCompileBtn({ state: v.state, errors: v.errors });
+    compileTimer.current = setTimeout(() => setCompileBtn((b) => ({ ...b, state: "idle" })), COMPILE_RESULT_MS);
+    if (v.state === "error") {
+      setPanelTab("problems");
+      setPanelOpen(true);
+    } else if (isPhone()) setTab("diagram");
   }
 
   // The diagram follows the open file: compile right away on a switch, after a pause while typing.
@@ -211,7 +238,11 @@ export function PlaygroundApp({
     const id = ws.active;
     const switched = compiledId.current !== id;
     compiledId.current = id;
-    const timer = setTimeout(() => void runCompile(id, activeText), switched ? 0 : DEBOUNCE_MS);
+    const timer = setTimeout(() => {
+      // An explicit compile of this exact text is on its way; superseding it would swallow its result.
+      if (inflight.current?.id === id && inflight.current.text === activeText) return;
+      void runCompile(id, activeText);
+    }, switched ? 0 : DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [loaded, lsp, ws.active, activeText]);
 
@@ -234,6 +265,7 @@ export function PlaygroundApp({
     return () => {
       removeEventListener("pagehide", flush);
       clearTimeout(shareTimer.current);
+      clearTimeout(compileTimer.current);
     };
   }, []);
 
@@ -259,6 +291,8 @@ export function PlaygroundApp({
   function openFile(name: string, text: string) {
     update((w) => openText(w, name, text).ws);
     setTab("source");
+    // Examples and imports start in the explorer: on a phone its drawer makes way for the new file.
+    if (isPhone()) setExplorerOpen(false);
   }
 
   function onChange(id: string, text: string) {
@@ -409,6 +443,8 @@ export function PlaygroundApp({
     prev: () => update((w) => cycleTab(w, -1)),
     explorer: () => setExplorerOpen((o) => !(o ?? !isPhone())),
     panel: () => setPanelOpen((o) => !(o ?? !isPhone())),
+    compile: () => void compileNow(),
+    shortcuts: () => setShortcutsOpen(true),
   };
   useEffect(() => {
     // Capture phase, so these win over Monaco. Alt combinations match the physical key (macOS turns Alt+N into a dead key).
@@ -416,8 +452,12 @@ export function PlaygroundApp({
       const mod = (e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey;
       const alt = e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
       const k = e.key.toLowerCase();
+      // "?" types into fields and the editor; it opens the shortcuts only from elsewhere.
+      const typing = e.target instanceof Element && !!e.target.closest("input, textarea, select, [contenteditable], .monaco-editor, dialog");
       const action =
-        mod && k === "s" ? "save"
+        isCompileShortcut(e) ? "compile"
+        : e.key === "?" && !e.ctrlKey && !e.metaKey && !e.altKey && !typing ? "shortcuts"
+        : mod && k === "s" ? "save"
         : mod && k === "b" ? "explorer"
         : mod && k === "j" ? "panel"
         : alt && e.code === "KeyN" ? "newFile"
@@ -485,13 +525,13 @@ export function PlaygroundApp({
         <ClientHost onClient={onClient} />
         <PlaygroundHeader
           version={version}
-          presets={PRESETS}
-          onPreset={(p) => void onPreset(p)}
-          onImportFile={(f) => void importFile(f, "file")}
-          exportState={{ bpmn: !!active && compile.state !== "error" && !empty }}
-          onExport={(f) => void onExport(f)}
+          compileState={compileBtn.state}
+          compileErrors={compileBtn.errors}
+          canCompile={!!active}
+          onCompile={() => void compileNow()}
           shareState={shareState}
           onShare={() => void onShare()}
+          onShortcuts={() => setShortcutsOpen(true)}
           design={design}
         />
         <main id="main" className="pg-main">
@@ -515,6 +555,11 @@ export function PlaygroundApp({
               onRename={rename}
               onDelete={remove}
               onClose={() => setExplorerOpen(false)}
+              presets={PRESETS}
+              onPreset={(p) => void onPreset(p)}
+              onImportFile={(f) => void importFile(f, "file")}
+              exportState={{ bpmn: !!active && compile.state !== "error" && !empty }}
+              onExport={(f) => void onExport(f)}
             />
           </div>
           {explorerOpen && <div className="pg-scrim" aria-hidden="true" onClick={() => setExplorerOpen(false)} />}
@@ -638,6 +683,11 @@ export function PlaygroundApp({
             if (lsp === "failed") client.now()?.restart();
           }}
         />
+        <ShortcutsDialog
+          open={shortcutsOpen}
+          onClose={() => setShortcutsOpen(false)}
+          keybindings={(id) => editor.now()?.keybindings(id) ?? []}
+        />
         {dragging && (
           <div className="pg-drop" aria-hidden="true">
             {t("import.drop")}
@@ -648,17 +698,6 @@ export function PlaygroundApp({
   );
 }
 
-const SHORTCUTS: [string, string][] = [
-  ["save", "Ctrl+S"],
-  ["newFile", "Alt+N"],
-  ["closeTab", "Alt+W"],
-  ["nextTab", "Alt+PageDown"],
-  ["prevTab", "Alt+PageUp"],
-  ["explorer", "Ctrl+B"],
-  ["panel", "Ctrl+J"],
-  ["rename", "F2"],
-];
-
 /** Shown over the editor while no file is open: what to do, and the keyboard shortcuts. */
 function NoFile() {
   const t = useTranslations("playground");
@@ -666,21 +705,8 @@ function NoFile() {
     <div className="pg-nofile" data-pg-nofile="">
       <p className="pg-nofile-title">{t("noFile.title")}</p>
       <p>{t("noFile.hint")}</p>
-      <dl aria-label={t("shortcuts.title")}>
-        {SHORTCUTS.map(([k, combo]) => (
-          <div key={k}>
-            <dt>{t(`shortcuts.${k}`)}</dt>
-            <dd>
-              {combo.split("+").map((key, i) => (
-                <span key={i}>
-                  {i > 0 && "+"}
-                  <kbd>{key}</kbd>
-                </span>
-              ))}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <PlaygroundShortcutList />
+      <p>{t("noFile.shortcutsHint")}</p>
     </div>
   );
 }

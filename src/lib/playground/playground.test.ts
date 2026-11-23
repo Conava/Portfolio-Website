@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { compileView, exportName, importView, shouldReportCompileError } from "./outcome";
+import { shouldReportCompileError } from "./outcome";
 import { DEFAULT_PRESET, PRESETS } from "./presets";
-import { decodeShare, encodeShare } from "./share";
 import {
   activate,
   cleanName,
@@ -18,106 +17,14 @@ import {
   type Workspace,
 } from "./workspace";
 
-async function deflate(data: Uint8Array) {
-  const cs = new CompressionStream("deflate-raw");
-  const w = cs.writable.getWriter();
-  void w.write(data as BufferSource);
-  void w.close();
-  return new Uint8Array(await new Response(cs.readable).arrayBuffer());
-}
-
-describe("share", () => {
-  test("round trip with non-ASCII", async () => {
-    const src = "process Prüfung {\n  start\n}\n".repeat(80);
-    const e = await encodeShare(src);
-    if (!e.ok) throw new Error("expected ok");
-    expect(e.hash.startsWith("src=")).toBe(true);
-    for (const h of [e.hash, "#" + e.hash]) {
-      expect(await decodeShare(h)).toEqual({ ok: true, source: src });
-    }
-  });
-  test("too-long", async () => {
-    let seed = 1;
-    const noise = Array.from({ length: 12000 }, () => {
-      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-      return String.fromCharCode(33 + (seed % 90));
-    }).join("");
-    expect(await encodeShare(noise)).toEqual({ ok: false, reason: "too-long" });
-  });
-  test("too-large", async () => {
-    const big = await deflate(new Uint8Array(300 * 1024).fill(97));
-    const hash = "src=" + Buffer.from(big).toString("base64url");
-    expect(await decodeShare(hash)).toEqual({ ok: false, reason: "too-large" });
-  });
-  test("garbage never throws", async () => {
-    expect(await decodeShare("src=%%%")).toEqual({ ok: false, reason: "invalid" });
-    expect(await decodeShare("src=AAAA")).toEqual({ ok: false, reason: "invalid" });
-    expect(await decodeShare("src=")).toEqual({ ok: false, reason: "invalid" });
-    expect(await decodeShare("")).toEqual({ ok: false, reason: "absent" });
-    expect(await decodeShare("#other=1")).toEqual({ ok: false, reason: "absent" });
-  });
-});
-
+// compileView, importView, exportName, share links and the diagram helpers are tested where they
+// live, in @bpmn-script/editor.
 describe("outcome", () => {
-  const d = (line: number) => ({
-    line,
-    character: 0,
-    endLine: line,
-    endCharacter: 1,
-    message: "m",
-    severity: 1 as const,
-    text: "t",
-  });
-  test("compileView", () => {
-    expect(compileView({ ok: false, kind: "validation", diagnostics: [d(4), d(9)] })).toMatchObject({
-      state: "error",
-      errors: 2,
-      firstErrorLine: 5,
-    });
-    expect(
-      compileView({ ok: false, kind: "validation", diagnostics: [{ ...d(1), severity: 2 }, d(6)] }),
-    ).toMatchObject({ errors: 1, firstErrorLine: 7 });
-    expect(compileView({ ok: true, output: "<x/>", layoutWarning: "w" })).toMatchObject({
-      state: "ok",
-      xml: "<x/>",
-      layoutWarning: "w",
-      errors: 0,
-    });
-    expect(compileView({ ok: false, kind: "error", message: "boom" })).toMatchObject({
-      state: "error",
-      message: "boom",
-    });
-  });
-  test("importView", () => {
-    const w = { elementId: "a", category: "c", message: "head\nnote: n1\nhelp: h1" };
-    expect(importView({ ok: true, output: "s", warnings: [w], buildErrors: [] })).toEqual({
-      kind: "warning",
-      source: "s",
-      warnings: [{ headline: "head", notes: ["note: n1", "help: h1"] }],
-    });
-    expect(importView({ ok: true, output: "s", warnings: [], buildErrors: [] })).toMatchObject({
-      kind: "ok",
-      source: "s",
-    });
-    expect(importView({ ok: false, kind: "unsupported", message: "no\nnote: why" })).toMatchObject({
-      kind: "refused",
-      message: { headline: "no", notes: ["note: why"] },
-    });
-    expect(importView({ ok: false, kind: "error", message: "e" }).kind).toBe("refused");
-  });
   test("shouldReportCompileError", () => {
     expect(shouldReportCompileError("pending", "error")).toBe(true);
     expect(shouldReportCompileError("ok", "error")).toBe(true);
     expect(shouldReportCompileError("error", "error")).toBe(false);
     expect(shouldReportCompileError("error", "ok")).toBe(false);
-  });
-  test("exportName", () => {
-    expect(exportName("process loan-approval(\n", ".bpmnscript")).toBe("loan-approval.bpmnscript");
-    expect(exportName('<bpmn:process id="p-1_x">', ".bpmn")).toBe("p-1_x.bpmn");
-    expect(exportName("// process fake {\nprocess real(\n", ".bpmnscript")).toBe("real.bpmnscript");
-    expect(exportName('<!-- process x -->\n<bpmn:process id="p">', ".bpmn")).toBe("p.bpmn");
-    expect(exportName("nothing", ".bpmn")).toBe("process.bpmn");
-    expect(exportName("process a/b {", ".bpmn")).toBe("a_b.bpmn");
   });
 });
 
@@ -189,7 +96,7 @@ describe("presets", () => {
     for (const p of PRESETS) {
       const ext = p.kind === "source" ? "bpmnscript" : "bpmn";
       expect(p.file).toBe(`/playground/presets/${p.id}.${ext}`);
-      expect(p.upstreamPath.endsWith("." + ext)).toBe(true);
+      expect(p.path.endsWith("." + ext)).toBe(true);
     }
   });
 });

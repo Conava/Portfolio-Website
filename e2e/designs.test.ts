@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Browser, BrowserContext, Page } from "playwright-core";
 import { launchBrowser } from "../scripts/shots";
-import { assertBuilt, escapeHtml, get, githubStub, ROOT, startSite, STUB_MERGED_TOTAL, type Site } from "./helpers";
+import { assertBuilt, escapeHtml, get, githubStub, ROOT, startSite, STUB_MERGED_TOTAL, type Site, markup, textOf } from "./helpers";
 
 const json = (file: string) => JSON.parse(readFileSync(join(ROOT, file), "utf8"));
 const DESIGNS = ["keynote", "thread", "flow", "type"] as const;
@@ -21,7 +21,6 @@ const slugs = readdirSync(join(ROOT, "content/en/projects"))
   .filter((f) => f.endsWith(".mdx"))
   .map((f) => f.replace(/\.mdx$/, ""));
 // Rendered markup only: the RSC payload in <script> tags carries every UI message string.
-const markup = (html: string) => html.replace(/<script[^]*?<\/script>/g, "");
 const prefix = (l: string) => (l === "de" ? "/de" : "");
 const home = (l: string) => (l === "de" ? "/de" : "/");
 
@@ -100,6 +99,32 @@ describe("designs", () => {
         expect(f.includes("<details"), name).toBe(name === "thread");
         expect(f).toContain("<table");
       }
+    }
+  });
+
+  test("1c. graphs carry no period sub-labels; each Dux helper user says once what it is built for and uses", async () => {
+    for (const l of LOCALES)
+      for (const name of DESIGNS) {
+        const html = markup(await (await get(main, home(l), { Cookie: `design=${name}` })).text());
+        expect(html, `${name}/${l}`).not.toContain('class="viz-sub"');
+        expect(html, `${name}/${l}`).not.toContain(l === "de" ? ">laufend<" : ">ongoing<");
+        if (name === "flow") continue; // Flow lays out its Dux projects on its own
+        const rel = [...html.matchAll(/<p class="dux-rel">([^]*?)<\/p>/g)].map((m) => textOf(m[1]));
+        const built = l === "de" ? "Gebaut für die Dux Shell, nutzt dux-cast." : "Built for Dux Shell, uses dux-cast.";
+        // Dux Player and Dux Plugins use dux-cast; dux-cast itself keeps its "Used by" line.
+        expect(rel.filter((r) => r === built).length, `${name}/${l}`).toBe(2);
+        expect(rel.length, `${name}/${l}`).toBe(3);
+      }
+  });
+
+  test("1d. Trace's career diagram: no visible legend, a named figure, dotted past today, the M.S. as M.S. CS", async () => {
+    for (const l of LOCALES) {
+      const html = markup(await (await get(main, home(l), { Cookie: "design=thread" })).text());
+      const fig = html.match(/<figure class="t-career"[^>]*>[^]*?<\/figure>/)?.[0] ?? "";
+      expect(fig).toContain(`aria-label="${escapeHtml(json(`messages/${l}.json`).trace.career)}"`);
+      expect(fig).not.toContain("<figcaption");
+      expect(fig).toContain('class="cg-ahead cg-at"');
+      expect(fig).toContain('<span class="cg-l">M.S. CS</span>');
     }
   });
 

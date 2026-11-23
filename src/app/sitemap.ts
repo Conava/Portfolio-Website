@@ -2,19 +2,17 @@ import matter from "gray-matter";
 import type { MetadataRoute } from "next";
 import { ARTICLE_SLUGS, getArticle, getProjectSlugs, getProjectSource } from "@/lib/content";
 import { localizedPath } from "@/lib/seo";
-import { articlesLive, siteConfig } from "@/lib/site-config";
+import { articlesLive, germanLive, siteConfig } from "@/lib/site-config";
 import type { Locale, ProjectFrontmatter } from "@/lib/types";
 
-// Read per request: the ARTICLES switch is a runtime env, so a build-time sitemap would miss it.
+// Read per request: the ARTICLES and GERMAN switches are runtime env, so a build-time sitemap would miss them.
 export const dynamic = "force-dynamic";
-
-const LOCALES: Locale[] = ["en", "de"];
 
 /**
  * One entry per path and locale, each listing both languages (and English as x-default) as `xhtml:link` alternates.
  * `lastModified` is set only for articles, which carry a real date; project dates are years.
  * The DE entry reuses the EN date: both locales are updated together. The playground is English only:
- * one entry, no DE alternate.
+ * one entry, no DE alternate. Without `GERMAN=on` every page is English only.
  */
 export function sitemapEntries(input: {
   articles: { slug: string; updated: string }[];
@@ -27,9 +25,10 @@ export function sitemapEntries(input: {
     { path: "/projects" },
     ...input.projectSlugs.map((slug) => ({ path: `/projects/${slug}` })),
   ];
+  const all: Locale[] = germanLive() ? ["en", "de"] : ["en"];
   const abs = (path: string, locale: Locale) => siteConfig.url + localizedPath(path, locale).replace(/^\/$/, "");
   return pages.flatMap(({ path, lastModified }) => {
-    const locales = path === "/playground" ? (["en"] as const) : LOCALES;
+    const locales = path === "/playground" ? (["en"] as const) : all;
     const languages = Object.fromEntries([...locales.map((l) => [l, abs(path, l)]), ["x-default", abs(path, "en")]]);
     return locales.map((locale) => ({
       url: abs(path, locale),

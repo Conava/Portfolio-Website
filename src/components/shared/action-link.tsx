@@ -4,15 +4,18 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Project } from "@/lib/types";
 import { ArrowRightIcon, DownloadIcon, ExternalIcon, GithubMark, LinkedinMark } from "./icons";
-import { isPageHref } from "@/lib/seo";
+import { isArticleHref, isPageHref } from "@/lib/seo";
+import { articlesLive } from "@/lib/site-config";
 
 /**
  * A link styled as a button (`.btn`, `.btn-primary` for the section's one main action).
  * Site pages go through the locale-aware Link with a trailing arrow; files (`/resume.pdf`)
  * stay plain unprefixed URLs with a download icon; github.com and linkedin.com links lead with their mark;
  * other sites keep the external mark. Always an `<a>`, so the delegated analytics listener sees it.
+ * Renders nothing for an unpublished article. Server-rendered only: the client has no `ARTICLES` env.
  */
 export function ActionLink({ href, children, primary }: { href: string; children: ReactNode; primary?: boolean }) {
+  if (isArticleHref(href) && !articlesLive()) return null;
   const className = primary ? "btn btn-primary" : "btn";
   const external = /^https?:/.test(href);
   if (isPageHref(href)) {

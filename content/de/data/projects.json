@@ -14,177 +14,380 @@
       ],
       "panel": {
         "did": [
-          "Ich gebe Spezifikation und Plan frei und entscheide am Ende über den Merge. Den Rest erledigt devline allein.",
+          "Manuelle Freigaben nach Spezifikation und Plan, ein letztes Gate vor dem Merge. Den Rest erledigt devline allein.",
           "Der Planer teilt jeder Aufgabe eigene Dateien zu und ordnet die Aufgaben nach Abhängigkeiten in Wellen. Agenten setzen eine Welle parallel in Git-Worktrees um, ohne Merge-Konflikte.",
-          "Jede Aufgabe bekommt ein eigenes Review. Blockierende Befunde gehen zurück an die Umsetzung, und nach drei gescheiterten Runden schreibt der Planer den Ansatz neu.",
+          "Jede Aufgabe bekommt ein eigenes Review. Blockierende Befunde gehen zurück an die Umsetzung, und wenn Fixes wiederholt scheitern, übernehmen erst der Debugger, dann der Planer.",
           "Security-Hooks verweigern zerstörerische Befehle und das Lesen von Secrets und fragen bei riskanten nach. Deshalb kann ein Lauf unbeaufsichtigt durchgehen.",
           "Ich nutze es täglich für meine eigenen Projekte."
         ],
         "viz": {
-          "type": "pipeline",
-          "caption": "Nur die drei manuellen Freigaben halten den Lauf an. Dazwischen blockieren Hooks zerstörerische Befehle und das Lesen von Secrets.",
+          "type": "devline-run",
+          "caption": "Ein Beispiellauf, Stufe für Stufe: die Route, die devline wählt, die Arbeit, die Reviews und die Stellen, an denen es auf dich wartet.",
+          "heading": "Was ein Lauf macht",
+          "request": "OAuth2-Login mit Google und GitHub hinzufügen",
+          "marks": [
+            "hinzufügen",
+            "OAuth2-Login"
+          ],
           "stages": [
             {
+              "id": "idea",
+              "name": "Idee",
+              "line": "/devline und ein Satz zum Feature."
+            },
+            {
+              "id": "route",
+              "name": "Route",
+              "line": "devline liest die Anfrage und entscheidet, welche Stufen die Änderung braucht."
+            },
+            {
               "id": "brainstorm",
-              "label": "Brainstorm",
-              "skill": "brainstorm",
-              "approval": true
+              "name": "Brainstorm",
+              "line": "Fragt nach, was unklar ist, und schreibt eine kurze Spec.",
+              "gate": "Manuelle Freigabe"
             },
             {
               "id": "design",
-              "label": "Designsystem",
-              "skill": "design",
-              "optional": true,
-              "agents": [
-                {
-                  "id": "designer",
-                  "model": "Opus"
-                }
-              ]
+              "name": "Design",
+              "line": "Mehrere Entwürfe zur Auswahl, dann ein Designsystem, an das sich der Code hält."
             },
             {
               "id": "plan",
-              "label": "Plan",
-              "skill": "plan",
-              "approval": true,
-              "agents": [
-                {
-                  "id": "planner",
-                  "model": "Opus",
-                  "kb": [
-                    "kb-tdd-workflow",
-                    "kb-blast-radius"
-                  ]
-                }
-              ]
+              "name": "Plan",
+              "line": "Plant die ganze Umsetzung, bevor Code entsteht: Aufgaben, ihre Tests und Wellen, die parallel laufen.",
+              "gate": "Manuelle Freigabe"
             },
             {
               "id": "implement",
-              "label": "Implementierung",
-              "skill": "implement",
-              "perTask": true,
-              "agents": [
-                {
-                  "id": "implementer",
-                  "model": "Sonnet",
-                  "kb": [
-                    "kb-tdd-workflow",
-                    "kb-engineering"
-                  ]
-                },
-                {
-                  "id": "reviewer",
-                  "model": "Sonnet",
-                  "kb": [
-                    "kb-blast-radius",
-                    "kb-engineering"
-                  ]
-                },
-                {
-                  "id": "debugger",
-                  "model": "Opus"
-                }
-              ]
+              "name": "Umsetzung",
+              "line": "Ein Implementer pro Aufgabe, Test zuerst. Ein eigener Reviewer prüft jede Aufgabe."
             },
             {
               "id": "docs",
-              "label": "Dokumentation",
-              "agents": [
-                {
-                  "id": "docs-keeper",
-                  "model": "Sonnet"
-                }
-              ]
+              "name": "Doku",
+              "line": "Der docs-keeper bringt die Dokumentation auf den Stand des Codes."
+            },
+            {
+              "id": "reviews",
+              "name": "Reviews",
+              "line": "Die zusätzlichen Reviews, die die Route gewählt hat, etwa ein Security-Scan und Best Practices."
             },
             {
               "id": "deep-review",
-              "label": "Deep Review",
-              "skill": "deep-review",
-              "agents": [
+              "name": "Deep Review",
+              "line": "Ein letztes Review des ganzen Branches, auf Opus."
+            },
+            {
+              "id": "final",
+              "name": "Letztes Gate",
+              "line": "devline legt das Ergebnis vor: mergen, PR öffnen oder zurückschicken.",
+              "gate": "Manuelle Freigabe"
+            }
+          ],
+          "map": {
+            "idea": "Idee",
+            "route": "Route",
+            "full": "Full",
+            "brain": "Brainstorm",
+            "design": "Design",
+            "plan": "Plan",
+            "prep": "Vorbereitendes Refactoring",
+            "impl": "Umsetzung",
+            "reviewer": "Reviewer, frischer Kontext",
+            "docs": "Dokumentation",
+            "sec": "Security-Scan",
+            "bp": "Best-Practices-Review",
+            "perf": "Profiling, Optimierung",
+            "deep": "Deep Review, auf Opus",
+            "final": "Letztes Gate",
+            "merge": "Merge",
+            "quick": "Quick",
+            "bug": "Bugfix",
+            "back": "Bug gefunden: Debugger",
+            "approval": "Manuelle Freigabe",
+            "decide": "Manuelle Freigabe"
+          },
+          "card": {
+            "requestLabel": "Die Anfrage",
+            "spec": [
+              "Umfang",
+              "Folgen für die Architektur",
+              "Wichtige Entscheidungen"
+            ],
+            "looks": "Mehrere Entwürfe",
+            "pick": "Du wählst einen",
+            "planNote": "Eine Welle läuft parallel. Jede Aufgabe hat ihre eigenen Dateien.",
+            "waves": [
+              "Welle 1",
+              "Welle 2"
+            ],
+            "tasks": [
+              "Auth-Modul",
+              "Callback-Routen",
+              "Login-Screen"
+            ],
+            "files": [
+              "auth/oauth.ts",
+              "routes/callback.ts",
+              "ui/Login.tsx"
+            ],
+            "later": "Login Ende zu Ende",
+            "laterFile": "e2e/login.spec.ts",
+            "implementer": "Implementer, eigener Worktree",
+            "reviewer": "Reviewer, frischer Kontext",
+            "steps": [
+              "Test",
+              "Code",
+              "Test",
+              "Merge"
+            ],
+            "summary": "Ein blockierender Befund, behoben",
+            "docsAgent": "docs-keeper",
+            "docFiles": [
+              "README.md",
+              "CLAUDE.md",
+              "docs/auth.md"
+            ],
+            "branch": "Feature-Branch",
+            "checks": [
+              "Security-Scan",
+              "Best-Practices-Review",
+              "Profiling, Optimierung",
+              "Deep Review"
+            ],
+            "approved": "Freigegeben",
+            "done": [
+              "Aufgaben erledigt",
+              "Reviews bestanden"
+            ],
+            "options": [
+              "Mergen",
+              "PR öffnen",
+              "Commit",
+              "Beenden"
+            ],
+            "bug": "Bug gefunden",
+            "debugger": "debugger",
+            "rootCause": "Findet die Ursache, dann wieder Umsetzung und Review",
+            "stamp": "FREIGEGEBEN"
+          },
+          "model": {
+            "agents": [
+              "designer",
+              "planner",
+              "implementer und reviewer",
+              "docs-keeper",
+              "Reviewer",
+              "reviewer, ganzer Branch",
+              "debugger"
+            ],
+            "cheap": "Sonnet",
+            "cheapNote": "günstiger",
+            "strong": "Opus",
+            "strongNote": "stärker, teurer"
+          },
+          "parts": {
+            "heading": "Die Teile",
+            "skills": {
+              "title": "Skills",
+              "text": "Befehle, die du tippst. Die erste Gruppe bildet einen devline-Lauf.",
+              "pipeline": "In einem devline-Lauf",
+              "other": "Außerhalb der Pipeline",
+              "alone": "läuft auch für sich",
+              "pipelineItems": [
                 {
-                  "id": "reviewer",
+                  "name": "devline",
+                  "alone": false
+                },
+                {
+                  "name": "quick",
+                  "alone": true
+                },
+                {
+                  "name": "brainstorm",
+                  "alone": true
+                },
+                {
+                  "name": "design",
+                  "alone": true
+                },
+                {
+                  "name": "plan",
+                  "alone": true
+                },
+                {
+                  "name": "implement",
+                  "alone": true
+                },
+                {
+                  "name": "review",
+                  "alone": true
+                },
+                {
+                  "name": "deep-review",
+                  "alone": true
+                },
+                {
+                  "name": "debug",
+                  "alone": true
+                },
+                {
+                  "name": "git",
+                  "alone": true
+                }
+              ],
+              "otherItems": [
+                "writing",
+                "deps",
+                "brand",
+                "graphic-design",
+                "handoff",
+                "setup",
+                "verify-setup"
+              ]
+            },
+            "agents": {
+              "title": "Agents",
+              "text": "Sie machen die Arbeit, jeder auf dem Modell, das zu seiner Aufgabe passt.",
+              "default": "läuft in einem devline-Lauf standardmäßig",
+              "items": [
+                {
+                  "name": "debugger",
                   "model": "Opus",
-                  "kb": [
-                    "kb-blast-radius",
-                    "kb-engineering"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "gate",
-              "label": "Merge oder neue Runde",
-              "gate": true
-            }
-          ],
-          "hooks": [
-            {
-              "id": "validate-bash.sh"
-            },
-            {
-              "id": "validate-write.sh"
-            },
-            {
-              "id": "pre-compact.sh"
-            }
-          ],
-          "standalone": [
-            {
-              "id": "quick",
-              "command": "/devline:quick",
-              "agents": [
+                  "role": "findet die Ursache eines Fehlers",
+                  "default": false
+                },
                 {
-                  "id": "implementer",
+                  "name": "dependency",
                   "model": "Sonnet",
-                  "kb": [
-                    "kb-tdd-workflow",
-                    "kb-engineering"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "debug",
-              "command": "/devline:debug",
-              "agents": [
+                  "role": "aktualisiert Abhängigkeiten",
+                  "default": false
+                },
                 {
-                  "id": "debugger",
-                  "model": "Opus"
-                }
-              ]
-            },
-            {
-              "id": "review",
-              "command": "/devline:review",
-              "agents": [
+                  "name": "designer",
+                  "model": "Opus",
+                  "role": "Entwürfe und Designsysteme",
+                  "default": false
+                },
                 {
-                  "id": "reviewer",
+                  "name": "docs-keeper",
                   "model": "Sonnet",
-                  "kb": [
-                    "kb-blast-radius",
-                    "kb-engineering"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "deps",
-              "command": "/devline:deps",
-              "agents": [
+                  "role": "hält die Doku auf dem Stand des Codes",
+                  "default": true
+                },
                 {
-                  "id": "dependency",
+                  "name": "implementer",
                   "model": "Sonnet",
-                  "kb": [
-                    "kb-dependency-management"
+                  "role": "eine Aufgabe, Test zuerst",
+                  "default": true
+                },
+                {
+                  "name": "planner",
+                  "model": "Opus",
+                  "role": "der Plan und seine Wellen",
+                  "default": true
+                },
+                {
+                  "name": "reviewer",
+                  "model": "Sonnet",
+                  "role": "prüft jede Aufgabe und den Branch",
+                  "default": true
+                }
+              ]
+            },
+            "knowledge": {
+              "title": "Wissensbasen",
+              "text": "Passive Skills, die die Agents beim Arbeiten lesen.",
+              "items": [
+                {
+                  "name": "kb-tdd-workflow",
+                  "text": "Wie man zuerst testet, auf der richtigen Ebene",
+                  "users": [
+                    "implementer",
+                    "planner"
+                  ]
+                },
+                {
+                  "name": "kb-engineering",
+                  "text": "Checklisten für Tests, Zuverlässigkeit, Sicherheit und Performance",
+                  "users": [
+                    "implementer",
+                    "reviewer"
+                  ]
+                },
+                {
+                  "name": "kb-blast-radius",
+                  "text": "Welche Dateien eine Änderung treffen kann und was sie erreicht",
+                  "users": [
+                    "planner",
+                    "reviewer",
+                    "devline"
+                  ]
+                },
+                {
+                  "name": "kb-dependency-management",
+                  "text": "Wie jeder Paketmanager Abhängigkeiten aktualisiert und prüft",
+                  "users": [
+                    "dependency"
+                  ]
+                },
+                {
+                  "name": "kb-m3e",
+                  "text": "Werte und Regeln für Material 3 Expressive",
+                  "users": [
+                    "designer",
+                    "reviewer"
+                  ]
+                },
+                {
+                  "name": "find-docs",
+                  "text": "Aktuelle Doku zu Bibliotheken statt Erinnerung",
+                  "users": [
+                    "debugger",
+                    "implementer",
+                    "planner",
+                    "reviewer"
                   ]
                 }
               ]
             },
-            {
-              "id": "writing",
-              "command": "/writing"
+            "hooks": {
+              "title": "Hooks",
+              "text": "Sie prüfen jeden Befehl und jeden Dateizugriff, bevor er läuft. Deshalb ist der Auto-Accept-Modus sicher genug.",
+              "rules": [
+                {
+                  "command": "rm -rf ~",
+                  "verdict": "Blockiert",
+                  "kind": "deny"
+                },
+                {
+                  "command": "cat ~/.ssh/id_ed25519",
+                  "verdict": "Blockiert",
+                  "kind": "deny"
+                },
+                {
+                  "command": "Read .env",
+                  "verdict": "Blockiert",
+                  "kind": "deny"
+                },
+                {
+                  "command": "git push --force",
+                  "verdict": "Fragt erst",
+                  "kind": "ask"
+                },
+                {
+                  "command": "npm publish",
+                  "verdict": "Fragt erst",
+                  "kind": "ask"
+                },
+                {
+                  "command": "git status",
+                  "verdict": "Läuft",
+                  "kind": "run"
+                }
+              ]
             }
-          ]
+          }
         }
       },
       "url": "/devline"
@@ -250,9 +453,9 @@
     },
     {
       "id": "homeserver",
-      "name": "VPS-Homeserver",
+      "name": "Server und Systemadministration",
       "slug": "homeserver",
-      "blurb": "Eine private Cloud auf einem Linux-VPS: Docker-Compose-Dienste hinter Traefik, darunter Nextcloud, Matrix und Navidrome.",
+      "blurb": "Ein Linux-VPS und ein Raspberry Pi zu Hause, die ich selbst aufgesetzt habe und betreibe: Docker, Traefik, eigenes DNS, ein Mesh-VPN zwischen allen Geräten, Backups und Monitoring.",
       "tech": [
         "Docker",
         "Traefik",
@@ -260,10 +463,11 @@
       ],
       "panel": {
         "did": [
-          "Ich betreibe einen eigenen Linux-VPS: Nextcloud, einen Matrix-Server mit Sprach- und Videoanrufen, Navidrome für Musik und die Backends meiner Projekte, alles in Docker.",
-          "Traefik steht vor jedem Dienst und holt die Let's-Encrypt-Zertifikate.",
-          "Jede Kategorie von Diensten hat eine eigene Compose-Datei. So kann ich einen Dienst aktualisieren, zurückrollen oder debuggen, ohne den Rest anzufassen.",
-          "Dateien und Medien liegen auf externen Storage-Boxen, sodass der Speicher ohne größeren Server wächst.",
+          "Ein Linux-VPS betreibt meine Alltagsdienste in Docker hinter Traefik: Nextcloud, einen Matrix-Server mit Sprach- und Videoanrufen, Navidrome für Musik, die Analytics dieser Website und die Backends meiner Projekte.",
+          "Ein Raspberry Pi zu Hause ist der DNS-Server des Netzwerks, mit Werbe- und Tracker-Blocking für jedes Gerät, dazu eine Netzwerkfreigabe auf einer verschlüsselten Festplatte und Container, die nur über einen VPN-Tunnel mit Kill-Switch ins Internet kommen.",
+          "Alle meine Geräte hängen in einem selbst gehosteten Mesh-VPN (Headscale), sodass DNS und Dienste von zu Hause überall funktionieren.",
+          "Das Docker-Networking ist pro Dienst eingerichtet: Datenbanken liegen in internen Netzen ohne Zugang zum Proxy, und die Heimdienste bekommen Wildcard-Zertifikate über eine DNS-Challenge, die der VPS beantwortet.",
+          "Nächtliche Backups gehen auf eine Storage-Box und verschlüsselt zu einem zweiten Anbieter; ein Uptime-Monitoring schickt Push-Benachrichtigungen, wenn ein Dienst ausfällt.",
           "Diese Website läuft dort: GitHub Actions baut das Image, schiebt es nach GHCR und startet den Container per SSH neu."
         ]
       }

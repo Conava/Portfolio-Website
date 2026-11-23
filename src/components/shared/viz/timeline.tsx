@@ -193,7 +193,6 @@ export async function Timeline({
                 <Fragment key={e.id}>
                   <span className="viz-label" aria-hidden="true" style={{ gridRow: e.row }}>
                     {e.short}
-                    {(e.on || e.future) && <span className="viz-sub">{e.on ? t("ongoing") : period(e)}</span>}
                   </span>
                   <svg className="viz-track" aria-hidden="true" style={{ gridRow: e.row }}>
                     {!e.future && (

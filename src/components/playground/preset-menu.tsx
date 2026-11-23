@@ -116,7 +116,7 @@ export function MenuItem({
   );
 }
 
-/** The menu button's face: icon, label (icon-only between 640 and 900 px), chevron. */
+/** The menu button's face: icon, label, chevron. */
 export function MenuFace({ icon, label }: { icon: ReactNode; label: string }) {
   return (
     <>
@@ -134,7 +134,7 @@ const ExamplesIcon = () => (
   </svg>
 );
 
-/** Examples (source presets) and BPMN files to import, as two menu groups. */
+/** Examples (source presets) and BPMN files to import, as two menu groups; a full-width button in the explorer. */
 export function PresetMenu({
   presets,
   onPreset,
@@ -169,7 +169,7 @@ export function PresetMenu({
 
   return (
     <div className="pg-menu-root" {...m.rootProps}>
-      <button className="pg-btn" aria-label={label} data-tip={label} data-tip-align="start" {...m.buttonProps}>
+      <button className="pg-btn" data-pg-examples="" {...m.buttonProps}>
         <MenuFace icon={<ExamplesIcon />} label={label} />
       </button>
       <div className="pg-menu" data-align="start" {...m.menuProps}>

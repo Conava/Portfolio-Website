@@ -1,11 +1,13 @@
 // Builds the BPMNscript browser worker (@bpmn-script/web) and Monaco's editor worker, and puts
-// them, the presets and the Monarch grammar where the playground loads them. Source: the
+// them, the presets, the Monarch grammar and the editor core's source (@bpmn-script/editor)
+// where the playground loads them. Source: the
 // checkout in BPMNSCRIPT_DIR, else a shallow clone of package.json "bpmnscript" (repo, ref),
-// overridable with BPMNSCRIPT_REPO / BPMNSCRIPT_REF. All outputs are gitignored.
-import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+// overridable with BPMNSCRIPT_REPO / BPMNSCRIPT_REF. Ref "latest" means the newest vX.Y.Z tag
+// on the remote. All outputs are gitignored.
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import pkg from "../package.json";
-import { PRESETS } from "../src/lib/playground/presets";
+import { newestTag } from "./lib/newest-tag";
 
 const root = join(import.meta.dir, "..");
 const WEB_OUT = ["server-worker.js", "monarch.js", "language-configuration.json", "LICENSE", "operaton-moddle.LICENSE", "THIRD_PARTY_NOTICES.txt"];
@@ -15,6 +17,8 @@ const BPMNSCRIPT = "public/playground/bpmnscript";
 const PRESETS_DIR = "public/playground/presets";
 const EDITOR_WORKER = "public/playground/editor.worker.js";
 const GENERATED = "src/generated/bpmnscript";
+// Copied as source, so the playground compiles it against its own Monaco (one instance per page).
+const EDITOR_SRC = "packages/editor/src";
 
 class Fail extends Error {}
 
@@ -34,7 +38,8 @@ type Source = { dir: string; source: "git" | "local"; ref: string; commit: strin
 
 function local(dir: string): Source {
   requireTools(["git", "node", "npm"]);
-  if (!existsSync(join(dir, "packages/web/package.json"))) throw new Fail(`BPMNSCRIPT_DIR=${dir} is not a BPMNscript checkout with packages/web.`);
+  if (!existsSync(join(dir, "packages/web/package.json")) || !existsSync(join(dir, EDITOR_SRC)))
+    throw new Fail(`BPMNSCRIPT_DIR=${dir} is not a BPMNscript checkout with packages/web and packages/editor.`);
   if (!existsSync(join(dir, "node_modules"))) throw new Fail(`${dir} has no node_modules: run \`npm install\` there first.`);
   run(["npm", "run", "build:web"], dir);
   return {
@@ -94,22 +99,37 @@ function git(repo: string, ref: string, fromEnv: boolean): Source {
   return { dir, source: "git", ref, commit, dirty: false };
 }
 
+function resolveRef(repo: string, ref: string): string {
+  if (ref !== "latest") return ref;
+  requireTools(["git"]);
+  const tag = newestTag(run(["git", "ls-remote", "--tags", "--refs", "--", repo], root));
+  if (!tag) throw new Fail(`No vX.Y.Z release tag found in ${repo}.`);
+  return tag;
+}
+
 async function main() {
   const envDir = process.env.BPMNSCRIPT_DIR?.trim();
+  const repo = process.env.BPMNSCRIPT_REPO || pkg.bpmnscript.repo;
   const src = envDir
     ? local(envDir)
-    : git(process.env.BPMNSCRIPT_REPO || pkg.bpmnscript.repo, process.env.BPMNSCRIPT_REF || pkg.bpmnscript.ref, !!process.env.BPMNSCRIPT_REF);
+    : git(repo, resolveRef(repo, process.env.BPMNSCRIPT_REF || pkg.bpmnscript.ref), !!process.env.BPMNSCRIPT_REF);
 
   const stage = join(root, ".cache/playground-stage");
   rmSync(stage, { recursive: true, force: true });
   const out = (target: string, f = "") => join(stage, target, f);
   const webOut = join(src.dir, "packages/web/out");
 
+  const editorSrc = join(src.dir, EDITOR_SRC);
+  if (!existsSync(editorSrc))
+    throw new Fail(`${src.ref} in ${src.dir} has no ${EDITOR_SRC} (@bpmn-script/editor); the playground needs a BPMNscript release that has it.`);
   for (const f of WEB_OUT) cpSync(join(webOut, f), out(BPMNSCRIPT, f));
+  // tsc runs without outDir can leave .js and .d.ts beside the sources; only the .ts files are the package.
+  for (const f of readdirSync(editorSrc)) if (f.endsWith(".ts") && !f.endsWith(".d.ts")) cpSync(join(editorSrc, f), out(GENERATED, `editor/${f}`));
+  const { PRESETS }: { PRESETS: readonly { id: string; kind: "source" | "bpmn"; path: string }[] } = await import(join(editorSrc, "presets.ts"));
   for (const p of PRESETS) {
-    const from = join(src.dir, p.upstreamPath);
-    if (!existsSync(from)) throw new Fail(`Preset "${p.id}": ${p.upstreamPath} is missing in the BPMNscript checkout at ${src.dir}.`);
-    cpSync(from, out(PRESETS_DIR, p.file.split("/").pop()!));
+    const from = join(src.dir, p.path);
+    if (!existsSync(from)) throw new Fail(`Preset "${p.id}": ${p.path} is missing in the BPMNscript checkout at ${src.dir}.`);
+    cpSync(from, out(PRESETS_DIR, `${p.id}.${p.kind === "source" ? "bpmnscript" : "bpmn"}`));
   }
 
   // The worker monaco-languageclient's default classic-mode loader points at.

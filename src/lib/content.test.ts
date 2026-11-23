@@ -116,6 +116,23 @@ describe("real content", () => {
       }
     }
   });
+
+  test("with articles unpublished, the home content links to no article; published, it does", async () => {
+    const articleHrefs = (c: Awaited<ReturnType<typeof getHomeContent>>) =>
+      [...c.bpmnscript.links.map((l) => l.href), ...c.dux.links.map((l) => l.href), ...c.projects.projects.map((p) => p.url)].filter((h) =>
+        ARTICLE_SLUGS.some((s) => h === `/${s}`),
+      );
+    const prev = process.env.ARTICLES;
+    try {
+      process.env.ARTICLES = "";
+      for (const l of ["en", "de"] as const) expect(articleHrefs(await getHomeContent(l)), l).toEqual([]);
+      process.env.ARTICLES = "on";
+      expect(articleHrefs(await getHomeContent("en")).sort()).toEqual(["/bpmnscript", "/devline", "/dux"]);
+    } finally {
+      if (prev === undefined) delete process.env.ARTICLES;
+      else process.env.ARTICLES = prev;
+    }
+  });
 });
 
 describe("EN/DE parity", () => {

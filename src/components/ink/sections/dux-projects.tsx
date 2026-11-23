@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { SectionProps } from "@/components/home-types";
 import { ActionLink } from "@/components/shared/action-link";
-import { DuxBuiltOn, DuxRelations } from "@/components/shared/dux-relations";
+import { DuxRelations } from "@/components/shared/dux-relations";
 import { Gallery } from "@/components/shared/gallery";
 import { RepoFacts } from "@/components/shared/github/repo-facts";
 import { DetailPanel } from "@/components/shared/panel/detail-panel";
@@ -46,7 +46,6 @@ export async function InkDuxProjects({ content, github, locale }: SectionProps) 
             </h3>
             <div className="dux-text">
               <p className="prose">{player.blurb}</p>
-              <DuxBuiltOn locale={locale} />
               {facts(player)}
             </div>
             {player.panel && (

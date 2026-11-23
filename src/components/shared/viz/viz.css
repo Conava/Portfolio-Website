@@ -22,13 +22,8 @@
 .viz-label {
   font-weight: 500;
 }
-.viz-sub,
 .viz-axis {
   color: var(--s-mute);
-}
-.viz-sub {
-  display: block;
-  font-weight: 400;
 }
 .viz-num {
   font-weight: 500;

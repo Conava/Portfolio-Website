@@ -2,10 +2,10 @@
   "name": "Marlon Kranz",
   "lede": "Software engineer in Hamburg. I build distributed, enterprise-scale cloud services in Java at Adobe, and open-source projects in Go and TypeScript.",
   "statement": [
-    "I build backend services and cloud architecture. I'm passionate about solving problems, and when a project needs an interface, I like it clean.",
-    "At Adobe I own and plan the migration of a production pipeline, one of my team's biggest efforts, and help maintain four production services that millions of people use every day. On the side, I'm invested in my team's AI tooling.",
-    "Beyond work I build what I use every day. I'm a core contributor to Dux Shell, my Linux desktop shell, and built its music player, Dux Player. I also maintain devline, my own Claude Code plugin.",
-    "My bachelor thesis at the University of Hamburg is BPMNscript, a programming language that brings executable BPMN 2.0 processes into the IDE. The B.Sc. in Information Systems, with an exchange year at San Diego State University, is expected in December 2026. In January 2027 I start a part-time M.S. in Computer Science at Georgia Tech."
+    "I build backend services and cloud architecture. I'm passionate about solving problems, building algorithms and designing systems that scale. I enjoy working with distributed systems, and I have a strong interest in programming languages and compilers.",
+    "At Adobe my team and I maintain four production services that millions of people use every day. I own and plan the migration of a production data pipeline on our GitOps-based Kubernetes platform, and I'm heavily invested in my team's (AI) tooling.",
+    "Beyond work I build or contribute to software I use daily. I'm a contributor to Dux Shell, a Linux Wayland shell, and I also maintain devline, my own Claude Code plugin.",
+    "As my bachelor thesis at the University of Hamburg I built BPMNscript, a programming language for executable business process models in the BPMN 2.0 standard. The B.Sc. in Information Systems at the University of Hamburg, with an exchange year at San Diego State University, will be completed in December 2026, and in January 2027 I start a part-time M.S. in Computer Science at the Georgia Institute of Technology."
   ],
   "links": [
     {

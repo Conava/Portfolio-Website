@@ -80,3 +80,12 @@ test("malformed URL and oversized content-length fall back", async () => {
   const boom = (async () => { throw new Error("x"); }) as unknown as typeof fetch;
   expect((await getResumePdf({ url: "not a url", fetchImpl: boom, fallbackPath })).source).toBe("fallback");
 });
+
+test("each variant has its own cache", async () => {
+  const fetchImpl = (async (u: string) => pdf(u.endsWith("de") ? "de" : "en")) as unknown as typeof fetch;
+  const en = await getResumePdf({ variant: "en", url: "https://x/en", fetchImpl, fallbackPath });
+  const de = await getResumePdf({ variant: "de", url: "https://x/de", fetchImpl, fallbackPath });
+  expect(text(en.body)).toContain("en");
+  expect(text(de.body)).toContain("de");
+  expect((await getResumePdf({ variant: "de", url: "https://x/de", fetchImpl, fallbackPath })).source).toBe("cache");
+});

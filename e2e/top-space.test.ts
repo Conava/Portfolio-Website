@@ -97,9 +97,9 @@ test(`trace: the line holds through a small scroll (${size.width}px)`, async () 
       expect(Math.abs(s.h1 - r[0].h1)).toBeLessThan(1.5);
       expect(s.probe).toBe("0.000");
     }
-    // one column: the handover is scroll-linked and has begun; two columns: the next form takes
-    // over only past the middle of the gap between the beats, so the hero still holds
-    if (size.width < 1200) expect(+r[4].probe).toBeGreaterThan(0);
-    else expect(r[4].probe).toBe("0.000");
+    // past the hold the handover is scroll-linked and has begun; in two columns it has not jumped
+    // ahead to the next beat (a small scroll moves the form a little)
+    expect(+r[4].probe).toBeGreaterThan(0);
+    if (size.width >= 1200) expect(+r[4].probe).toBeLessThan(0.5);
   }, 60_000);
 }

@@ -2,19 +2,19 @@
 
 <InvoiceExample />
 
-BPMN 2.0 (Business Process Model and Notation) ist eine standardisierte Notation für Geschäftsprozesse. Ein Prozess wird als Diagramm aus Tasks, Events und Gateways gezeichnet, den Stellen, an denen sich der Ablauf teilt oder zusammenführt, und als XML gespeichert. Eine Process Engine wie [Operaton](https://operaton.org/) führt dieses XML aus: Sie legt Aufgaben für Menschen an, ruft Services auf und folgt dem Ablauf bis zum Ende. Gezeichnet werden Prozesse meist in einem Modellierungswerkzeug. BPMNscript schreibt denselben Prozess als Quelltext. Die Schritte laufen von oben nach unten, und strukturierte Blöcke, z. B. `if` oder `while`, beschreiben den Kontrollfluss. Der Compiler leitet daraus die Gateways und Sequence Flows ab und schreibt BPMN-2.0-XML, das Operaton unverändert deployt, ohne eine Bibliothek von BPMNscript zur Laufzeit.
+BPMN 2.0 (Business Process Model and Notation) ist eine standardisierte Notation für Geschäftsprozesse. Man zeichnet einen Prozess als Diagramm aus Tasks, Events und Gateways, also den Stellen, an denen sich der Ablauf verzweigt oder wieder zusammenläuft, und speichert ihn als XML. Eine Process Engine wie [Operaton](https://operaton.org/) führt dieses XML aus: Sie legt Aufgaben für Menschen an, ruft Services auf und folgt dem Ablauf bis zum Ende. Meistens werden Prozesse in einem Modellierungstool gezeichnet. Mit BPMNscript schreibt man denselben Prozess als Quellcode. Die Schritte laufen von oben nach unten, und strukturierte Blöcke wie `if` oder `while` beschreiben den Kontrollfluss. Aus diesen Blöcken leitet der Compiler die Gateways und Sequence Flows ab und schreibt BPMN-2.0-XML, das Operaton so, wie es ist, deployt. Zur Laufzeit braucht es keine Library von BPMNscript.
 
-Durchgehendes Beispiel auf dieser Seite ist die Rechnungsfreigabe ganz oben. Eine Person prüft die Rechnung, eine Rechnung mit `amount > 1000` geht in eine zusätzliche Freigabe, und jede andere gibt eine Java-Klasse frei.
+Die Rechnungsfreigabe oben zieht sich als Beispiel durch diese Seite. Eine Person prüft die Rechnung, Rechnungen mit `amount > 1000` gehen zusätzlich an eine Senior-Freigabe, und alle anderen gibt eine Java-Klasse automatisch frei.
 
-Meine Bachelorarbeit fragt, wie Entwickler ausführbare BPMN-2.0-Prozesse als Quelltext schreiben und trotzdem als BPMN-2.0-XML austauschbar halten können. Sie stellt drei Anforderungen: Der Kontrollfluss wird mit Anweisungen geschrieben, aus denen die Gateways folgen. Das kompilierte XML läuft auf einer bestehenden Engine ohne Zusatzsoftware. Und vorhandenes BPMN-XML lässt sich zurück in bearbeitbaren Quelltext importieren. Keine der Textnotationen, die ich gefunden habe, erfüllt alle drei. Am nächsten kommt die MontiCore Workflow DSL (Drave et al. 2022). Sie schreibt aber jedes Gateway aus, und in meinem Test verlor ihr Export der Rechnungsfreigabe die Bedingung der Verzweigung. Operaton lehnte das Ergebnis ab.
+Meine Bachelorarbeit geht der Frage nach, wie Entwickler ausführbare BPMN-2.0-Prozesse als Quellcode schreiben können, ohne dass die Prozesse ihre Austauschbarkeit als BPMN-2.0-XML verlieren. Dafür stellt sie drei Anforderungen auf. Erstens wird der Kontrollfluss mit Anweisungen geschrieben, und die Gateways ergeben sich daraus. Zweitens läuft das kompilierte XML ohne Zusatzsoftware auf einer bestehenden Engine. Drittens lässt sich vorhandenes BPMN-XML zurück in bearbeitbaren Quellcode importieren. Keine der textuellen Notationen, die ich gefunden habe, erfüllt alle drei. Am nächsten kommt die MontiCore Workflow DSL (Drave et al. 2022), in der man allerdings jedes Gateway von Hand schreibt. In meinem Test ging beim Export der Rechnungsfreigabe außerdem die Bedingung der Verzweigung verloren, und Operaton hat das Ergebnis abgelehnt.
 
 </Section>
 
 <Section id="why-text">
 
-BPMNscript richtet sich an Entwickler, die Kontrollfluss aus Programmiersprachen kennen, die BPMN-Notation aber nie gelernt haben. Die Arbeit nimmt an, dass ihnen Anweisungen besser liegen als ein Diagramm. Text bringt außerdem die Werkzeuge mit, die sie für Code ohnehin nutzen: Diffs und Merges Zeile für Zeile, Vervollständigung und Fehlermeldungen schon beim Tippen statt erst beim Deployment.
+BPMNscript ist für Entwickler gedacht, die Kontrollfluss aus Programmiersprachen kennen, die BPMN-Notation aber nie gelernt haben. Die Arbeit geht davon aus, dass ihnen Anweisungen eher liegen als ein Diagramm. Außerdem bringt Text die Tools mit, die sie für Code sowieso nutzen: Diffs und Merges Zeile für Zeile, Autovervollständigung und Fehler schon beim Tippen statt erst beim Deployment.
 
-Eine zusätzliche Freigabe durch den CFO für große Rechnungen kostet in der Rechnungsfreigabe <Num id="editLines" /> Zeilen Quelltext:
+Soll in der Rechnungsfreigabe bei großen Rechnungen zusätzlich der CFO freigeben, sind das <Num id="editLines" /> Zeilen Quellcode:
 
 ```bpmnscript
 if (amount > 10000) {
@@ -22,19 +22,19 @@ if (amount > 10000) {
 }
 ```
 
-Im kompilierten XML ohne Diagramm zeigt ein Zeilendiff <Num id="editXmlAdded" /> hinzugefügte und <Num id="editXmlRemoved" /> entfernte Zeilen. Das XML erhält zwei exklusive Gateways, einen User Task und fünf Sequence Flows, und ein vorhandener Sequence Flow wird ersetzt, weil seine ID die IDs seiner beiden Enden enthält.
+Im kompilierten XML ohne Diagramm zeigt ein Zeilendiff dafür <Num id="editXmlAdded" /> neue und <Num id="editXmlRemoved" /> entfernte Zeilen. Das XML bekommt zwei exklusive Gateways, einen User Task und fünf Sequence Flows, und ein bestehender Sequence Flow wird ersetzt, weil seine ID die IDs seiner beiden Enden enthält.
 
 </Section>
 
 <Section id="compiler">
 
-Der Compiler macht aus jedem Block Gateways. Eine `if`/`else`-Kette wird zu einem exklusiven Split und einem exklusiven Join: Jede Bedingung steht am Sequence Flow in ihren Zweig, und der `else`-Zweig ist der Default Flow des Splits. Eine `while`-Schleife wird zu einem einzigen exklusiven Gateway vor ihrem Rumpf, mit einem Sequence Flow vom Ende des Rumpfs zurück. Ein `parallel`-Block wird zu einem parallelen Fork und Join, ein `goto` zu einem einzelnen Sequence Flow zu seinem Ziel.
+Der Compiler macht aus jedem Block Gateways. Eine `if`/`else`-Kette wird zu einem exklusiven Split und einem exklusiven Join: Jede Bedingung steht am Sequence Flow in ihren Zweig, und der `else`-Zweig ist der Default Flow des Splits. Aus einer `while`-Schleife wird ein einzelnes exklusives Gateway vor dem Schleifenrumpf, und vom Ende des Rumpfs führt ein Sequence Flow zu ihm zurück. Ein `parallel`-Block wird zu einem parallelen Fork und Join, ein `goto` zu einem einzelnen Sequence Flow zu seinem Ziel.
 
-Erzeugte Elemente bekommen ihre IDs aus der Position der Anweisung, aus der sie stammen, sodass unveränderter Quelltext immer dieselben IDs ergibt. Das Diagramm legt bpmn-auto-layout bei jedem Kompilieren neu aus, nach einer Änderung muss also keine Linie von Hand verlegt werden. Beim Import geht ein Layout verloren, das jemand im Modellierungswerkzeug von Hand angeordnet hat.
+Generierte Elemente bekommen ihre IDs aus der Position der Anweisung, aus der sie entstehen. Unveränderter Quellcode ergibt deshalb immer dieselben IDs. Das Diagramm legt bpmn-auto-layout bei jedem Kompilieren neu an, nach einer Änderung muss man also keine Linie von Hand verlegen. Umgekehrt geht beim Import ein Layout verloren, das jemand im Modellierungstool von Hand angeordnet hat.
 
 <Figure id="expense-claim" />
 
-In der Standardkonfiguration lehnt Operaton ein Modell ohne History Time to Live ab, also ohne die Frist, nach der die Engine die Daten einer beendeten Instanz löschen darf. Der Compiler ergänzt deshalb bei jedem Modell ohne eigenen Wert den Standardwert. Ein Service Task nennt, was die Engine aufruft: eine Java-Klasse (`class:`), eine Expression oder ein Topic für External Tasks, das ein Worker abholt.
+In der Standardkonfiguration lehnt Operaton jedes Modell ohne History Time to Live ab. Das ist die Frist, nach der die Engine die Daten einer beendeten Instanz löschen darf. Der Compiler setzt deshalb bei jedem Modell, das keinen eigenen Wert hat, den Standardwert. Ein Service Task gibt an, was die Engine aufruft: eine Java-Klasse (`class:`), eine Expression oder ein Topic für External Tasks, das ein Worker abholt.
 
 <Figure id="running-instance" />
 
@@ -42,11 +42,11 @@ In der Standardkonfiguration lehnt Operaton ein Modell ohne History Time to Live
 
 <Section id="import">
 
-Der Import liest BPMN-XML und gibt es als BPMNscript aus. Diese Richtung ist die schwierigere: Beim Kompilieren wird aus verschachtelten Blöcken ein Graph, aber ein im Modellierungswerkzeug gezeichneter Gateway-Graph muss keine blockstrukturierte Entsprechung haben.
+Der Import liest BPMN-XML und gibt es als BPMNscript aus. Diese Richtung ist die schwierigere. Beim Kompilieren wird aus verschachtelten Blöcken ein Graph, aber ein Gateway-Graph, den jemand in einem Modellierungstool gezeichnet hat, muss überhaupt keine Entsprechung in Blockform haben.
 
-Der Printer untersucht den Graphen jedes Prozesses mit Dominatoren und Post-Dominatoren. Ein Knoten dominiert einen anderen, wenn jeder Pfad vom Start zu diesem über ihn führt. Post-Dominanz gilt entsprechend in Richtung Ende. Beide berechne ich mit dem iterativen Verfahren von Cooper et al. (2001). Der nächste Post-Dominator eines Splits, also der erste Knoten, den alle seine Zweige wieder erreichen, ist der Kandidat für den zugehörigen Join. Schleifen findet die Analyse als starke Zusammenhangskomponenten, sodass auch eine Schleife mit mehreren Eingängen einen Kopf bekommt.
+Der Printer analysiert den Graphen jedes Prozesses mit Dominatoren und Post-Dominatoren. Ein Knoten dominiert einen anderen, wenn jeder Pfad vom Start zu diesem anderen Knoten über ihn führt. Post-Dominanz ist dasselbe in Richtung Ende. Beides berechne ich mit dem iterativen Verfahren von Cooper et al. (2001). Der nächste Post-Dominator eines Splits, also der erste Knoten, den alle seine Zweige wieder erreichen, ist der Kandidat für den passenden Join. Schleifen findet die Analyse als starke Zusammenhangskomponenten. Dadurch bekommt auch eine Schleife, die man an mehr als einem Knoten betreten kann, einen Kopf.
 
-Ein Katalog aus sieben Mustern faltet den Graphen anschließend in Blöcke. Ein exklusiver Split mit seinem Join wird zu `if`, zwei Arten von Rückwärtskanten werden zu `while` und `do … while`, ein paralleler oder inklusiver Fork mit seinem Join wird zu `parallel` und ein ereignisbasiertes Gateway zu `await`. Jede übrige Kante wird zu `goto`. Im folgenden Ausschnitt (ohne Einstellungen) führt eine überarbeitete Abrechnung zurück zu einer Prüfung, die ein Task ist, sodass keines der Schleifenmuster passt:
+Danach faltet ein Katalog aus sieben Mustern den Graphen in Blöcke. Ein exklusiver Split mit seinem Join wird zu `if`, zwei Arten von Rückwärtskanten werden zu `while` und `do … while`, ein paralleler oder inklusiver Fork mit seinem Join wird zu `parallel` und ein ereignisbasiertes Gateway zu `await`. Jede übrige Kante wird zu `goto`. Im folgenden Ausschnitt, ohne Einstellungen, geht eine überarbeitete Spesenabrechnung zurück zu einer Prüfung, die selbst ein Task ist. Deshalb passt keines der beiden Schleifenmuster:
 
 ```bpmnscript
 service CheckPolicy(...)
@@ -56,11 +56,11 @@ if (!compliant) {
 }
 ```
 
-Erwogen habe ich auch einen Printer auf Basis des Refined Process Structure Tree, der `goto` auf die Teile eines Graphen beschränken würde, die überhaupt keine Blockform haben. Den Katalog habe ich gewählt, weil er weniger Aufwand in Implementierung und Test macht. Der andere Printer bleibt für spätere Arbeit.
+Ich habe auch über einen Printer auf Basis des Refined Process Structure Tree nachgedacht. Er würde `goto` auf die Teile eines Graphen beschränken, die gar keine Blockform haben. Entschieden habe ich mich für den Katalog, weil er sich mit weniger Aufwand implementieren und testen lässt. Der andere Printer bleibt eine Aufgabe für später.
 
-Der Importer soll einen Prozess nicht ändern, ohne es zu melden. Würde Operaton das Deployment ablehnen oder hat BPMNscript für ein Konstrukt keine Form, lehnt er die Datei mit einem Fehler ab und schreibt nichts. Was er verwirft oder umschreibt, bekommt eine Warnung, die das Element nennt und angibt, ob der neu gebaute Prozess anders läuft. Die Evaluation zeigt, wo das nicht reicht: In <Num id="unwarned" /> der <Num id="divergent" /> abweichenden Modelle der Evaluation trägt mindestens ein geändertes Element keine Warnung.
+Der Importer soll einen Prozess nie stillschweigend verändern. Würde Operaton das Deployment ablehnen oder hat BPMNscript für ein Konstrukt keine Form, lehnt er die Datei mit einem Fehler ab und schreibt nichts. Wenn er etwas verwirft oder umschreibt, gibt er eine Warnung aus, die das Element nennt und sagt, ob der neu gebaute Prozess anders abläuft. Die Evaluation zeigt, wo das noch nicht reicht: Bei <Num id="unwarned" /> der <Num id="divergent" /> abweichenden Modelle in der Evaluation hat mindestens ein geändertes Element keine Warnung.
 
-Die Datei „Fehler-Startereignis“ im Playground startet ihren Prozess mit einem Fehler. Operaton ignoriert einen solchen Auslöser, deshalb lehnt der Importer sie ab:
+Die Datei „Error start event“ im Playground startet ihren Prozess mit einem Fehler. Operaton ignoriert einen solchen Auslöser, also lehnt der Importer die Datei ab:
 
 ```text
 Error: error-start.bpmn: element 'ShipmentFailed' cannot be imported: a process cannot start on an error
@@ -69,7 +69,7 @@ Error: error-start.bpmn: element 'ShipmentFailed' cannot be imported: a process 
   help: catch it with 'on error' inside the scope that raises it
 ```
 
-Das Rechnungsbeispiel von Camunda („Rechnungseingang“ im Playground) wird mit Warnungen importiert. Eine davon betrifft einen Form Key, den Operaton liest und BPMNscript nicht übernimmt:
+Das Rechnungsbeispiel von Camunda, im Playground „Invoice receipt“, wird mit Warnungen importiert. Eine davon betrifft einen Form Key, den Operaton liest, BPMNscript aber nicht übernimmt:
 
 ```text
 Warning: setting 'operaton:formKey' on 'StartEvent_1' was not imported
@@ -81,25 +81,25 @@ Warning: setting 'operaton:formKey' on 'StartEvent_1' was not imported
 
 <Section id="evaluation">
 
-Vorhandenes BPMN-XML importieren zu können, ist eine der drei Anforderungen der Arbeit, und die Evaluation prüft das an realen Modellen: Ist ein Modell, das nach BPMNscript und wieder zurück nach XML geht, danach noch derselbe Prozess, und führt Operaton es noch aus?
+Der Import von vorhandenem BPMN-XML ist eine der drei Anforderungen der Arbeit, und die Evaluation prüft ihn an echten Modellen. Die Frage ist: Wenn ein Modell nach BPMNscript und wieder zurück nach XML geht, ist es dann noch derselbe Prozess, und führt Operaton es noch aus?
 
-Die Evaluation läuft in einem eigenen Repository, festgelegt auf das BPMNscript-Release 0.1.1. Jedes Modell durchläuft dieselben Schritte: Operaton 2.1.0 deployt das Original, der Importer macht daraus Quelltext, der Compiler baut aus diesem Quelltext ein neues Dokument, ein Vergleich prüft den Neubau gegen das Original, und Operaton deployt den Neubau. Ein Modell besteht, wenn der Neubau äquivalent ist und sich deployen lässt.
+Die Evaluation läuft in einem eigenen Repository und ist auf das BPMNscript-Release 0.1.1 festgelegt. Jedes Modell durchläuft dieselben Schritte. Operaton 2.1.0 deployt das Original, der Importer macht daraus Quellcode, der Compiler baut aus diesem Quellcode ein neues Dokument, ein Vergleich prüft den Neubau gegen das Original, und schließlich deployt Operaton den Neubau. Ein Modell besteht, wenn der Neubau äquivalent ist und sich deployen lässt.
 
-Die Modelle stammen aus dem GitHub BPMN Artifacts Dataset von Türker et al. (2022), einer Liste von BPMN-Dateien in öffentlichen Open-Source-Repositorys. Es sind keine eigenen Modelle. Die Evaluation hat die im Oktober 2026 noch verfügbaren Dateien geladen und davon die behalten, die einen Prozess als ausführbar markieren und die Erweiterungen von Operaton oder Camunda nutzen. Von diesen <Num id="screened" /> Dateien deployt Operaton <Num id="deployed" />.
+Die Modelle stammen aus dem GitHub BPMN Artifacts Dataset von Türker et al. (2022), einer Liste von BPMN-Dateien in öffentlichen Open-Source-Repositories. Ich habe sie also nicht selbst geschrieben. Für die Evaluation wurden die Dateien geladen, die im Oktober 2026 noch verfügbar waren, und davon die behalten, die einen Prozess als ausführbar markieren und die Erweiterungen von Operaton oder Camunda nutzen. Von diesen <Num id="screened" /> Dateien deployt Operaton <Num id="deployed" />.
 
-Der Importer lehnt ein Modell ab, wenn Operaton das Deployment ablehnen würde oder BPMNscript für eines seiner Konstrukte keine Form hat, und der Fehler nennt den Grund. Bei einem akzeptierten Modell ist die Frage, ob sein Neubau zum Original äquivalent ist.
+Der Importer lehnt ein Modell ab, wenn Operaton das Deployment ablehnen würde oder BPMNscript für eines seiner Konstrukte keine Form hat. Die Fehlermeldung nennt dann den Grund. Bei einem akzeptierten Modell geht es darum, ob der Neubau äquivalent zum Original ist.
 
-Äquivalent heißt, dass beide Modelle dieselben Felder haben: die Sequence Flows mit ihren Bedingungen, die Einstellungen jedes Tasks und Events und die Namen. Der Vergleich ignoriert das Layout und die IDs, die der Compiler erzeugt, und toleriert zehn Unterschiede, die nicht ändern, welche Sequence Flows eine neue Instanz nimmt, etwa ein Gateway, das das Token nur weiterreicht. Er vergleicht Bedingungen so, wie sie geschrieben sind, und startet keine Instanz. Dass sich zwei äquivalente Modelle gleich verhalten, zeigt er deshalb nicht.
+Äquivalent heißt hier, dass beide Modelle dieselben Felder haben: die Sequence Flows mit ihren Bedingungen, die Einstellungen jedes Tasks und Events und die Namen. Layout und die vom Compiler generierten IDs ignoriert der Vergleich. Außerdem toleriert er zehn Unterschiede, die nicht ändern, welche Sequence Flows eine neue Instanz nimmt, zum Beispiel ein Gateway, das das Token nur weiterreicht. Bedingungen vergleicht er so, wie sie geschrieben sind, und er startet keine Instanz. Dass sich zwei äquivalente Modelle auch gleich verhalten, zeigt er deshalb nicht.
 
-<RoundTrip caption="Öffentliche Modelle aus dem GitHub BPMN Artifacts Dataset von Türker et al. (2022), die Operaton deployt, und wie viele davon jeden Schritt bestehen. 78,0 % der akzeptierten Modelle kommen äquivalent zurück, und der Anteil sinkt mit der Größe eines Modells (Tabelle unten)." />
+<RoundTrip caption="Öffentliche Modelle aus dem GitHub BPMN Artifacts Dataset von Türker et al. (2022), die Operaton deployt, und wie viele davon jeden Schritt bestehen. 78,0 % der akzeptierten Modelle kommen äquivalent zurück, und je größer ein Modell ist, desto kleiner wird der Anteil (Tabelle unten)." />
 
-Der Importer akzeptiert <Num id="accepted" /> der <Num id="deployed" /> deployten Modelle und lehnt die übrigen <Num id="refused" /> (<Pct of="refused" in="deployed" />) mit einem Fehler ab, der das Konstrukt nennt. Von den <Num id="accepted" /> akzeptierten Modellen ergeben <Num id="equivalent" /> im Round-Trip ein äquivalentes Modell, das sind <Pct of="equivalent" in="accepted" /> der akzeptierten und <Pct of="equivalent" in="deployed" /> der deployten Modelle. Den Neubau jedes dieser Modelle deployt Operaton. Weitere <Num id="divergent" /> weichen ab, meist im Routing, und bei <Num id="toolError" /> besteht der ausgegebene Quelltext die Prüfungen nicht, die BPMNscript vor dem Kompilieren ausführt.
+Der Importer akzeptiert <Num id="accepted" /> der <Num id="deployed" /> deployten Modelle. Die übrigen <Num id="refused" /> (<Pct of="refused" in="deployed" />) lehnt er mit einem Fehler ab, der das Konstrukt nennt. Von den <Num id="accepted" /> akzeptierten Modellen ergeben <Num id="equivalent" /> nach dem Round-Trip ein äquivalentes Modell. Das sind <Pct of="equivalent" in="accepted" /> der akzeptierten und <Pct of="equivalent" in="deployed" /> der deployten Modelle, und den Neubau jedes dieser Modelle deployt Operaton. Weitere <Num id="divergent" /> weichen ab, meistens im Routing, und bei <Num id="toolError" /> fällt der ausgegebene Quellcode durch die Prüfungen, die BPMNscript vor dem Kompilieren macht.
 
-Eine Ablehnung nennt das Konstrukt, an dem der Import scheitert, und sieben Arten von Konstrukten erklären <Num id="refusedTop" /> der <Num id="refused" /> abgelehnten Modelle: ein Connector, der über ein Plug-in von Operaton einen externen Dienst aufruft (<Num id="connector" />), mehrere ausführbare Prozesse in einer Datei (<Num id="multiProcess" />), eine Message ohne Namen (<Num id="messageNoName" />), ein Kompensations-Handler, der über eine Assoziation angehängt ist (<Num id="compensation" />), ein Skript, das Operaton aus einer externen Ressource lädt (<Num id="externalScript" />), eine Call Activity, die einen CMMN-Fall startet (<Num id="cmmn" />), und eine Bedingung, die ihre eigene Sprache angibt (<Num id="conditionLanguage" />).
+Jede Ablehnung nennt das Konstrukt, an dem der Import scheitert. Sieben Arten von Konstrukten stecken hinter <Num id="refusedTop" /> der <Num id="refused" /> abgelehnten Modelle: ein Connector, der über ein Plugin von Operaton einen externen Service aufruft (<Num id="connector" />), mehrere ausführbare Prozesse in einer Datei (<Num id="multiProcess" />), eine Message ohne Namen (<Num id="messageNoName" />), ein Compensation Handler, der über eine Association angehängt ist (<Num id="compensation" />), ein Skript, das Operaton aus einer externen Ressource lädt (<Num id="externalScript" />), eine Call Activity, die einen CMMN-Case startet (<Num id="cmmn" />), und eine Bedingung, die ihre eigene Sprache angibt (<Num id="conditionLanguage" />).
 
-Auf eine dieser Toleranzen geht der größte Teil des Ergebnisses zurück: <Num id="httl" /> der <Num id="equivalent" /> äquivalenten Modelle haben keine History Time to Live und kommen mit dem Standardwert `P30D` zurück. Die Einstellung legt nur fest, wann die Engine die Daten einer beendeten Instanz löschen darf, und lässt den Ablauf einer Instanz unverändert. Die Evaluation hat die Prüfung von Operaton dafür abgeschaltet, weil sich diese Originale sonst nicht deployen ließen.
+Eine dieser Toleranzen macht den größten Teil des Ergebnisses aus: <Num id="httl" /> der <Num id="equivalent" /> äquivalenten Modelle haben keine History Time to Live und kommen mit dem Standardwert `P30D` zurück. Diese Einstellung legt nur fest, wann die Engine die Daten einer beendeten Instanz löschen darf, und ändert nichts am Ablauf einer Instanz. Für die Evaluation war die entsprechende Prüfung in Operaton abgeschaltet, weil sich diese Originale sonst gar nicht deployen ließen.
 
-Der Anteil äquivalenter Modelle sinkt mit der Größe eines Modells, gezählt in Flow Nodes (Aktivitäten, Events und Gateways):
+Je größer ein Modell ist, gemessen in Flow Nodes, also Aktivitäten, Events und Gateways, desto seltener kommt es äquivalent zurück:
 
 | Flow Nodes | Äquivalente Modelle | Anteil |
 | --- | --- | --- |
@@ -108,13 +108,13 @@ Der Anteil äquivalenter Modelle sinkt mit der Größe eines Modells, gezählt i
 | 26 bis 50 | <Num id="band3Eq" /> von <Num id="band3" /> | <Pct of="band3Eq" in="band3" /> |
 | über 50 | <Num id="band4Eq" /> von <Num id="band4" /> | <Pct of="band4Eq" in="band4" /> |
 
-Die offiziellen Modelle von Operaton und Camunda, die die Entwickler der Engine zum Testen geschrieben haben, bestehen den Round-Trip häufiger: Von den <Num id="officialAccepted" />, die der Importer akzeptiert, sind <Num id="officialEq" /> (<Pct of="officialEq" in="officialAccepted" />) äquivalent. Alle <Num id="generatedValid" /> gültigen unter <Num id="generatedSeeds" /> Programmen aus dem Generator des Fuzz-Tests ergeben ein äquivalentes Modell. Die Ergebnisse für jedes einzelne Modell liegen im [Evaluations-Repository](https://github.com/BPMNscript/validation/tree/v1.1.0).
+Die offiziellen Modelle von Operaton und Camunda, die die Entwickler der Engine zum Testen geschrieben haben, bestehen den Round-Trip häufiger: Von den <Num id="officialAccepted" />, die der Importer akzeptiert, sind <Num id="officialEq" /> (<Pct of="officialEq" in="officialAccepted" />) äquivalent. Vom Generator des Fuzz-Tests kamen <Num id="generatedSeeds" /> Programme, und alle <Num id="generatedValid" /> gültigen davon ergeben ein äquivalentes Modell. Die Ergebnisse für jedes einzelne Modell stehen im [Evaluations-Repository](https://github.com/BPMNscript/validation/tree/v1.1.0).
 
 </Section>
 
 <Section id="editor">
 
-Die Editorunterstützung ist ein Language Server, den die Erweiterung für VS Code startet. Er meldet Fehler und Warnungen schon beim Tippen, mit denselben Prüfungen, die `bpmns build` ausführt, und bietet Vervollständigung, Hover, Go to Definition, Find References, Umbenennen und eine Gliederung.
+Für den Editor gibt es einen Language Server, den die VS-Code-Extension startet. Er meldet Fehler und Warnungen schon beim Tippen, mit denselben Prüfungen, die auch `bpmns build` macht, und bietet Autovervollständigung, Hover, Go to Definition, Find References, Rename und eine Outline.
 
 <Figure id="editor-missing-binding" />
 
@@ -124,18 +124,18 @@ Die Editorunterstützung ist ein Language Server, den die Erweiterung für VS Co
 
 <Figure id="editor-hover" />
 
-Der Server nutzt nur das Language Server Protocol, ein anderer Editor mit LSP-Client könnte ihn also starten. Eine andere Integration habe ich aber weder gebaut noch getestet. Der [Playground](/playground) führt denselben Language Server und Compiler im Browser aus. Auf der Kommandozeile kompiliert `bpmns build` eine Datei, und `bpmns parse` importiert eine.
+Der Server spricht nur das Language Server Protocol, also könnte ihn auch ein anderer Editor mit LSP-Client starten. Eine andere Integration habe ich aber weder gebaut noch getestet. Der [Playground](/playground) führt denselben Language Server und Compiler im Browser aus. Auf der Kommandozeile kompiliert `bpmns build` eine Datei, und `bpmns parse` importiert eine.
 
 </Section>
 
 <Section id="limits">
 
-BPMNscript zielt auf eine Engine, Operaton, weil Engines BPMN unterschiedlich ausführen. Für <Num id="coveredTypes" /> der <Num id="elementTypes" /> Elementtypen, die Operaton ausführt, hat die Sprache ein Konstrukt. Den Manual Task importiert sie als einfachen Schritt, weil Operaton ihn wie einen solchen ausführt. Einen Kompensations-Handler, der über eine Assoziation angehängt ist, lehnt der Import ab, da nur die andere Form, ein Event-Subprozess, in eine blockstrukturierte Sprache passt.
+BPMNscript ist auf eine einzige Engine ausgelegt, Operaton, weil jede Engine BPMN etwas anders ausführt. Für <Num id="coveredTypes" /> der <Num id="elementTypes" /> Elementtypen, die Operaton ausführt, hat die Sprache ein Konstrukt. Der Manual Task wird als einfacher Schritt importiert, weil Operaton ihn auch so ausführt. Einen Compensation Handler, der über eine Association angehängt ist, lehnt der Import ab. In eine blockstrukturierte Sprache passt nur die andere Form, ein Event-Subprozess.
 
-Eine Datei enthält einen Prozess. Pools, Lanes und das gezeichnete Layout verwirft der Import, jeweils mit einer Warnung. Große Modelle ergeben selten ein äquivalentes Modell, und wo der Printer keine Blockform findet, enthält der Quelltext `goto`. Über einen parallelen Split, den der Printer nur als Sprünge schreiben kann, setzt er einen Kommentar, der eine Reparatur von Hand verlangt.
+Eine Datei enthält genau einen Prozess. Pools, Lanes und das gezeichnete Layout verwirft der Import, jeweils mit einer Warnung. Große Modelle kommen nur selten äquivalent zurück, und wo der Printer keine Blockform findet, steht im Quellcode `goto`. Über einen parallelen Split, den der Printer nur als Sprünge schreiben kann, setzt er einen Kommentar, dass hier von Hand nachgebessert werden muss.
 
-Die abgelehnten Modelle zeigen, wo der Umfang wachsen könnte: Bis auf den CMMN-Fall ist jede der sieben größten Gruppen von Ablehnungen in der Evaluation ein Konstrukt, das BPMNscript schreiben lernen könnte, am häufigsten der Connector (<Num id="connector" /> Modelle).
+Die abgelehnten Modelle zeigen, wo die Sprache wachsen könnte. Bis auf den CMMN-Case ist jede der sieben größten Gruppen von Ablehnungen ein Konstrukt, das BPMNscript schreiben lernen könnte. Die größte davon ist der Connector mit <Num id="connector" /> Modellen.
 
-Der Nutzen für Entwickler ist nicht empirisch untersucht: Die Arbeit prüft nicht, ob sie mit BPMNscript besser arbeiten als mit einem Modellierungswerkzeug.
+Ob BPMNscript Entwicklern tatsächlich hilft, ist nicht empirisch untersucht. Die Arbeit testet nicht, ob sie damit besser arbeiten als mit einem Modellierungstool.
 
 </Section>

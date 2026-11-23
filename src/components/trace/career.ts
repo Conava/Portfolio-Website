@@ -21,11 +21,18 @@ export interface CareerInput {
 export interface CareerTask extends CareerInput {
   kind: Kind;
   row: number;
-  /** Left and right edge. A set end is drawn solid up to it; an open-ended running task ends on the today line. */
+  /** Left and right edge. A running task's box ends on the today line. */
   x0: number;
   x1: number;
+  /** A running task continues as a dotted bar past today up to here: its planned end, or the axis end when open. */
+  ahead: number | null;
   /** Too narrow for its label at the diagram's minimum width: the label sits to its right. */
   out: boolean;
+  /**
+   * Too narrow, on an overlap row (where a label outside would sit on the fork): the label wraps to
+   * two lines and `x0` moves left until the longest word fits. `x1`, the end, stays true.
+   */
+  wrap: boolean;
 }
 
 export interface CareerLayout {
@@ -62,10 +69,17 @@ export function careerLayout(input: CareerInput[], today: YearMonth): CareerLayo
     .map((e): CareerTask => {
       const kind = kindOf(e);
       const s = month(e.start);
-      const end = e.end ? month(e.end) + 1 : null;
-      const x1 = end !== null ? x(end) : kind === "now" ? x(now + 0.5) : 1;
+      const end = e.end ? x(month(e.end) + 1) : 1;
+      const x1 = kind === "now" ? x(now + 0.5) : end;
+      const ahead = kind === "now" && end > x1 ? end : null;
       const span = x1 * (d1 - d0) - (s - d0);
-      return { ...e, kind, row: lane[e.id], x0: x(s), x1, out: span < e.label.length * MONTHS_PER_CHAR + 1.5 };
+      const narrow = span < e.label.length * MONTHS_PER_CHAR + 1.5;
+      const row = lane[e.id];
+      if (!narrow || row === 0) return { ...e, kind, row, x0: x(s), x1, ahead, out: narrow, wrap: false };
+      const word = Math.max(...e.label.split(" ").map((w) => w.length));
+      // Two lines get 6px padding a side instead of 10px: about a month.
+      const x0 = Math.max(0, Math.min(x(s), x1 - (word * MONTHS_PER_CHAR + 1) / (d1 - d0)));
+      return { ...e, kind, row, x0, x1, ahead, out: false, wrap: true };
     })
     .sort((a, b) => a.x0 - b.x0);
 
@@ -84,13 +98,14 @@ export function careerInputs({ work, education }: HomeContent): CareerInput[] {
     ...work.jobs.map((j) => ({
       id: j.id,
       band: "work" as const,
-      label: schools.has(j.company) ? j.role.split(",")[0] : j.company,
+      label: j.short ?? (schools.has(j.company) ? j.role.split(",")[0] : j.company),
       start: j.start,
       end: j.end,
     })),
     ...education.schools.map((s) => {
       const long = `${s.degree}, ${s.field}`;
-      return { id: s.id, band: "edu" as const, label: span(s.start, s.end) > long.length ? long : s.degree, start: s.start, end: s.end };
+      const label = span(s.start, s.end) > long.length ? long : (s.short ?? s.degree);
+      return { id: s.id, band: "edu" as const, label, start: s.start, end: s.end };
     }),
   ];
 }

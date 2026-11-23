@@ -5,14 +5,16 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { DesignIcon } from "@/components/shared/icons";
 import { trackEvent } from "@/lib/analytics";
-import { DESIGNS, DESIGN_LABELS, nextDesign, type Design } from "@/lib/design-values";
+import { DESIGN_LABELS, nextDesign, type Design } from "@/lib/design-values";
 import { installNavContinuity, markNavigation } from "./nav-continuity";
+import { useSiteSwitches } from "./site-switches";
 import "./controls.css";
 
 /**
  * Links to other designs: `?design=<id>` makes the proxy set the cookie and
  * 307 back without the param, so there is no flash and no JS is needed.
- * The icon steps to the next design; the text switch lists all of them.
+ * The icon steps to the next enabled design; the text switch lists the enabled ones (`DESIGNS` env).
+ * Hidden when only one design is enabled.
  */
 export function DesignToggle({
   current,
@@ -25,6 +27,7 @@ export function DesignToggle({
 }) {
   const t = useTranslations("controls");
   const search = useSearchParams();
+  const { designs } = useSiteSwitches();
   useEffect(installNavContinuity, []);
 
   const link = (to: Design) => {
@@ -39,8 +42,10 @@ export function DesignToggle({
     };
   };
 
+  if (designs.length < 2) return null;
+
   if (variant === "icon") {
-    const other = nextDesign(current);
+    const other = nextDesign(current, designs);
     const label = t("toDesign", { name: DESIGN_LABELS[other] });
     return (
       <a {...link(other)} className="icon-btn ctl-design-icon" aria-label={label} data-tip={label}>
@@ -52,7 +57,7 @@ export function DesignToggle({
   return (
     <span role="group" aria-label={t("designLabel")} className="ctl-switch ctl-design">
       <span aria-hidden="true">{t("designLabel")}</span>
-      {DESIGNS.map((d) =>
+      {designs.map((d) =>
         d === current ? (
           <span key={d} className="ctl-item" aria-current="true">
             {DESIGN_LABELS[d]}

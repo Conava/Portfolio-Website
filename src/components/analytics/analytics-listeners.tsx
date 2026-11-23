@@ -13,6 +13,8 @@ export function AnalyticsListeners() {
   // Outbound / resume / email clicks (capture phase; modified clicks count).
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
+      // A prevented click went nowhere (e.g. the resume link that opens the language chooser).
+      if (e.defaultPrevented) return;
       const a = (e.target as Element | null)?.closest?.("a[href]");
       if (!a) return;
       const hit = classifyClick(a.getAttribute("href") ?? "", location.origin);
@@ -27,6 +29,8 @@ export function AnalyticsListeners() {
           label: truncate(label, 80),
           section,
         });
+      } else if (hit.name === "resume_download") {
+        trackEvent("resume_download", { section, version: hit.version });
       } else {
         trackEvent(hit.name, { section });
       }

@@ -1,8 +1,9 @@
 import { expect, test } from "bun:test";
 import { loadSitemapInput, sitemapEntries } from "./sitemap";
 
-// The real content with articles published; the unpublished case is the last test.
+// The real content with articles and German published; the unpublished cases are the last tests.
 process.env.ARTICLES = "on";
+process.env.GERMAN = "on";
 
 test("sitemap has an EN and a DE entry per page, each with both alternates", async () => {
   const input = await loadSitemapInput();
@@ -40,5 +41,20 @@ test("unpublished articles stay out of the sitemap", async () => {
     expect((await loadSitemapInput()).articles).toEqual([]);
   } finally {
     process.env.ARTICLES = "on";
+  }
+});
+
+test("without GERMAN=on the sitemap lists only English URLs, with no de alternates", async () => {
+  const input = await loadSitemapInput();
+  process.env.GERMAN = "";
+  try {
+    const entries = sitemapEntries(input);
+    expect(entries).toHaveLength(6 + input.projectSlugs.length);
+    for (const e of entries) {
+      expect(e.url).not.toMatch(/^https:\/\/marlonkranz\.com\/de(\/|$)/);
+      expect(Object.keys(e.alternates?.languages ?? {})).toEqual(["en", "x-default"]);
+    }
+  } finally {
+    process.env.GERMAN = "on";
   }
 });

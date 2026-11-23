@@ -16,7 +16,7 @@ import { DetailPanel } from "@/components/shared/panel/detail-panel";
 import { PanelBody } from "@/components/shared/panel/panel-body";
 import { jobEntries, monthIndex, schoolEntries, Timeline, timelineRange } from "@/components/shared/viz/timeline";
 import { Viz } from "@/components/shared/viz/viz";
-import { DuxBuiltOn, DuxRelations } from "@/components/shared/dux-relations";
+import { DuxRelations } from "@/components/shared/dux-relations";
 import { Link } from "@/i18n/navigation";
 import { formatMonth, formatRange } from "@/lib/format";
 import type { Project, YearMonth } from "@/lib/types";
@@ -443,7 +443,6 @@ export async function TypeHome(props: SectionProps) {
                           {d}
                         </p>
                       ))}
-                    {p === feature && viz(p.panel?.viz)}
                     {p.panel && p !== feature ? (
                       <DetailPanel
                         id={p.id}
@@ -459,6 +458,8 @@ export async function TypeHome(props: SectionProps) {
                       </p>
                     )}
                   </div>
+                  {/* The devline run needs the whole row: it pins and steps through its stages. */}
+                  {p === feature && <div className="ty-row-run">{viz(p.panel?.viz)}</div>}
                 </li>
                 {p === feature && dux.projects.length > 0 && (
                   <li className="ty-row ty-row-dux">
@@ -495,7 +496,6 @@ export async function TypeHome(props: SectionProps) {
                                 />
                               </p>
                               <p className="ty-prose">{d.blurb}</p>
-                              {k === 0 && <DuxBuiltOn locale={locale} />}
                               <DuxRelations project={d} projects={dux.projects} locale={locale} />
                               {d.panel ? (
                                 <DetailPanel id={d.id} name={d.name} section="projects" actions={<ActionLink href={d.url}>{t("projects.github")}</ActionLink>}>

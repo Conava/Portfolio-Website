@@ -123,10 +123,11 @@
     .ty-fly {
       --fly: var(--fly-d, 0.8);
     }
+    /* Plus a short settle while the eased camera lands (SETTLE in the stage script). */
     .ty-fly::after {
       content: "";
       display: block;
-      height: calc(var(--fly) * 100lvh);
+      height: calc((var(--fly) + 0.15) * 100lvh);
     }
     .ty-fly[data-ty-rest]::after {
       height: calc((var(--fly) + 0.6) * 100lvh);
@@ -137,7 +138,7 @@
       --hold: 0.18;
     }
     .ty-fly[data-ty-hold]::after {
-      height: calc((var(--fly) + var(--hold)) * 100lvh);
+      height: calc((var(--fly) + var(--hold) + 0.15) * 100lvh);
     }
     .ty-stage {
       position: sticky;
@@ -253,6 +254,10 @@
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     }
   }
+  .ty-row-run {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
   .ty-row-id,
   .ty-row-body {
     display: grid;
@@ -316,9 +321,6 @@
     .ty-diagram svg {
       min-width: 640px;
     }
-  }
-  .ty-proof {
-    max-width: 880px;
   }
   /* ---- Work: bars on one year axis, each widening into its job's panel ---- */
   .ty-jobs {

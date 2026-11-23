@@ -49,7 +49,6 @@
     "entry": "Entry",
     "period": "Period",
     "count": "Count",
-    "ongoing": "ongoing",
     "workTimeline": "Work, month by month",
     "timeline": "Work and education over time",
     "eduTimeline": "Education, month by month"
@@ -93,6 +92,12 @@
     "resume": "Resume (PDF)",
     "resumeShort": "Resume"
   },
+  "resumeChooser": {
+    "title": "Which version?",
+    "de": "German",
+    "en": "International (English)",
+    "close": "Close"
+  },
   "scene": {
     "diagramLabel": "Compiled BPMN diagram of the invoice approval",
     "diagramSteps": [
@@ -119,8 +124,6 @@
     "overlapNote": "Overlaps with {b}",
     "overlapDuring": "Alongside the {b}",
     "career": "Work and education",
-    "careerNow": "running now",
-    "careerNext": "planned",
     "keysHint": "j and k: next and previous entry"
   },
   "flow": {
@@ -128,9 +131,23 @@
     "work": "Work since {year}",
     "education": "Information systems and computer science",
     "bpmnscript": "A text language for BPMN",
-    "dux": "Core contributor to Dux Shell",
+    "dux": "Contributor to Dux Shell",
     "projects": "My own projects",
-    "contact": "Contact"
+    "contact": "Contact",
+    "migration": "The migration I lead",
+    "labels": {
+      "ottoIn": "Incoming channels and formats",
+      "ottoApps": "Intake applications",
+      "ottoCore": "One internal format",
+      "ottoPlatform": "Distributed platform",
+      "ottoLegacy": "Legacy system",
+      "adobeTop": "User-facing services",
+      "adobeBottom": "Asset storage layer over MongoDB",
+      "gitops": "Deployments to several AWS regions",
+      "oldPlatform": "Spring Cloud Data Flow",
+      "newPlatform": "GitOps platform on Kubernetes",
+      "changelog": "Kafka Streams changelog"
+    }
   },
   "gallery": {
     "previous": "Previous image",
@@ -143,8 +160,7 @@
     "page": "Project page",
     "article": "Read article",
     "usedBy": "Used by <list></list>",
-    "uses": "Uses <h>{helper}</h>, like <list></list>",
-    "builtOn": "Built on <a>Dux Shell</a>."
+    "builtFor": "Built for <a>Dux Shell</a>, uses <h>{helper}</h>."
   },
   "notFound": {
     "message": "No page at this address.",
@@ -260,7 +276,8 @@
     },
     "noFile": {
       "title": "No file open",
-      "hint": "Open a file in the explorer or pick an example."
+      "hint": "Open a file in the explorer or pick an example.",
+      "shortcutsHint": "Press ? for all keyboard shortcuts."
     },
     "shortcuts": {
       "title": "Keyboard shortcuts",
@@ -271,7 +288,35 @@
       "prevTab": "Previous tab",
       "explorer": "Show or hide the explorer",
       "panel": "Show or hide the panel",
-      "rename": "Rename (in the explorer)"
+      "rename": "Rename (in the explorer)",
+      "button": "Keyboard shortcuts",
+      "or": "or",
+      "close": "Close",
+      "groupPlayground": "Playground",
+      "groupEditor": "Editor",
+      "compile": "Compile",
+      "delete": "Delete (in the explorer)",
+      "shortcuts": "Keyboard shortcuts",
+      "palette": "Command palette",
+      "suggest": "Suggestions",
+      "hover": "Show hover",
+      "definition": "Go to definition",
+      "peek": "Peek definition",
+      "references": "Go to references",
+      "renameSymbol": "Rename symbol",
+      "quickFix": "Quick fix",
+      "format": "Format document",
+      "symbol": "Go to symbol",
+      "find": "Find",
+      "replace": "Replace",
+      "comment": "Toggle line comment",
+      "gotoLine": "Go to line"
+    },
+    "compile": {
+      "button": "Compile",
+      "busy": "Compiling",
+      "ok": "Compiled",
+      "error": "{n, plural, one {# error} other {# errors}}"
     }
   },
   "meta": {

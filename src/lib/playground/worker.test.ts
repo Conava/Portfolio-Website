@@ -5,7 +5,7 @@ import { join } from "node:path";
 import en from "../../../messages/en.json";
 import { INVOICE_SOURCE } from "../../components/shared/bpmn/invoice-approval";
 import { PRESETS } from "./presets";
-import { COMPILE_METHOD, DECOMPILE_METHOD, type CompileResult, type DecompileResult } from "./protocol";
+import { COMPILE_METHOD, DECOMPILE_METHOD, type CompileResult, type DecompileResult } from "@/generated/bpmnscript/editor/protocol";
 import { newFileText } from "./workspace";
 
 const PUBLIC = join(import.meta.dir, "../../../public");

@@ -52,14 +52,14 @@ for (const sig of ["SIGINT", "SIGTERM"] as const) {
 
 export type Site = { base: string; stop(): Promise<void> };
 
-/** The standalone server (`node server.js`, laid out as in Docker) on a free port. GITHUB_TOKEN, RESUME_PDF_URL, DESIGN and GITHUB_GRAPHQL_URL are unset unless `env` sets them; ARTICLES is on unless `env` sets it. */
+/** The standalone server (`node server.js`, laid out as in Docker) on a free port. GITHUB_TOKEN, RESUME_PDF_URL, DESIGN, DESIGNS and GITHUB_GRAPHQL_URL are unset unless `env` sets them; ARTICLES and GERMAN are on unless `env` sets them. */
 export async function startSite(env: Record<string, string> = {}): Promise<Site> {
   // Cached GitHub data from an earlier server must not leak into this one.
   prepareStandalone();
   rmSync(join(STANDALONE, ".next", "cache", "fetch-cache"), { recursive: true, force: true });
   const port = await freePort();
-  const childEnv: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: "production", PORT: String(port), HOSTNAME: "::", ARTICLES: "on", ...env };
-  for (const k of ["GITHUB_TOKEN", "RESUME_PDF_URL", "DESIGN", "GITHUB_GRAPHQL_URL"]) if (!(k in env)) delete childEnv[k];
+  const childEnv: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: "production", PORT: String(port), HOSTNAME: "::", ARTICLES: "on", GERMAN: "on", ...env };
+  for (const k of ["GITHUB_TOKEN", "RESUME_PDF_URL", "RESUME_PDF_URL_DE", "DESIGN", "DESIGNS", "GITHUB_GRAPHQL_URL"]) if (!(k in env)) delete childEnv[k];
   const proc: ChildProcess = spawn("node", ["server.js"], {
     cwd: STANDALONE,
     env: childEnv,
@@ -162,3 +162,13 @@ export const escapeHtml = (s: string) =>
 
 export const get = (site: Site, path: string, headers: Record<string, string> = {}) =>
   fetch(site.base + path, { headers, redirect: "manual" });
+
+/** Repeats a replacement until nothing changes, so no tag can be re-formed from the leftovers. */
+const untilStable = (s: string, re: RegExp) => {
+  for (let prev = ""; prev !== s; ) [prev, s] = [s, s.replace(re, "")];
+  return s;
+};
+/** Rendered markup only: drops <script> elements (the RSC payload repeats every UI string). */
+export const markup = (html: string) => untilStable(html, /<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi);
+/** The text of an HTML fragment, with every tag removed. */
+export const textOf = (html: string) => untilStable(html, /<[^>]*>/g);

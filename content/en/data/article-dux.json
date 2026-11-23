@@ -2,7 +2,7 @@
   "meta": {
     "title": "Dux",
     "description": "My features and bug fixes in Dux Shell, a desktop shell for Wayland compositors, with the live state of their pull requests, and the music player and Cast plugin I build for it.",
-    "lede": "I'm one of the core contributors to Dux Shell, a desktop shell for Wayland compositors. This page shows the features I built, the bugs I fixed, and the music player and Cast plugin I build for it.",
+    "lede": "I'm a contributor to Dux Shell, a desktop shell for Wayland compositors. This page shows the features I built, the bugs I fixed, and the music player and Cast plugin I build for it.",
     "published": "2026-11-11",
     "updated": "2026-11-17",
     "ogImage": {

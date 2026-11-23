@@ -2,7 +2,7 @@
   "schools": [
     {
       "id": "gatech",
-      "brief": "Masterstudent der Informatik am Georgia Institute of Technology",
+      "brief": "Masterstudent in Computer Science am Georgia Institute of Technology",
       "name": "Georgia Institute of Technology",
       "url": "https://www.gatech.edu",
       "logo": {
@@ -12,14 +12,15 @@
         "height": 162
       },
       "degree": "M.S.",
+      "short": "M.S. CS",
       "field": "Informatik",
       "start": "2027-01",
       "end": null,
       "status": "upcoming",
-      "note": "Online, in Teilzeit, zugelassen.",
+      "note": "Online und berufsbegleitend, Zulassung erhalten.",
       "panel": {
         "did": [
-          "Zugelassen zum Online-Teilzeit-Master Computer Science. Das Programm beginnt im Januar 2027."
+          "Ich bin für den berufsbegleitenden Online-Master in Computer Science zugelassen. Er beginnt im Januar 2027."
         ]
       }
     },
@@ -38,14 +39,13 @@
       "start": "2022-10",
       "end": "2026-12",
       "status": "in-progress",
-      "note": "Bachelorarbeit im Oktober 2026 abgegeben, Abschluss im Dezember 2026 erwartet.",
+      "note": "Bachelorarbeit im Oktober 2026 abgegeben, Abschluss voraussichtlich im Dezember 2026.",
       "panel": {
         "did": [
-          "Bisherige Note 1,97 (1,0 ist die beste Note, 4,0 die Bestehensgrenze). Der Abschluss wird im Dezember 2026 erwartet.",
-          "Abschlussarbeit: BPMNscript, eine domänenspezifische Sprache und ein Compiler für BPMN 2.0. Der Code ist Open Source, die Arbeit ist auf dieser Seite veröffentlicht.",
-          "Tutor für Software Engineering II, April bis Juli 2026."
-        ],
-        "significant": "In der Evaluation akzeptiert der Importer 4.946 der 6.060 öffentlichen Modelle, die Operaton deployt, und 3.858 davon durchlaufen den Round-Trip äquivalent."
+          "Bisheriger Notenschnitt 1,97. Den Abschluss erwarte ich im Dezember 2026.",
+          "Bachelorarbeit: BPMNscript, eine domänenspezifische Sprache mit Compiler für BPMN 2.0. Der Code ist Open Source, die Arbeit steht auf dieser Website.",
+          "Tutor in Software Engineering II von April bis Juli 2026."
+        ]
       }
     },
     {
@@ -70,7 +70,7 @@
       "note": "San Diego, Kalifornien.",
       "panel": {
         "did": [
-          "Austauschjahr in Computer Science, August 2024 bis Mai 2025, mit einem GPA von 3,87 von 4,00."
+          "Auslandsjahr in Computer Science von August 2024 bis Mai 2025, GPA 3,87 auf der US-Skala, bei der 4,0 die beste Note ist."
         ]
       }
     }

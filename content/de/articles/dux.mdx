@@ -1,8 +1,8 @@
 <Section id="shell">
 
-[Dux Shell](https://duxlabs.dev) ist eine Desktop-Shell für niri, Hyprland, Sway und andere Wayland-Compositors. Statt eines Desktops, der aus einzelnen Programmen für Leiste, Launcher, Benachrichtigungen und Sperrbildschirm zusammengesetzt wird, gibt es ein Programm, geschrieben in Go und QML auf Quickshell. Bis zur Version 2.0 im Oktober 2026 hieß das Projekt DankMaterialShell, deshalb tragen ältere Pull Requests und der Befehl `dms` noch diesen Namen.
+[Dux Shell](https://duxlabs.dev) ist eine Desktop-Shell für niri, Hyprland, Sway und andere Wayland-Compositors. Normalerweise baut man sich so einen Desktop aus einzelnen Tools zusammen, also Leiste, Launcher, Benachrichtigungen und Sperrbildschirm. Dux Shell ersetzt sie durch ein einziges Programm, geschrieben in Go und QML auf Basis von Quickshell. Bis zur Version 2.0 im Oktober 2026 hieß das Projekt DankMaterialShell, deshalb tragen ältere Pull Requests und der Befehl `dms` noch diesen Namen.
 
-An der Shell arbeite ich seit August 2026 mit, angefangen mit zwei Änderungen am Theming. Seitdem habe ich die Konfigurationsprofile, den überarbeiteten Systemmonitor, den Editor für Netzwerkverbindungen und die Ordner für Hintergrundbilder gebaut und quer durch die Shell Fehler behoben. Profile, Systemmonitor und Netzwerkeditor haben jeweils einen Go-Teil im Backend und einen QML-Teil in der Oberfläche, und für Profile und Systemmonitor habe ich auch die Seiten der Dokumentation geschrieben.
+Angefangen habe ich im August 2026 mit zwei Änderungen am Theming. Seitdem habe ich die Konfigurationsprofile, den überarbeiteten Systemmonitor, den Editor für Netzwerkverbindungen und die Ordner für Hintergrundbilder gebaut und quer durch die Shell Bugs behoben. Profile, Systemmonitor und Netzwerkeditor haben jeweils einen Go-Teil im Backend und einen QML-Teil in der Oberfläche. Für Profile und Systemmonitor habe ich auch die Seiten in der Doku geschrieben.
 
 </Section>
 
@@ -10,47 +10,47 @@ An der Shell arbeite ich seit August 2026 mit, angefangen mit zwei Änderungen a
 
 <Contribution id="profiles">
 
-Das ist mein Lieblingsfeature. Ein Profil umfasst die Gruppen, die der Benutzer auswählt (Theme, Hintergrundbild, Leiste, Dock, Schriften und weitere), und ein Wechsel ändert nur diese. Sync speichert Änderungen kurz danach ins aktive Profil, und Compare listet auf, was von den aktuellen Einstellungen abweicht, sodass sich einzelne Gruppen übernehmen lassen. Die Profile stehen als Galerie unter Wallpaper & colors, dazu kommen eine Kachel im Control Center zum Wechseln und die Befehle `dms profile` zum Auflisten, Exportieren und Importieren. Wo die Profile in den Einstellungen liegen, wurde in einer Designdiskussion auf dem Dux-Discord festgelegt.
+Das ist mein Lieblingsfeature. Ein Profil umfasst die Gruppen, die man auswählt, etwa Theme, Hintergrundbild, Leiste, Dock und Schriften, und ein Wechsel ändert nur diese Gruppen. Sync speichert Änderungen kurz danach ins aktive Profil, und Compare zeigt, was von den aktuellen Einstellungen abweicht. So lassen sich auch einzelne Gruppen übernehmen. Die Profile liegen als Galerie unter Wallpaper & colors, dazu gibt es eine Kachel im Control Center zum Wechseln und die Befehle `dms profile` zum Auflisten, Exportieren und Importieren. Wo die Profile in den Einstellungen hingehören, haben wir in einer Designdiskussion auf dem Dux-Discord geklärt.
 
-Einstellungen, die zum Rechner oder zur Person gehören, etwa Eingabe, Energie und die Bildschirmkonfiguration, sind nicht enthalten. Importe gelten als nicht vertrauenswürdig, weil Profile zum Weitergeben gedacht sind: Plugin-Einstellungen und der eigene Papierkorb-Befehl des Docks werden verworfen, Werte, die in eine Shell oder eine Compositor-Konfiguration gelangen, werden geprüft, und das Archiv wird mit Größengrenzen entpackt. Jeder Einstellungsschlüssel gehört entweder zu einer Gruppe oder ist ausdrücklich ausgenommen. Ein Test, den ich dafür geschrieben habe, schlägt fehl, wenn ein neuer Schlüssel keins von beidem ist, sodass auch über künftige Einstellungen entschieden werden muss.
+Einstellungen, die zum Rechner oder zur Person gehören, etwa Eingabe, Energie und die Bildschirmkonfiguration, sind nicht dabei. Weil Profile zum Teilen gedacht sind, gelten Importe als nicht vertrauenswürdig: Plugin-Einstellungen und der eigene Papierkorb-Befehl des Docks fliegen raus, Werte, die in eine Shell oder eine Compositor-Konfiguration gelangen, werden geprüft, und das Archiv wird nur mit Größenlimits entpackt. Jeder Einstellungsschlüssel gehört entweder zu einer Gruppe oder ist ausdrücklich ausgenommen. Ein Test, den ich dafür geschrieben habe, schlägt fehl, wenn ein neuer Schlüssel weder das eine noch das andere ist. Jede künftige Einstellung braucht also diese Entscheidung.
 
 </Contribution>
 
 <Contribution id="sysmon">
 
-Die Überarbeitung bestand aus zwei Hälften. In dux-gop, der Go-Bibliothek, die die Systemdaten sammelt, habe ich GPU-, Laufwerks- und Netzwerknutzung pro Prozess ergänzt, außerdem Sensoren, Speichermodule und eine Detailansicht pro Prozess. Weil jede Datei unter `/proc` jetzt nur einmal gelesen wird statt über mehrere Bibliotheksaufrufe, braucht eine Abfrage der Prozessliste auf meinem Rechner (etwa 600 Prozesse) 22 statt 375 ms CPU-Zeit. In der Shell habe ich das Fenster aus denselben Bausteinen wie die Einstellungen neu aufgebaut (gruppierte Listenzeilen, Diagrammkarten, die üblichen Dialoge), die Tabs sitzen jetzt in einer Leiste links.
+Die Überarbeitung hatte zwei Hälften. In dux-gop, der Go-Bibliothek, die die Systemdaten sammelt, habe ich GPU-, Laufwerks- und Netzwerknutzung pro Prozess ergänzt, dazu Sensoren, Speichermodule und eine Detailansicht pro Prozess. Jede Datei unter `/proc` wird jetzt nur noch einmal gelesen statt über mehrere Bibliotheksaufrufe. Damit braucht eine Abfrage der Prozessliste auf meinem Rechner mit etwa 600 Prozessen 22 statt 375 ms CPU-Zeit. In der Shell habe ich das Fenster aus denselben Bausteinen wie die Einstellungen neu gebaut, also gruppierten Listenzeilen, Diagrammkarten und den üblichen Dialogen, und die Tabs in eine Leiste links verschoben.
 
-Eine Laufwerkskarte zeigt den Zustand und die SMART-Werte, ohne eine schlafende Festplatte dafür aufzuwecken. Für Fehlerberichte kopiert die Seite System eine kurze Zusammenfassung oder einen vollständigen Bericht in Markdown, beide ohne Hostnamen, Benutzernamen und Netzwerknamen. Nach dem Merge kamen das Pausieren von Prozessen und das Ändern ihrer Priorität dazu, Zeilen, die sich in die Prozesse dahinter aufklappen lassen, und eine Reihe von Korrekturen an Prozessnamen, Icons und GPU-Namen.
+Eine Laufwerkskarte zeigt den Zustand und die SMART-Werte des Laufwerks, ohne eine schlafende Festplatte dafür aufzuwecken. Für Bug-Reports kopiert die Seite System eine kurze Zusammenfassung oder einen vollständigen Bericht in Markdown, beide ohne Hostnamen, Benutzernamen und Netzwerknamen. Nach dem Merge kamen noch das Anhalten von Prozessen und das Ändern ihrer Priorität dazu, Zeilen, die sich in die Prozesse dahinter aufklappen lassen, und eine Reihe von Fixes für Prozessnamen, Icons und GPU-Namen.
 
 </Contribution>
 
 <Contribution id="network">
 
-Ich wollte eduroam für meine Universität einrichten, ohne auf nmcli oder nm-connection-editor auszuweichen, und habe weitergemacht, bis die Netzwerkeinstellungen das meiste abdeckten, was NetworkManager bietet. Derselbe Pull Request bringt eine Hotspot-Seite mit QR-Code zum Verbinden, eine Tailscale-Seite für Konten und Exit Nodes und eine Schaltfläche für die Anmeldung an Captive Portals.
+Ich wollte eduroam für meine Uni einrichten, ohne dafür nmcli oder nm-connection-editor zu brauchen, und habe dann so lange weitergemacht, bis die Netzwerkeinstellungen das meiste abdeckten, was NetworkManager kann. Im selben Pull Request kamen eine Hotspot-Seite mit QR-Code zum Verbinden, eine Tailscale-Seite für Accounts und Exit Nodes und ein Button für den Login in Captive Portals dazu.
 
-Beim Überarbeiten des Pull Requests habe ich die Bearbeitung von Bond-, Bridge-, VLAN-, DSL- und CDMA-Profilen wieder entfernt: Diese Optionen sind veraltet oder nicht für den Desktop gedacht und hätten Wartung und Übersetzungen für Einstellungen gekostet, die kaum jemand nutzt. Die Einstellungen listen solche Profile weiterhin auf und öffnen sie in nm-connection-editor oder nmtui. Eine spätere Korrektur meldet VPN-Plugins ohne eigene Unterstützung in der Shell (OpenConnect mit AnyConnect oder Pulse, vpnc, gpclient) vor dem Verbinden an, denn bis dahin scheiterten sie mit „no valid VPN secrets“.
+Beim Überarbeiten des Pull Requests habe ich das Bearbeiten von Bond-, Bridge-, VLAN-, DSL- und CDMA-Profilen wieder rausgenommen. Diese Optionen sind veraltet oder nicht für den Desktop gedacht, und sie hätten Wartung und Übersetzungen für Einstellungen gekostet, die kaum jemand braucht. Solche Profile stehen trotzdem weiter in den Einstellungen und öffnen sich in nm-connection-editor oder nmtui. Mit einem späteren Fix meldet sich die Shell vor dem Verbinden bei VPN-Plugins an, für die sie keine eigene Unterstützung hat, also OpenConnect mit AnyConnect oder Pulse, vpnc und gpclient. Vorher scheiterten sie mit „no valid VPN secrets“.
 
 </Contribution>
 
 <Contribution id="wallpapers">
 
-Die Ordner gehören zu einer Reihe von Pull Requests für eine Bibliothek von Hintergrundbildern, die später Sammlungen, Diashows und eigene Hintergrundbilder pro Bildschirm bringen soll. Der erste Pull Request der Reihe verlagerte das Auflisten der Bilder in den Hintergrundprozess. Damit funktioniert der automatische Wechsel auch bei Ordnernamen mit Anführungszeichen und Dateinamen mit Zeilenumbruch, und ein KDE-Wallpaper-Paket zählt als ein einziges Bild. Der nächste Schritt ist noch offen: Er blendet Bilder aus, die vom Seitenverhältnis oder der Auflösung her nicht zum Bildschirm passen.
+Die Ordner gehören zu einer Reihe von Pull Requests für eine Bibliothek von Hintergrundbildern, die später Sammlungen, Diashows und eigene Hintergrundbilder pro Bildschirm bringen soll. Der erste Pull Request hat das Auflisten der Bilder in den Hintergrundprozess verlagert. Seitdem funktioniert der automatische Wechsel auch bei Ordnernamen mit Anführungszeichen und Dateinamen mit Zeilenumbruch, und ein KDE-Wallpaper-Paket zählt als ein Bild. Der nächste Schritt ist noch offen: Er blendet Bilder aus, deren Seitenverhältnis oder Auflösung nicht zum Bildschirm passt.
 
-Unabhängig davon lässt sich das Raster der Hintergrundbilder jetzt frei scrollen, weil ich das seitenweise Springen umständlich fand, und das alte Verhalten bleibt als Layout Paged grid erhalten. Dazu kommen zwei Fehlerbehebungen: der Tastaturfokus nach dem Schließen der Dateiauswahl und ein neues Hintergrundbild, das nicht übernommen wurde, wenn sich der Füllmodus änderte, während es noch lud.
+Unabhängig davon lässt sich das Raster der Hintergrundbilder jetzt frei scrollen, weil mich das seitenweise Springen genervt hat. Das alte Verhalten gibt es weiter als Layout Paged grid. Zwei Fixes runden das ab: der Tastaturfokus nach dem Schließen der Dateiauswahl und ein neues Hintergrundbild, das nicht übernommen wurde, wenn sich der Füllmodus änderte, während es noch lud.
 
 </Contribution>
 
 <Contribution id="popouts">
 
-Mir gefällt, wie der verbundene Modus aussieht, ich wollte aber die Island ohne den vollen Rahmen behalten. Die Option ist standardmäßig aus und berücksichtigt die Einstellungen für Deckkraft, Goth corners und Custom radius. Die Maintainer wünschten sich das auch außerhalb der Island, deshalb gibt es die Option ebenfalls für die normale Leiste, in den Darstellungseinstellungen der Leiste.
+Mir gefällt, wie der verbundene Modus aussieht, ich wollte aber die Island behalten, ohne den ganzen Rahmen. Die Option ist standardmäßig aus und berücksichtigt die Einstellungen für Deckkraft, Goth corners und Custom radius. Die Maintainer wollten das auch außerhalb der Island haben, deshalb gibt es die Option auch für die normale Leiste, in deren Darstellungseinstellungen.
 
 </Contribution>
 
 <Contribution id="theming">
 
-Das Farbschema entstand bisher aus der Farbe, die den größten Teil des Hintergrundbilds bedeckt, und das ist oft nur der Hintergrund, etwa der Himmel. Die Einstellung Source Color bietet die Optionen von matugen und zusätzlich Colorful, das ich ergänzt habe: Es wägt ab, wie viel vom Bild eine Farbe bedeckt und wie farbig sie ist, angelehnt an caelestia-cli. Dominant bleibt die Voreinstellung und liefert dasselbe Ergebnis wie zuvor.
+Bisher entstand das Farbschema aus der Farbe, die den größten Teil des Hintergrundbilds bedeckt, und das ist oft nur der Hintergrund, etwa der Himmel. Die Einstellung Source Color bietet jetzt die Optionen von matugen und zusätzlich Colorful, das ich ergänzt habe. Colorful wägt ab, wie viel vom Bild eine Farbe bedeckt und wie kräftig sie ist, angelehnt an caelestia-cli. Dominant bleibt die Voreinstellung und liefert dasselbe Ergebnis wie vorher.
 
-Für Qt-Anwendungen habe ich qtengine als Platform Theme hinzugefügt, weil beide bisherigen Optionen für Qt 6 Probleme hatten. Terminals haben eine Hintergrundtransparenz bekommen und eine Option, ihre Farben zum Hintergrundbild hin zu tönen.
+Für Qt-Anwendungen habe ich qtengine als Platform Theme hinzugefügt, weil beide bisherigen Optionen für Qt 6 Probleme hatten. Terminals haben einen transparenten Hintergrund bekommen und eine Option, ihre Farben zum Hintergrundbild hin zu tönen.
 
 </Contribution>
 
@@ -60,7 +60,7 @@ Für Qt-Anwendungen habe ich qtengine als Platform Theme hinzugefügt, weil beid
 
 <Contribution id="fixes">
 
-Ein paar Beispiele: Der verbundene Rahmenmodus ignorierte einige der Einstellungen, die er überschreibt, mehrere Optionen für Fensterregeln wirkten unter Hyprland 0.56 nicht, und Unmute im Menü einer Benachrichtigung löschte die ganze Benachrichtigungsregel der App.
+Ein paar Beispiele: Der verbundene Rahmenmodus ignorierte einige der Einstellungen, die er überschreibt, mehrere Optionen für Fensterregeln hatten unter Hyprland 0.56 keine Wirkung, und Unmute im Menü einer Benachrichtigung hat gleich die ganze Benachrichtigungsregel der App gelöscht.
 
 </Contribution>
 

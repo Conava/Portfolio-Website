@@ -4,7 +4,7 @@ import { useId } from "react";
 import { useTranslations } from "next-intl";
 import { CloseIcon } from "@/components/shared/icons";
 import type { Message } from "@/lib/playground/outcome";
-import type { ConvDiagnostic } from "@/lib/playground/protocol";
+import type { ConvDiagnostic } from "@/generated/bpmnscript/editor/protocol";
 import { FileIcon } from "./explorer";
 import { tabKeys } from "./mobile-tabs";
 import { ErrorIcon, WarnIcon } from "./status-bar";

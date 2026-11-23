@@ -1,14 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#0d0d0d"/>
-  <text
-    x="16"
-    y="22"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="13"
-    font-weight="400"
-    font-style="italic"
-    fill="#C9A96E"
-    text-anchor="middle"
-    letter-spacing="0.5"
-  >MK</text>
+  <style>
+    .t{fill:#f0f1ec}.i{stroke:#12151c}.a{stroke:#2a3fd1}
+    @media (prefers-color-scheme:dark){.t{fill:#0d1017}.i{stroke:#eceef2}.a{stroke:#9aa8ff}}
+  </style>
+  <rect class="t" width="32" height="32" rx="7"/>
+  <g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path class="i" d="M4.5 25V15.5a3.25 3.25 0 0 1 6.5 0V25M11 15.5a3.25 3.25 0 0 1 6.5 0V25M21.5 7V25"/>
+    <path class="a" d="M28 12.5l-6.5 6.5 6.5 6"/>
+  </g>
 </svg>

@@ -32,6 +32,9 @@ All optional locally.
 | `GITHUB_TOKEN` | runtime | Live stars, releases and PR counts. Without it the site renders without those numbers. |
 | `RESUME_PDF_URL` | runtime | Direct-download URL for the current resume. Without it `/resume.pdf` serves the bundled copy. |
 | `DESIGN` | runtime | Default design (`keynote`, `thread`, `flow` or `type`) when the visitor has not picked one. |
+| `DESIGNS` | runtime | Comma list of the designs offered and served, e.g. `keynote,type`. Unset means all four. |
+| `GERMAN` | runtime | `on` publishes German under `/de`. Unset means English only: `/de/...` redirects to the English page, no language toggle, no German hreflang or sitemap entries. `bun dev` and the e2e tests turn it on. |
+| `ARTICLES` | runtime | `on` publishes the articles. Unset means their routes say "coming soon" and nothing links to them. The e2e tests turn it on. |
 | `GITHUB_GRAPHQL_URL` | runtime | Overrides the GitHub GraphQL endpoint (the e2e tests use a stub). |
 | `NEXT_PUBLIC_UMAMI_URL`, `NEXT_PUBLIC_UMAMI_WEBSITE_ID` | build | Enable Umami. Docker build args; the URL is the full script URL, e.g. `https://analytics.marlonkranz.com/script.js`. |
 | `BPMNSCRIPT_DIR` | build, dev | Local BPMNscript checkout to build the playground from. Put it in `.env.local`. |
@@ -46,7 +49,7 @@ All optional locally.
 | `flow` | Flow | A three.js scene, dark only; falls back to stills without a GPU or with reduced motion. |
 | `type` | Type | Giant type; you scroll through the letters into the next section. |
 
-Resolution order: visitor cookie, then `DESIGN`, then the default in `src/lib/site-config.ts`. Open any URL with `?design=<value>` to switch; it sets a one-year cookie and redirects, keeping other parameters such as `utm_*`. The header toggle switches between all four. Try one locally with `DESIGN=flow bun dev`.
+Resolution order: visitor cookie, then `DESIGN`, then the default in `src/lib/site-config.ts`. Open any URL with `?design=<value>` to switch; it sets a one-year cookie and redirects, keeping other parameters such as `utm_*`. The header toggle switches between the enabled ones (`DESIGNS`, all four by default); a cookie, `?design=` or `DESIGN` naming a disabled design is ignored. Try one locally with `DESIGN=flow bun dev`.
 
 ## Languages
 
@@ -163,6 +166,10 @@ One-time steps on the VPS:
        GITHUB_TOKEN: ${PORTFOLIO_GITHUB_TOKEN}
        RESUME_PDF_URL: ${PORTFOLIO_RESUME_PDF_URL}
        # DESIGN: keynote
+       # First release: Ink and Type, English only, articles unpublished. Set GERMAN / ARTICLES to "on" to publish.
+       DESIGNS: keynote,type
+       # GERMAN: "on"
+       # ARTICLES: "on"
      labels:
        - "traefik.enable=true"
        - "traefik.http.routers.portfolio.rule=Host(`marlonkranz.com`)"

@@ -5,31 +5,6 @@
     margin: 0;
     min-width: 0;
   }
-  .t-career-cap {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 18px;
-    margin-bottom: var(--sp-3);
-  }
-  /* Legend: the same swatch as a running and a planned task. */
-  .cg-key::before {
-    content: "";
-    display: inline-block;
-    width: 22px;
-    height: 10px;
-    margin-right: 7px;
-    vertical-align: -1px;
-    box-sizing: border-box;
-    border-radius: 3px;
-  }
-  .cg-key[data-kind="now"]::before {
-    border: 1.5px solid var(--acc);
-    background: color-mix(in srgb, var(--acc) 14%, var(--bg));
-  }
-  .cg-key[data-kind="next"]::before {
-    border: 1.25px dashed var(--line-3);
-  }
   /* Phones scroll the diagram sideways; it keeps a readable minimum width. */
   .t-career-scroll {
     overflow-x: auto;
@@ -149,20 +124,6 @@
     border-top: 1.25px solid var(--ln);
     margin-top: -0.6px;
   }
-  /* After a running task: the flow continues past today. */
-  .cg-flow.cg-on {
-    border-top-style: dashed;
-    border-top-color: var(--acc);
-  }
-  .cg-flow.cg-on::after {
-    content: "";
-    position: absolute;
-    right: -2px;
-    top: -4.6px;
-    border: 4px solid transparent;
-    border-right: 0;
-    border-left: 7px solid var(--acc);
-  }
 
   /* Tasks. */
   .cg-task {
@@ -209,9 +170,9 @@
     color: var(--fg);
     font-weight: 600;
   }
-  /* Upcoming: dashed, open to the right. */
+  /* Upcoming: dotted, open to the right. */
   .cg-task[data-kind="next"] {
-    border-style: dashed;
+    border-style: dotted;
     border-right: 0;
     border-radius: var(--r-2) 0 0 var(--r-2);
     width: calc((100% - var(--l0) - var(--r0)) * var(--w) - 3px);
@@ -224,14 +185,17 @@
     position: absolute;
     left: calc(100% + 28px);
   }
-  /* A short branch box: its label sits left of the fork gateway, where the row is empty. */
-  .cg-task[data-out][data-branch] .cg-l {
-    left: auto;
-    right: calc(100% + 26px);
+  /* A short branch box: its label wraps to two lines; the layout widens the box to the left to fit. */
+  .cg-task[data-wrap] {
+    padding: 0 6px;
+    font-size: 12px;
+    line-height: 1.05;
+    white-space: normal;
+    min-width: min-content;
   }
   /* A box never clips its label: if the date span is shorter it grows right, past the end of the span
      (the today line and token still mark the true end). */
-  .cg-task:not([data-out]):not([data-open]) {
+  .cg-task:not([data-out]):not([data-wrap]):not([data-kind="now"]) {
     min-width: max-content;
   }
   /* Short running box: tight padding so the label clears the token on the today line. */
@@ -239,9 +203,18 @@
     padding: 0 18px 0 5px;
     font-size: 12.5px;
   }
-  /* An open-ended box stops exactly on the today line: it does not grow, so keep its padding tight. */
-  .cg-task[data-open] {
+  /* A running box stops exactly on the today line: it does not grow, so keep its padding tight. */
+  .cg-task[data-kind="now"] {
     padding-right: 9px;
+  }
+  /* Past today a running entry continues as the same dotted bar an upcoming one is. */
+  .cg-ahead {
+    width: calc((100% - var(--l0) - var(--r0)) * var(--w));
+    height: 30px;
+    margin-top: -15px;
+    box-sizing: border-box;
+    border: 1.25px dotted var(--ln);
+    border-inline: 0;
   }
 
   /* An overlapping entry on its own row: forked off the row above, joined back when done. */

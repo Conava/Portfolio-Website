@@ -1,7 +1,7 @@
 /** The playground's files: plain data and pure updates, persisted as JSON in localStorage. */
 
 export type PgFile = {
-  /** Stable across renames; the editor model's URI is built from it, so undo survives a rename. */
+  /** Stable across renames: tabs, view state and diagnostics are keyed by it. */
   id: string;
   name: string;
   /** Current text (what the editor shows). */
@@ -22,7 +22,6 @@ export const EXT = ".bpmnscript";
 const MAX_NAME = 80;
 
 export const isDirty = (f: PgFile) => f.text !== f.saved;
-export const fileUri = (id: string) => `file:///playground/${id}${EXT}`;
 export const baseName = (name: string) => (name.endsWith(EXT) ? name.slice(0, -EXT.length) : name);
 
 export function defaultWorkspace(name: string, text: string): Workspace {

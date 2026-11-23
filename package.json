@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "bun@1.4.4",
   "scripts": {
-    "dev": "bun run playground:assets && next dev",
+    "dev": "bun run playground:assets && GERMAN=${GERMAN-on} next dev",
     "build": "bun run playground:assets && next build",
     "start": "next start",
     "typecheck": "bun run playground:assets && next typegen && tsc --noEmit",
@@ -16,7 +16,7 @@
   },
   "bpmnscript": {
     "repo": "https://github.com/BPMNscript/bpmnscript.git",
-    "ref": "v0.2.0"
+    "ref": "latest"
   },
   "dependencies": {
     "@codingame/monaco-vscode-api": "37.6.1",

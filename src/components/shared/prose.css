@@ -119,6 +119,14 @@
   display: block;
   min-width: 720px;
 }
+/* A diagram drawn for phone width carries a figure's data-size: no minimum width, capped like the figure
+   (:root outranks each design's text measure on `.pj-body > *`). */
+.pj-body > div[data-size]:has(> svg) > svg {
+  min-width: 0;
+}
+:root .pj-body > div[data-size="lg"]:has(> svg) {
+  max-width: 32rem;
+}
 .pj-body table:not([class]) {
   width: 100%;
   min-width: 30rem;
@@ -281,7 +289,7 @@
     grid-column: 1 / -1;
     max-width: 62ch;
   }
-  .pj-body > :is(div:has(> svg), .pj-table, .pj-fig:not([data-size])) {
+  .pj-body > :is(div:not([data-size]):has(> svg), .pj-table, .pj-fig:not([data-size])) {
     max-width: 880px;
   }
   /* Code hugs its longest line, between the text measure and the figure width. */
@@ -410,7 +418,7 @@
   .pj-body > * {
     max-width: 64ch;
   }
-  .pj-body > :is(div:has(> svg), .pj-table, .pj-fig:not([data-size])) {
+  .pj-body > :is(div:not([data-size]):has(> svg), .pj-table, .pj-fig:not([data-size])) {
     max-width: 880px;
   }
   /* Code hugs its longest line, between the text measure and the figure width. */

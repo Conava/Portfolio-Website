@@ -1,11 +1,11 @@
 {
   "name": "Marlon Kranz",
-  "lede": "Softwareentwickler in Hamburg. Bei Adobe entwickle ich verteilte Cloud-Services in Java im Enterprise-Maßstab, außerdem Open-Source-Projekte in Go und TypeScript.",
+  "lede": "Softwareentwickler in Hamburg. Bei Adobe baue ich verteilte Cloud-Services im Enterprise-Maßstab in Java, daneben Open-Source-Projekte in Go und TypeScript.",
   "statement": [
-    "Ich baue Backend-Services und Cloud-Architektur. Meine Leidenschaft ist das Lösen von Problemen, und wenn ein Projekt eine Oberfläche braucht, soll sie aufgeräumt sein.",
-    "Bei Adobe verantworte und plane ich die Migration einer Produktions-Pipeline, eines der größten Vorhaben meines Teams, und betreue vier Produktions-Services mit, die täglich Millionen Menschen nutzen. Nebenbei kümmere ich mich um das KI-Tooling meines Teams.",
-    "Privat baue ich, was ich jeden Tag benutze. Ich gehöre zu den Core-Contributors von Dux Shell, meiner Desktop-Shell unter Linux, und habe ihren Musikplayer Dux Player gebaut. Außerdem pflege ich devline, mein eigenes Claude-Code-Plugin.",
-    "Meine Bachelorarbeit an der Universität Hamburg ist BPMNscript, eine Programmiersprache, die ausführbare BPMN-2.0-Prozesse in die IDE bringt. Den B.Sc. in Wirtschaftsinformatik mit einem Auslandsjahr an der San Diego State University schließe ich voraussichtlich im Dezember 2026 ab. Im Januar 2027 beginne ich einen berufsbegleitenden M.S. in Computer Science am Georgia Tech."
+    "Ich baue Backend-Services und Cloud-Architekturen. Mich begeistert es, Probleme zu lösen, Algorithmen zu entwickeln und Systeme zu entwerfen, die skalieren. Ich arbeite gern mit verteilten Systemen, und Programmiersprachen und Compiler interessieren mich sehr.",
+    "Bei Adobe betreue ich mit meinem Team vier Services in Produktion, die täglich Millionen Menschen nutzen. Die Migration einer produktiven Datenpipeline auf unsere Kubernetes-Plattform mit GitOps plane und verantworte ich selbst, und ins Tooling meines Teams stecke ich viel Arbeit, gerade rund um KI.",
+    "Außerhalb der Arbeit entwickle ich Software, die ich selbst jeden Tag nutze. Ich arbeite an Dux Shell mit, einer Wayland-Shell für Linux, und pflege mein eigenes Claude-Code-Plugin devline.",
+    "In meiner Bachelorarbeit an der Universität Hamburg habe ich BPMNscript entwickelt, eine Programmiersprache für ausführbare Geschäftsprozessmodelle nach dem Standard BPMN 2.0. Meinen B.Sc. in Wirtschaftsinformatik, mit einem Auslandsjahr an der San Diego State University, schließe ich im Dezember 2026 ab. Im Januar 2027 beginne ich berufsbegleitend einen M.S. in Computer Science am Georgia Institute of Technology."
   ],
   "links": [
     {

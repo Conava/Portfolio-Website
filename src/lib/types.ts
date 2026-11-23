@@ -24,7 +24,64 @@ export interface PipelineStage {
 export interface PipelineAgent { id: string; model: string; kb?: string[] }
 /** Extras around a run: hooks that guard it and commands usable on their own (notes in messages `devline.run`). */
 export interface PipelineExtras { hooks?: { id: string }[]; standalone?: { id: string; command: string; agents?: PipelineAgent[] }[] }
+/**
+ * The scroll-stepped devline run on the homepage: one example request walked through the route
+ * map, stage by stage. Every visible string of the scene lives here. stages: in run order (idea,
+ * route, brainstorm, design, plan, implement, docs, reviews, deep review, final gate); gate
+ * marks a stage the run stops at. map/card: labels keyed by station or card part.
+ */
+export interface DevlineRunViz {
+  type: "devline-run";
+  caption: string;
+  heading: string;
+  request: string;
+  /** Words in the request devline reads; they are highlighted at Route. */
+  marks: string[];
+  stages: { id: string; name: string; line: string; gate?: string }[];
+  map: Record<"idea" | "route" | "full" | "brain" | "design" | "plan" | "prep" | "impl" | "reviewer" | "docs" | "sec" | "bp" | "perf" | "deep" | "final" | "merge" | "quick" | "bug" | "back" | "approval" | "decide", string>;
+  card: {
+    requestLabel: string;
+    spec: string[];
+    looks: string;
+    pick: string;
+    planNote: string;
+    /** Wave labels; the tasks run in the first wave, `later` in the second. */
+    waves: string[];
+    tasks: string[];
+    /** The file each task owns, by index of `tasks`. */
+    files: string[];
+    later: string;
+    laterFile: string;
+    implementer: string;
+    reviewer: string;
+    /** Per lane: failing test, code, passing test, merge. */
+    steps: string[];
+    summary: string;
+    docsAgent: string;
+    docFiles: string[];
+    branch: string;
+    /** Security scan, best-practices review, profiling (left out), deep review. */
+    checks: string[];
+    approved: string;
+    done: string[];
+    options: string[];
+    bug: string;
+    debugger: string;
+    rootCause: string;
+    stamp: string;
+  };
+  /** One agent per stage from design on, ending with the debugger in the final-gate sketch. */
+  model: { agents: string[]; cheap: string; cheapNote: string; strong: string; strongNote: string };
+  parts: {
+    heading: string;
+    skills: { title: string; text: string; pipeline: string; other: string; alone: string; pipelineItems: { name: string; alone: boolean }[]; otherItems: string[] };
+    agents: { title: string; text: string; default: string; items: { name: string; model: string; role: string; default: boolean }[] };
+    knowledge: { title: string; text: string; items: { name: string; text: string; users: string[] }[] };
+    hooks: { title: string; text: string; rules: { command: string; verdict: string; kind: "deny" | "ask" | "run" }[] };
+  };
+}
 export type Viz =
+  | DevlineRunViz
   | { type: "funnel"; caption: string; steps: { label: string; value: number }[] }
   | { type: "pr-dots"; caption: string; repos?: string[] }
   | { type: "pipeline-compare"; caption: string; before: { label: string; stages: string[] }; after: { label: string; stages: string[] } }
@@ -34,9 +91,11 @@ export type Viz =
 export interface Panel { did: string[]; significant?: string; viz?: Viz }
 export interface AboutContent { name: string; lede: string; statement: string[]; links: Link[] }
 /** brief: the clause the hero status line uses while the entry is current or upcoming ("Cloud Software Engineer at Adobe"). */
-export interface Job { id: string; brief?: string; company: string; url: string; logo?: Image; role: string; location: string; start: YearMonth; end: YearMonth | null; summary: string; panel?: Panel; figures?: { services?: number; moved?: number; apps?: number } }
+/** short: the job's chart label when the full one does not fit its span (e.g. "TA"). */
+export interface Job { id: string; brief?: string; short?: string; company: string; url: string; logo?: Image; role: string; location: string; start: YearMonth; end: YearMonth | null; summary: string; panel?: Panel; figures?: { services?: number; moved?: number; apps?: number } }
 export interface WorkContent { intro?: string; jobs: Job[] }
-export interface School { id: string; brief?: string; name: string; url: string; logo: Image; degree: string; field: string; start: YearMonth; end: YearMonth | null; status: "completed" | "in-progress" | "upcoming"; note?: string; gpa?: { value: string; scale: string }; panel?: Panel }
+/** short: the degree as a chart label when the full "degree, field" does not fit (e.g. "M.S. CS"). */
+export interface School { id: string; brief?: string; name: string; url: string; logo: Image; degree: string; short?: string; field: string; start: YearMonth; end: YearMonth | null; status: "completed" | "in-progress" | "upcoming"; note?: string; gpa?: { value: string; scale: string }; panel?: Panel }
 export interface EducationContent { intro?: string; schools: School[] }
 export interface BpmnscriptContent { intro: string; repo: string; sample: string; proof: { sentence: string; steps: { label: string; value: number }[] }; links: Link[]; panel?: Panel }
 /** title is the fallback when GitHub data is missing; note is an optional plain-language description; image: a screenshot of the feature, shown small beside the blurb */

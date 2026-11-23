@@ -4,13 +4,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { FitIcon, ZoomInIcon, ZoomOutIcon } from "@/components/shared/icons";
 import { formatPercent } from "@/lib/format";
+import { DIAGRAM_LABEL_PX, fitViewbox, fixLayout, type Box, type LayoutElement } from "@/generated/bpmnscript/editor/diagram";
 import type { Locale } from "@/lib/types";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-js.css";
 import "./diagram-pane.css";
 
 // Minimal slices of the diagram-js services this pane uses.
-type Box = { x: number; y: number; width: number; height: number };
 type Viewbox = Box & { scale: number; inner: Box; outer: { width: number; height: number } };
 type Canvas = {
   viewbox(box?: Box): Viewbox;
@@ -18,7 +18,7 @@ type Canvas = {
   resized(): void;
   getContainer(): HTMLElement;
 };
-type Element = { type: string; parent?: unknown; waypoints?: unknown };
+type Registry = { filter(fn: (e: LayoutElement) => boolean): LayoutElement[] };
 type Viewer = {
   importXML(xml: string): Promise<unknown>;
   get<T>(name: string): T;
@@ -26,11 +26,14 @@ type Viewer = {
   destroy(): void;
 };
 
-const LABEL_PX = 14;
+// The fitted view never goes below this, so labels stay readable (12 px x 0.9); a larger diagram is panned.
+const MIN_FIT = 0.9;
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 4;
 const STEP = 1.2;
 const PAD = 24;
+// Below the zoom controls (8 px inset, 40 px tall) when a tall diagram starts at its top.
+const PAD_TOP = 64;
 const GRID = 20;
 
 type Props = {
@@ -100,8 +103,8 @@ export function DiagramPane({ xml, fitKey, label, onError, fallback }: Props) {
           defaultLabelColor: "var(--pg-diagram-label)",
         },
         textRenderer: {
-          defaultStyle: { fontFamily, fontSize: LABEL_PX, lineHeight: 1.2 },
-          externalStyle: { fontSize: LABEL_PX },
+          defaultStyle: { fontFamily, fontSize: DIAGRAM_LABEL_PX, lineHeight: 1.2 },
+          externalStyle: { fontSize: DIAGRAM_LABEL_PX, lineHeight: 1.2 },
         },
       }) as unknown as Viewer;
       if (disposed) {
@@ -164,6 +167,7 @@ export function DiagramPane({ xml, fitKey, label, onError, fallback }: Props) {
         if (before) canvas.viewbox(before);
         return;
       }
+      fixLayout(viewer);
       setElements(countShapes(viewer));
       // A new file always fits; an edit keeps the view only once the visitor has zoomed or panned.
       if (key !== fittedKey.current) manual.current = false;
@@ -176,7 +180,8 @@ export function DiagramPane({ xml, fitKey, label, onError, fallback }: Props) {
     });
   }, [xml, fitKey]);
 
-  function fit(canvas: Canvas) {
+  /** The default view keeps MIN_FIT; the Fit button (minScale 0) shows the whole diagram. */
+  function fit(canvas: Canvas, minScale = MIN_FIT) {
     const { inner, outer } = canvas.viewbox();
     if (outer.width === 0 || outer.height === 0) {
       // Hidden pane (phone tab): fit once it has a size.
@@ -184,12 +189,7 @@ export function DiagramPane({ xml, fitKey, label, onError, fallback }: Props) {
       return;
     }
     pendingFit.current = false;
-    // canvas.zoom("fit-viewport", "auto") with a margin: the whole diagram, centered, never above 100 %.
-    const room = { w: Math.max(1, outer.width - 2 * PAD), h: Math.max(1, outer.height - 2 * PAD) };
-    const scale = Math.min(1, room.w / inner.width, room.h / inner.height);
-    const w = outer.width / scale;
-    const h = outer.height / scale;
-    canvas.viewbox({ x: inner.x + inner.width / 2 - w / 2, y: inner.y + inner.height / 2 - h / 2, width: w, height: h });
+    canvas.viewbox(fitViewbox(inner, outer, { pad: PAD, minScale, padTop: PAD_TOP }));
   }
 
   // The dot grid moves and scales with the diagram, like any drawing canvas.
@@ -210,7 +210,7 @@ export function DiagramPane({ xml, fitKey, label, onError, fallback }: Props) {
     if (!viewer) return;
     const canvas = viewer.get<Canvas>("canvas");
     manual.current = factor !== "fit";
-    if (factor === "fit") fit(canvas);
+    if (factor === "fit") fit(canvas, 0);
     else canvas.zoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, canvas.zoom() * factor)));
   }
 
@@ -248,6 +248,6 @@ export function DiagramPane({ xml, fitKey, label, onError, fallback }: Props) {
 }
 
 function countShapes(viewer: Viewer): number {
-  const registry = viewer.get<{ filter(fn: (e: Element) => boolean): Element[] }>("elementRegistry");
+  const registry = viewer.get<Registry>("elementRegistry");
   return registry.filter((e) => e.parent != null && e.type !== "label" && e.waypoints == null).length;
 }

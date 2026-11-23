@@ -57,10 +57,12 @@ describe("classifyClick", () => {
     });
   });
   test("resume", () => {
-    expect(classifyClick("/resume.pdf", o)).toEqual({ name: "resume_download" });
+    expect(classifyClick("/resume.pdf", o)).toEqual({ name: "resume_download", version: "en" });
     expect(classifyClick("https://marlonkranz.com/resume.pdf", o)).toEqual({
       name: "resume_download",
+      version: "en",
     });
+    expect(classifyClick("/resume-de.pdf", o)).toEqual({ name: "resume_download", version: "de" });
   });
   test("email", () => {
     expect(classifyClick("mailto:x@y", o)).toEqual({ name: "email_click" });

@@ -1,7 +1,7 @@
 ---
 title: "The King's Game: Modulare Schachplattform"
 date: "2023–heute"
-summary: "Eine Schachplattform in Java 17 und JavaFX 21 mit drei Maven-Modulen: Desktop-Client, Spiel-Engine ohne Abhängigkeiten und ein TCP-Server für Online-Partien mit Konten und Matchmaking. Standardschach und Chess 960."
+summary: "Eine Schachplattform in Java 17 und JavaFX 21 aus drei Maven-Modulen: ein Desktop-Client, eine Spiel-Engine ohne Abhängigkeiten und ein TCP-Server für Online-Partien mit Accounts und Matchmaking. Klassisches Schach und Chess 960."
 tech: ["Java 17", "JavaFX 21", "Maven", "TCP Networking", "SQLite", "JUnit 5", "Mockito", "Docker", "CSS Theming", "i18n"]
 githubUrl: "https://github.com/Conava/chess"
 thumbnail: "/images/projects/chess-engine/cover.jpg"
@@ -12,22 +12,22 @@ fullWidth: false
 
 ## Überblick
 
-Das Projekt besteht aus drei Maven-Modulen. `application` ist der JavaFX-Desktop-Client, `core` die Spiel-Engine für Standardschach und Chess 960, und `server` hostet Online-Partien über TCP, mit Konten, Matchmaking und Persistenz. `core` hat keine externen Abhängigkeiten, Client und Server hängen nur von `core` ab und kennen einander nicht.
+Das Projekt besteht aus drei Maven-Modulen. `application` ist der Desktop-Client in JavaFX, `core` die Spiel-Engine für klassisches Schach und Chess 960, und `server` hostet Online-Partien über TCP, mit Accounts, Matchmaking und Persistenz. `core` hat keine externen Abhängigkeiten. Client und Server hängen nur von `core` ab und wissen nichts voneinander.
 
-Begonnen habe ich es im zweiten Studienjahr. Der Client wurde im März 2026 von Swing auf JavaFX umgeschrieben, und der Server speichert Benutzerkonten, Sessions und Partien in SQLite. Ich nutze das Projekt, um zu sehen, wie sich Spec-getriebene und testgetriebene Agent-Workflows auf einer Codebasis schlagen, in der Architekturregeln und Tests das Ergebnis prüfen.
+Angefangen habe ich damit im zweiten Studienjahr. Im März 2026 wurde der Client von Swing auf JavaFX umgeschrieben, und der Server speichert Accounts, Sessions und Partien in SQLite. Ich nutze das Projekt, um auszuprobieren, wie gut Spec-driven und testgetriebene Agent-Workflows auf einer Codebasis funktionieren, deren Architekturregeln und Tests das Ergebnis prüfen.
 
 ![Hauptmenü im Midnight-Theme](/images/projects/chess-engine/main-menu-midnight.png)
 
-## Funktionen
+## Features
 
-- Lokales Spiel für zwei Personen am selben Rechner
-- Online-Spiel mit TCP-Lobby, Join-Codes und automatischem Matchmaking
-- Standardschach und Chess 960, pro Partie wählbar
-- Vollständige Regelprüfung: Rochade, en passant, Umwandlung mit Figurenauswahl, Patt, 50-Züge-Regel, dreifache Stellungswiederholung und unzureichendes Material
+- Lokale Partien zu zweit am selben Rechner
+- Online-Partien mit TCP-Lobby, Join-Codes und automatischem Matchmaking
+- Klassisches Schach und Chess 960, für jede Partie wählbar
+- Alle Regeln werden geprüft: Rochade, en passant, Umwandlung mit Auswahldialog für die Figur, Patt, 50-Züge-Regel, dreifache Stellungswiederholung und ungenügendes Material
 - Sechs Themes: Midnight, Ember und Abyss (dunkel), Manuscript, Fjord und Sakura (hell)
 - Deutsch und Englisch über `ResourceBundle`
-- Ein Headless-Modus zur programmatischen Spielsteuerung (`nogui`-Flag)
-- Ein im Code gezeichnetes animiertes Hauptmenü, das sich über die Einstellung Reduced Motion abschalten lässt
+- Ein Headless-Modus, in dem Programme das Spiel steuern (Flag `nogui`)
+- Ein animiertes Hauptmenü, das im Code gezeichnet wird und sich mit der Einstellung Reduced Motion abschalten lässt
 
 ![Lokale Partie im Ember-Theme, Spielmitte mit Zughervorhebungen](/images/projects/chess-engine/local-game-ember.png)
 
@@ -64,13 +64,13 @@ Begonnen habe ich es im zweiten Studienjahr. Der Client wurde im März 2026 von 
 </svg>
 </div>
 
-Fünf Regeln gelten modulübergreifend:
+Für alle Module gelten fünf Regeln:
 
 1. `core` hängt weder von `application` noch von `server` ab. Client und Server hängen nur von `core` ab, nie voneinander.
-2. Jeder Zugriff auf die Spiel-Engine läuft über die Facade `Chess.java`. Code außerhalb von `core` instanziiert keine `Game`-Unterklassen direkt.
+2. Jeder Zugriff auf die Spiel-Engine läuft über die Facade `Chess.java`. Code außerhalb von `core` erzeugt keine Unterklassen von `Game` direkt.
 3. UI-Komponenten implementieren `GameObserver` und registrieren sich über `chess.addObserver()`. Es gibt kein Polling.
 4. `core` enthält nur Logik: keine UI-Imports, kein JavaFX, kein I/O.
-5. Eine neue Regelvariante implementiert das Interface `Ruleset`. `Game` verzweigt nicht nach Variante.
+5. Eine neue Regelvariante implementiert das Interface `Ruleset`. `Game` selbst enthält keine Fallunterscheidung nach Variante.
 
 ## Design Patterns
 
@@ -79,25 +79,25 @@ Fünf Regeln gelten modulübergreifend:
 | Facade | `Chess.java` | Ein Einstiegspunkt für jeden Zugriff auf die Engine |
 | Observer | `GameObserver` / `Observable` | Gibt Zustandsänderungen an UI und Netzwerkschicht weiter, ohne sie an `core` zu koppeln |
 | Strategy | `Ruleset` mit `StandardChessRuleset` und `Chess960Ruleset` | Regelvarianten ohne Bedingungen in der Spiellogik |
-| Factory Method | `Game.createGame()` / `Game.createServerGame()` | Hält Konstruktoren package-private und erzwingt so die Modulgrenzen |
-| Template Method | `Game.executeMove()` | Legt den Ablauf eines Zugs fest, `OnlineGame` überschreibt den Schritt, der ihn über das Netzwerk weitergibt |
+| Factory Method | `Game.createGame()` / `Game.createServerGame()` | Hält die Konstruktoren package-private und setzt so die Modulgrenzen durch |
+| Template Method | `Game.executeMove()` | Legt die Reihenfolge eines Zugs fest, und `OnlineGame` überschreibt den Schritt, der den Zug übers Netzwerk weitergibt |
 
 ## Multiplayer-Server
 
-Der Server nimmt TCP-Verbindungen auf einem konfigurierbaren Port an (Standard 54321) und nutzt ein zeilenbasiertes Textprotokoll. Port, Partielimit, Timeouts und Ablaufzeiten kommen aus `server.properties`.
+Der Server nimmt TCP-Verbindungen auf einem konfigurierbaren Port an, standardmäßig 54321, und spricht ein zeilenbasiertes Textprotokoll. Port, Partielimit, Timeouts und Ablaufzeiten kommen aus `server.properties`.
 
 - Standardmäßig bis zu 40 gleichzeitige Partien, begrenzt durch eine Semaphore.
 - Join-Codes haben 12 Zeichen aus A–Z und 0–9 und werden als `XXXX-XXXX-XXXX` angezeigt. Sie stammen aus `SecureRandom` und verfallen standardmäßig nach 10 Minuten.
 - Eine Matchmaking-Warteschlange führt Gegner zusammen, die keinen Join-Code nutzen.
-- Login, Registrierung und tokenbasierte Sessions, SQLite speichert Benutzer, Sessions und Partien.
-- Jeder Zug wird von derselben Engine geprüft, bevor er weitergegeben wird. Illegale Züge werden abgelehnt.
-- Bei einem Verbindungsabbruch pausiert die Partie. Kehrt die Person nach 300 Sekunden (Standardwert) nicht zurück, gewinnt der Gegner durch Zeitüberschreitung.
+- Login, Registrierung und tokenbasierte Sessions. Benutzer, Sessions und Partien liegen in SQLite.
+- Bevor ein Zug weitergegeben wird, prüft ihn dieselbe Engine, und illegale Züge werden abgelehnt.
+- Bricht die Verbindung ab, pausiert die Partie. Ist der Spieler nach 300 Sekunden, dem Standardwert, nicht zurück, gewinnt der Gegner durch Zeitüberschreitung.
 
 ![Online-Spielsetup mit Auswahl des Chess-960-Regelsets](/images/projects/chess-engine/online-setup-ember.png)
 
 ## Tests
 
-Die drei Module zusammen haben 75 Testklassen.
+Zusammen haben die drei Module 75 Testklassen.
 
 | Modul | Testklassen | Schwerpunkt |
 |-------|-------------|-------------|

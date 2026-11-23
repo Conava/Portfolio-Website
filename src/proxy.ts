@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { type NextRequest, NextResponse } from "next/server";
 import { DESIGN_COOKIE, isDesign } from "./lib/design";
 import { getProjectSlugs } from "./lib/content";
+import { enabledDesigns, germanLive } from "./lib/site-config";
 import { routing } from "./i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
@@ -9,14 +10,22 @@ const intlMiddleware = createMiddleware(routing);
 let slugs: Promise<string[]> | undefined;
 
 export default async function proxy(req: NextRequest) {
-  // ?design=x: set the cookie (valid values only) and redirect with only
+  // German unpublished: /de and /de/... go to the English page; the query is kept, the browser keeps the hash.
+  const de = req.nextUrl.pathname.match(/^\/de(\/.*)?$/);
+  if (de && !germanLive()) {
+    const url = req.nextUrl.clone();
+    url.pathname = de[1] || "/";
+    return NextResponse.redirect(url, { status: 307 });
+  }
+
+  // ?design=x: set the cookie (enabled designs only) and redirect with only
   // `design` stripped; path (incl. /de) and other params (utm_*) are kept.
   const design = req.nextUrl.searchParams.get("design");
   if (design !== null) {
     const url = req.nextUrl.clone();
     url.searchParams.delete("design");
     const res = NextResponse.redirect(url, { status: 307 });
-    if (isDesign(design)) {
+    if (isDesign(design) && enabledDesigns().includes(design)) {
       res.cookies.set(DESIGN_COOKIE, design, {
         path: "/",
         maxAge: 60 * 60 * 24 * 365,

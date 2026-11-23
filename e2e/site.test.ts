@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser } from "playwright-core";
 import { launchBrowser, routeSlug } from "../scripts/shots";
-import { assertBuilt, escapeHtml, get, githubStub, ROOT, startSite, STUB_MERGED_TOTAL, stub, type Site } from "./helpers";
+import { assertBuilt, escapeHtml, get, githubStub, ROOT, startSite, STUB_MERGED_TOTAL, stub, type Site, markup } from "./helpers";
 
 const json = (file: string) => JSON.parse(readFileSync(join(ROOT, "content", file), "utf8"));
 const lede = { en: json("en/data/about.json").lede as string, de: json("de/data/about.json").lede as string };
@@ -19,7 +19,6 @@ async function site(env: Record<string, string> = {}) {
   return s;
 }
 // Rendered markup only: the RSC payload in <script> tags carries every UI message string.
-const markup = (html: string) => html.replace(/<script[^]*?<\/script>/g, "");
 const design = (html: string) => /<html[^>]*data-design="([^"]*)"/.exec(html)?.[1];
 
 let main: Site; // no env at all
@@ -167,6 +166,14 @@ describe("resume", () => {
     expect(res.headers.get("x-resume-source")).toBe("fallback");
     expect(await head(res)).toBe("%PDF-");
   }, 90_000);
+
+  test("German resume from its own URL", async () => {
+    const pdf = stub(() => new Response(PDF, { headers: { "content-type": "application/pdf" } }));
+    stubs.push(pdf);
+    const res = await get(await site({ RESUME_PDF_URL_DE: pdf.url }), "/resume-de.pdf");
+    expect(res.headers.get("x-resume-source")).toBe("remote");
+    expect(res.headers.get("content-disposition")).toContain("Lebenslauf");
+  }, 90_000);
 });
 
 describe("analytics (real browser, window.umami stubbed)", () => {
@@ -179,7 +186,7 @@ describe("analytics (real browser, window.umami stubbed)", () => {
   });
 
   /** Click one element, return the non-passive events recorded for it. */
-  async function clicked(path: string, selector: string, permissions: string[] = []) {
+  async function clicked(path: string, selector: string, permissions: string[] = [], base = main.base, then?: string) {
     const ctx = await browser.newContext({ permissions });
     try {
       const page = await ctx.newPage();
@@ -192,8 +199,9 @@ describe("analytics (real browser, window.umami stubbed)", () => {
         addEventListener("click", (e) => (e.target as Element).closest?.("a") && e.preventDefault());
       });
       await page.route(/^(?!http:\/\/localhost)/, (r) => r.abort());
-      await page.goto(main.base + path, { waitUntil: "load" });
+      await page.goto(base + path, { waitUntil: "load" });
       await page.locator(selector).first().click();
+      if (then) await page.locator(then).click();
       await page.waitForTimeout(300);
       return events.filter(([n]) => n !== "section_view" && n !== "scroll_depth");
     } finally {
@@ -216,6 +224,15 @@ describe("analytics (real browser, window.umami stubbed)", () => {
     const ev = await clicked("/", 'a[href="/resume.pdf"]');
     expect(ev.map(([n]) => n)).toEqual(["resume_download"]);
   }, 60_000);
+
+  test("with a German resume the link opens the chooser; the pick is tracked", async () => {
+    const pdf = stub(() => new Response("%PDF-1.7", { headers: { "content-type": "application/pdf" } }));
+    stubs.push(pdf);
+    const de = await site({ RESUME_PDF_URL_DE: pdf.url });
+    // German page: German first; picking it sends one resume_download for "de".
+    const ev = await clicked("/de", 'main a[href="/resume.pdf"]', [], de.base, ".resume-chooser[open] .rc-option >> nth=0");
+    expect(ev).toEqual([["resume_download", { section: expect.any(String), version: "de" }]]);
+  }, 90_000);
 
   test("design toggle sends one design_toggle", async () => {
     const ev = await clicked("/", 'header a[href*="design=thread"]');
