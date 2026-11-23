@@ -9,3 +9,4 @@ public/playground/bpmnscript
 public/playground/presets
 public/playground/editor.worker.js
 src/generated
+/.playground-stage
