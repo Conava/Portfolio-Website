@@ -27,6 +27,18 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
 
+  # The image build runs on PRs too (without pushing), so a Docker-only failure shows before a merge.
+  image:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+
   deploy:
     needs: check
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

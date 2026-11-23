@@ -20,6 +20,8 @@ const GENERATED = "src/generated/bpmnscript";
 // Copied as source, so the playground compiles it against its own Monaco (one instance per page).
 const EDITOR_SRC = "packages/editor/src";
 
+const STAGE = join(root, ".playground-stage");
+
 class Fail extends Error {}
 
 function run(cmd: string[], cwd: string): string {
@@ -114,7 +116,8 @@ async function main() {
     ? local(envDir)
     : git(repo, resolveRef(repo, process.env.BPMNSCRIPT_REF || pkg.bpmnscript.ref), !!process.env.BPMNSCRIPT_REF);
 
-  const stage = join(root, ".cache/playground-stage");
+  // Not under .cache: Docker mounts that as a build cache, and renames across mounts fail (EXDEV).
+  const stage = STAGE;
   rmSync(stage, { recursive: true, force: true });
   const out = (target: string, f = "") => join(stage, target, f);
   const webOut = join(src.dir, "packages/web/out");
@@ -186,7 +189,7 @@ async function main() {
 try {
   await main();
 } catch (e) {
-  rmSync(join(root, ".cache/playground-stage"), { recursive: true, force: true });
+  rmSync(STAGE, { recursive: true, force: true });
   if (!(e instanceof Fail)) throw e;
   console.error(`playground:assets failed.\n${e.message}`);
   process.exit(1);
